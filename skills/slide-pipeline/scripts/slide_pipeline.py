@@ -15,14 +15,12 @@ from pathlib import Path
 
 # Import from sibling skills
 _root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(_root / "slide-html-standardize" / "scripts"))
 sys.path.insert(0, str(_root / "slide-html-to-pptx" / "scripts"))
 sys.path.insert(0, str(_root / "slide-validate" / "scripts"))
 sys.path.insert(0, str(_root / "slide-render" / "scripts"))
 sys.path.insert(0, str(_root / "slide-compare" / "scripts"))
 sys.path.insert(0, str(_root / "chrome-extract" / "scripts"))
 
-from html_standardize import standardize_html
 from html_to_pptx import build_deck, extract_notes
 from slide_validate import validate_pptx
 
@@ -54,23 +52,11 @@ def run_pipeline(input_dir, output_path, slides, viewport_w=1280, viewport_h=720
     hide = hide_selectors or ['.slide-nav']
     results = {'stages': {}, 'success': True}
 
-    # Stage 1: Standardize
-    if standardize:
-        print("\n=== Stage 1: Standardize ===")
-        count = 0
-        for si in slides:
-            html_path = os.path.join(input_dir, si['file'])
-            if os.path.exists(html_path):
-                standardize_html(html_path, viewport_w=viewport_w, viewport_h=viewport_h)
-                count += 1
-        results['stages']['standardize'] = {'files_processed': count}
-        print(f"  Standardized {count} files")
-    else:
-        print("\n=== Stage 1: Standardize [SKIPPED] ===")
-
-    # Stage 2: Convert
-    print("\n=== Stage 2: Convert ===")
-    pptx_path = build_deck(slides, input_dir, output_path, hide, viewport_w, viewport_h)
+    # Stage 1+2: Standardize + Convert (parallel per-slide extraction)
+    stage_label = "Standardize + Convert" if standardize else "Convert"
+    print(f"\n=== {stage_label} (parallel) ===")
+    pptx_path = build_deck(slides, input_dir, output_path, hide, viewport_w, viewport_h,
+                           standardize=standardize)
     results['stages']['convert'] = {'output': pptx_path}
 
     # Stage 3: Validate

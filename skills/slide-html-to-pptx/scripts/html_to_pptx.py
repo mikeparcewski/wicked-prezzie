@@ -2,21 +2,19 @@
 """
 slide-html-to-pptx skill — Convert HTML slide decks to editable PowerPoint.
 
+Parallel extraction: each slide is standardized, extracted, and screenshotted
+concurrently via ProcessPoolExecutor. Results are assembled into one PPTX
+sequentially (python-pptx is not thread-safe).
+
 Usage:
     python skills/html_to_pptx.py --input-dir ./slides --output deck.pptx
     python skills/html_to_pptx.py --slides slide-01.html,slide-02.html --output deck.pptx
     python skills/html_to_pptx.py --manifest slides.json --output deck.pptx
-
-The manifest JSON format:
-    [
-        {"file": "slide-01.html", "title": "Title Slide", "act": "Intro"},
-        {"file": "slide-02.html", "title": "Hook Statement", "act": "Intro"},
-        ...
-    ]
 """
 
-import argparse, os, sys, json, tempfile, glob
+import argparse, os, sys, json, tempfile, glob, time
 from pathlib import Path
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 # Import from sibling skills
 _root = Path(__file__).parent.parent.parent
@@ -45,17 +43,80 @@ def extract_notes(html_path):
         return ''
 
 
-def build_deck(slides, input_dir, output_path, hide_selectors=None,
-               viewport_w=1280, viewport_h=720):
-    """
-    Build a PowerPoint deck from HTML slides.
+# ---------------------------------------------------------------------------
+# Phase 1: Per-slide extraction (runs in worker processes)
+# ---------------------------------------------------------------------------
 
-    Args:
-        slides: list of dicts with at least 'file' key, optionally 'title', 'act'
-        input_dir: directory containing HTML files
-        output_path: output .pptx path
-        hide_selectors: CSS selectors to hide during extraction
-        viewport_w/h: browser viewport size
+def _extract_single_slide(args):
+    """
+    Worker function: standardize + extract layout + take screenshot for one slide.
+
+    Runs in a separate process. Returns a dict with all data needed to build
+    the PPTX slide in the assembly phase. The screenshot is taken once here
+    and cached on disk — no duplicate Chrome launches during assembly.
+    """
+    (index, slide_info, input_dir, cache_dir,
+     viewport_w, viewport_h, hide_selectors, do_standardize) = args
+
+    filename = slide_info['file']
+    html_path = os.path.join(input_dir, filename)
+
+    result = {
+        'index': index,
+        'slide_info': slide_info,
+        'filename': filename,
+        'layout': None,
+        'screenshot_path': None,
+        'notes': '',
+        'error': None,
+    }
+
+    if not os.path.exists(html_path):
+        result['error'] = 'NOT FOUND'
+        return result
+
+    try:
+        # Standardize if requested
+        if do_standardize:
+            standardize_html(html_path, viewport_w=viewport_w, viewport_h=viewport_h)
+
+        # Per-slide temp directory for Chrome artifacts
+        slide_tmpdir = os.path.join(cache_dir, f"slide-{index:03d}")
+        os.makedirs(slide_tmpdir, exist_ok=True)
+
+        # Extract layout via Chrome headless
+        layout = extract_layout(html_path, slide_tmpdir, viewport_w, viewport_h,
+                                hide_selectors)
+        result['layout'] = layout
+
+        # Take the full-page screenshot once — used for SVG cropping and fallback
+        ss_path = os.path.join(cache_dir, f"screenshot-{index:03d}.png")
+        screenshot_html(html_path, ss_path, slide_tmpdir,
+                        viewport_w, viewport_h, hide_selectors=hide_selectors)
+        if os.path.exists(ss_path):
+            result['screenshot_path'] = ss_path
+
+        # Extract speaker notes
+        result['notes'] = extract_notes(html_path)
+
+    except Exception as e:
+        result['error'] = str(e)
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Phase 2: PPTX assembly (runs sequentially in main process)
+# ---------------------------------------------------------------------------
+
+def build_deck(slides, input_dir, output_path, hide_selectors=None,
+               viewport_w=1280, viewport_h=720, standardize=False,
+               workers=None):
+    """
+    Build a PowerPoint deck from HTML slides using parallel extraction.
+
+    Phase 1: Extract all slides concurrently (Chrome headless per slide).
+    Phase 2: Assemble layouts into one PPTX sequentially.
     """
     sw, sh = 13.333, 7.5
     builder = SlideBuilder(sw, sh, viewport_w, viewport_h)
@@ -64,71 +125,122 @@ def build_deck(slides, input_dir, output_path, hide_selectors=None,
     prs.slide_height = Inches(sh)
 
     total = len(slides)
-    stats = {'layout': 0, 'fallback': 0}
+    hide = hide_selectors or ['.slide-nav']
+    max_workers = workers or min(total, os.cpu_count() or 4)
 
-    with tempfile.TemporaryDirectory() as tmpdir:
-        for i, si in enumerate(slides):
-            filename = si['file']
-            title = si.get('title', filename)
-            act = si.get('act', '')
-            html_path = os.path.join(input_dir, filename)
+    with tempfile.TemporaryDirectory() as cache_dir:
+        # --- Phase 1: Parallel extraction ---
+        t0 = time.time()
+        print(f"\n  Extracting {total} slides ({max_workers} workers)...")
 
-            if not os.path.exists(html_path):
-                print(f"  [{i+1}/{total}] {filename}: NOT FOUND, skipping")
+        work_items = [
+            (i, si, input_dir, cache_dir, viewport_w, viewport_h, hide, standardize)
+            for i, si in enumerate(slides)
+        ]
+
+        # Collect results keyed by index to preserve slide order
+        extracted = {}
+        with ProcessPoolExecutor(max_workers=max_workers) as pool:
+            futures = {pool.submit(_extract_single_slide, item): item[0]
+                       for item in work_items}
+            for future in as_completed(futures):
+                result = future.result()
+                idx = result['index']
+                extracted[idx] = result
+                filename = result['filename']
+                if result['error'] == 'NOT FOUND':
+                    print(f"    [{idx+1}/{total}] {filename}: NOT FOUND")
+                elif result['error']:
+                    print(f"    [{idx+1}/{total}] {filename}: error: {result['error']}")
+                elif result['layout'] and result['layout'].get('elements'):
+                    ne = len(result['layout']['elements'])
+                    print(f"    [{idx+1}/{total}] {filename}: {ne} elements")
+                else:
+                    print(f"    [{idx+1}/{total}] {filename}: fallback")
+
+        extract_time = time.time() - t0
+        print(f"  Extraction: {extract_time:.1f}s ({extract_time/total:.1f}s/slide effective)")
+
+        # --- Phase 2: Sequential PPTX assembly ---
+        t1 = time.time()
+        print(f"\n  Assembling PPTX...")
+        stats = {'layout': 0, 'fallback': 0, 'skipped': 0}
+
+        for i in range(total):
+            result = extracted.get(i)
+            if not result or result['error'] == 'NOT FOUND':
+                stats['skipped'] += 1
                 continue
 
-            print(f"  [{i+1}/{total}] {filename}: {title}", end="", flush=True)
+            si = result['slide_info']
+            title = si.get('title', result['filename'])
+            act = si.get('act', '')
+            layout = result['layout']
+            screenshot_path = result['screenshot_path']
 
-            try:
-                layout = extract_layout(html_path, tmpdir, viewport_w, viewport_h,
-                                       hide_selectors)
+            has_layout = (layout and 'error' not in layout
+                          and len(layout.get('elements', [])) > 0)
 
-                if layout and 'error' not in layout and len(layout.get('elements', [])) > 0:
-                    # Create SVG screenshot callback
-                    full_ss_path = [None]  # mutable for closure
-                    def screenshot_svg(svg_rect, _si=si, _fss=full_ss_path):
-                        if not _fss[0]:
-                            _fss[0] = os.path.join(tmpdir, f"full_{_si['file']}.png")
-                            screenshot_html(os.path.join(input_dir, _si['file']),
-                                          _fss[0], tmpdir, viewport_w, viewport_h,
-                                          hide_selectors=hide_selectors)
-                        out = os.path.join(tmpdir,
-                            f"svg_{i}_{int(svg_rect['x'])}_{int(svg_rect['y'])}.png")
-                        if crop_region(_fss[0], out, svg_rect, viewport_w, viewport_h):
-                            return out
+            if has_layout:
+                # SVG screenshot callback uses the cached full-page screenshot
+                def screenshot_svg(svg_rect, _ss=screenshot_path, _idx=i,
+                                   _cache=cache_dir, _vw=viewport_w, _vh=viewport_h):
+                    if not _ss or not os.path.exists(_ss):
                         return None
+                    out = os.path.join(_cache,
+                        f"svg_{_idx}_{int(svg_rect['x'])}_{int(svg_rect['y'])}.png")
+                    if crop_region(_ss, out, svg_rect, _vw, _vh):
+                        return out
+                    return None
 
-                    notes = f"[{act}] {title}\n\n{extract_notes(html_path)}" if act else extract_notes(html_path)
-                    builder.build_slide(prs, layout, screenshot_svg, notes)
-
-                    ns = len([e for e in layout['elements'] if e['type'] == 'shape'])
-                    nt = len([e for e in layout['elements'] if e['type'] in ('text', 'richtext')])
-                    nv = len(layout.get('svgElements', []))
-                    print(f" [{ns}s {nt}t {nv}svg]")
-                    stats['layout'] += 1
-                else:
-                    # Fallback: screenshot-based slide
-                    _build_fallback(prs, builder, html_path, si, tmpdir,
-                                   viewport_w, viewport_h, hide_selectors)
-                    print(" [fallback]")
-                    stats['fallback'] += 1
-            except Exception as e:
+                notes = f"[{act}] {title}\n\n{result['notes']}" if act else result['notes']
                 try:
-                    _build_fallback(prs, builder, html_path, si, tmpdir,
-                                   viewport_w, viewport_h, hide_selectors)
-                    print(f" [fallback: {e}]")
-                except:
-                    print(f" [ERROR: {e}]")
+                    builder.build_slide(prs, layout, screenshot_svg, notes)
+                    stats['layout'] += 1
+                except Exception as e:
+                    # Layout build failed — try fallback
+                    _build_fallback_from_cache(prs, builder, screenshot_path,
+                                               result['notes'])
+                    stats['fallback'] += 1
+            elif screenshot_path:
+                # No usable layout — use cached screenshot as fallback
+                _build_fallback_from_cache(prs, builder, screenshot_path,
+                                           result['notes'])
+                stats['fallback'] += 1
+            elif not result['error']:
+                # Extraction returned nothing and no screenshot
                 stats['fallback'] += 1
 
+        assemble_time = time.time() - t1
+
     prs.save(output_path)
-    print(f"\nSaved: {output_path}")
-    print(f"Layout: {stats['layout']}/{total}, Fallback: {stats['fallback']}")
+    total_time = time.time() - t0
+    print(f"\n  Saved: {output_path}")
+    print(f"  Layout: {stats['layout']}, Fallback: {stats['fallback']}, "
+          f"Skipped: {stats['skipped']}")
+    print(f"  Timing: extract {extract_time:.1f}s + assemble {assemble_time:.1f}s "
+          f"= {total_time:.1f}s total")
     return output_path
 
 
+def _build_fallback_from_cache(prs, builder, screenshot_path, notes_text):
+    """Build a fallback slide from a cached screenshot PNG."""
+    from pptx.dml.color import RGBColor
+    from pptx.util import Emu
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    bg = slide.background
+    bg.fill.solid()
+    bg.fill.fore_color.rgb = RGBColor(0x0A, 0x0A, 0x0F)
+    if screenshot_path and os.path.exists(screenshot_path):
+        slide.shapes.add_picture(screenshot_path, Emu(0), Emu(0),
+                                 Inches(builder.sw), Inches(builder.sh))
+    if notes_text:
+        slide.notes_slide.notes_text_frame.text = notes_text
+
+
+# Keep the old fallback for backward compatibility with direct callers
 def _build_fallback(prs, builder, html_path, si, tmpdir, vw, vh, hide_selectors):
-    """Screenshot fallback when extraction fails."""
+    """Screenshot fallback when extraction fails (legacy sequential path)."""
     from pptx.dml.color import RGBColor
     from pptx.util import Emu
     slide = prs.slides.add_slide(prs.slide_layouts[6])
@@ -153,6 +265,8 @@ def main():
     parser.add_argument('--viewport', default='1280x720', help='Viewport WxH (default 1280x720)')
     parser.add_argument('--standardize', action='store_true',
                         help='Run slide-html-standardize on slides before conversion')
+    parser.add_argument('--workers', '-w', type=int, default=None,
+                        help='Max parallel workers (default: min(slide_count, cpu_count))')
     args = parser.parse_args()
 
     vw, vh = map(int, args.viewport.split('x'))
@@ -174,15 +288,9 @@ def main():
         print("No slides found. Use --slides, --manifest, or place HTML files in --input-dir")
         sys.exit(1)
 
-    if args.standardize:
-        print(f"Standardizing {len(slides)} slides...")
-        for si in slides:
-            html_path = os.path.join(args.input_dir, si['file'])
-            if os.path.exists(html_path):
-                standardize_html(html_path, viewport_w=vw, viewport_h=vh)
-
     print(f"Converting {len(slides)} slides from {args.input_dir}")
-    build_deck(slides, args.input_dir, args.output, hide, vw, vh)
+    build_deck(slides, args.input_dir, args.output, hide, vw, vh,
+               standardize=args.standardize, workers=args.workers)
 
 
 if __name__ == '__main__':
