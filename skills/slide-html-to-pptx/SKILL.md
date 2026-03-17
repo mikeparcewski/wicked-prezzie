@@ -44,13 +44,13 @@ Run the conversion script at `scripts/html_to_pptx.py`:
 
 ```bash
 # Convert all HTML files in a directory
-python slide-html-to-pptx/scripts/html_to_pptx.py --input-dir ./slides --output deck.pptx
+python skills/slide-html-to-pptx/scripts/html_to_pptx.py --input-dir ./slides --output deck.pptx
 
 # Convert specific slides
-python slide-html-to-pptx/scripts/html_to_pptx.py --slides slide-01.html,slide-02.html --output deck.pptx
+python skills/slide-html-to-pptx/scripts/html_to_pptx.py --slides slide-01.html,slide-02.html --output deck.pptx
 
 # Use a JSON manifest for ordering and metadata
-python slide-html-to-pptx/scripts/html_to_pptx.py --manifest slides.json --output deck.pptx
+python skills/slide-html-to-pptx/scripts/html_to_pptx.py --manifest slides.json --output deck.pptx
 ```
 
 ### Manifest Format

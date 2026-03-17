@@ -19,85 +19,74 @@ Topic/brief → slide-outline → slide-generate → slide-html-standardize → 
 
 ## Project Structure
 
-Each directory is a Claude Code skill with SKILL.md + optional scripts/ and references/.
+All skills live under `skills/`. Each has SKILL.md + optional scripts/ and references/.
 
 ```
-slide-theme/             — Brand/style definitions: colors, fonts, layout tokens
-  SKILL.md
-  scripts/slide_theme.py
-  themes/                        (auto-created: midnight-purple, corporate-light, warm-dark)
+skills/
+  slide-theme/             — Brand/style definitions: colors, fonts, layout tokens
+    SKILL.md
+    scripts/slide_theme.py
+    themes/                      (auto-created: midnight-purple, corporate-light, warm-dark)
+  slide-outline/           — Topic → structured outline (Pyramid Principle)
+    SKILL.md
+    scripts/slide_outline.py
+    references/pyramid-principle.md
+  slide-generate/          — Outline → themed HTML slides
+    SKILL.md
+    scripts/slide_generate.py    (imports: slide-theme)
+    references/templates.md
+  chrome-extract/          — Chrome headless layout extraction + screenshots
+    SKILL.md
+    scripts/chrome_extract.py
+    references/js-dom-walker.md
+  slide-pptx-builder/      — Layout JSON → native PPTX shapes/text + color utils
+    SKILL.md
+    scripts/pptx_builder.py
+    scripts/color_utils.py       (CSS color parsing, alpha blending)
+    references/coordinate-system.md
+    references/text-clamping.md
+  slide-html-standardize/  — Normalize AI-generated HTML before conversion
+    SKILL.md
+    scripts/html_standardize.py
+  slide-html-to-pptx/      — Batch convert HTML slides to PPTX (conversion stage)
+    SKILL.md
+    scripts/html_to_pptx.py      (imports: chrome-extract, slide-pptx-builder)
+  slide-validate/          — Post-conversion QA: bounds, overflow, scoring
+    SKILL.md
+    scripts/slide_validate.py    (imports: slide-render)
+    references/overflow-detection.md
+  slide-render/            — PPTX → PNG via PowerPoint headless
+    SKILL.md
+    scripts/slide_render.py
+  slide-design/            — Design principles + quality rubric (reference only)
+    SKILL.md
+    references/design-principles.md
+    references/quality-rubric.md
+  slide-compare/           — Visual comparison: HTML screenshots vs PPTX renders
+    SKILL.md
+    scripts/slide_compare.py     (imports: chrome-extract)
+  slide-pipeline/          — End-to-end orchestrator (chains all stages)
+    SKILL.md
+    scripts/slide_pipeline.py    (imports: all skills)
+  slide-config/            — User-configurable settings (quality threshold, viewport, etc.)
+    SKILL.md
+    scripts/slide_config.py
+    config.json                  (auto-created on first `set`)
 
-slide-outline/           — Topic → structured outline (Pyramid Principle)
-  SKILL.md
-  scripts/slide_outline.py
-  references/pyramid-principle.md
-
-slide-generate/          — Outline → themed HTML slides
-  SKILL.md
-  scripts/slide_generate.py      (imports: slide-theme)
-  references/templates.md
-
-chrome-extract/          — Chrome headless layout extraction + screenshots
-  SKILL.md
-  scripts/chrome_extract.py
-  references/js-dom-walker.md
-
-slide-pptx-builder/      — Layout JSON → native PPTX shapes/text + color utils
-  SKILL.md
-  scripts/pptx_builder.py
-  scripts/color_utils.py         (CSS color parsing, alpha blending)
-  references/coordinate-system.md
-  references/text-clamping.md
-
-slide-html-standardize/  — Normalize AI-generated HTML before conversion
-  SKILL.md
-  scripts/html_standardize.py
-
-slide-html-to-pptx/      — Batch convert HTML slides to PPTX (orchestrator)
-  SKILL.md
-  scripts/html_to_pptx.py        (imports: chrome-extract, slide-pptx-builder)
-
-slide-validate/          — Post-conversion QA: bounds, overflow, scoring
-  SKILL.md
-  scripts/slide_validate.py      (imports: slide-render)
-  references/overflow-detection.md
-
-slide-render/            — PPTX → PNG via LibreOffice headless
-  SKILL.md
-  scripts/slide_render.py
-
-slide-design/            — Design principles + quality rubric (reference only)
-  SKILL.md
-  references/design-principles.md
-  references/quality-rubric.md
-
-slide-compare/           — Visual comparison: HTML screenshots vs PPTX renders
-  SKILL.md
-  scripts/slide_compare.py       (imports: chrome-extract)
-
-slide-pipeline/          — End-to-end orchestrator (chains all stages)
-  SKILL.md
-  scripts/slide_pipeline.py      (imports: all skills)
-
-slide-config/            — User-configurable settings (quality threshold, viewport, etc.)
-  SKILL.md
-  scripts/slide_config.py
-  config.json                    (auto-created on first `set`)
-
-tests/                   — Test fixtures, evals, and trigger-evals
-  test-slide-01.html     — Title slide (heading, subtitle, accent bar)
-  test-slide-02.html     — Content slide (card grid with stats)
-  test-slide-03.html     — Section divider (CTA, inline color spans)
-  evals.json             — End-to-end evaluation prompts
-  trigger-evals/         — Per-skill triggering accuracy tests
+tests/                     — Test fixtures, evals, and trigger-evals
+  test-slide-01.html       — Title slide (heading, subtitle, accent bar)
+  test-slide-02.html       — Content slide (card grid with stats)
+  test-slide-03.html       — Section divider (CTA, inline color spans)
+  evals.json               — End-to-end evaluation prompts
+  trigger-evals/           — Per-skill triggering accuracy tests
 ```
 
 ## Cross-Skill Import Pattern
 
-Skills import from sibling skills via sys.path:
+Skills import from sibling skills via sys.path (all skills are siblings under `skills/`):
 
 ```python
-_root = Path(__file__).parent.parent.parent  # project root
+_root = Path(__file__).parent.parent.parent  # skills/ directory
 sys.path.insert(0, str(_root / "chrome-extract" / "scripts"))
 from chrome_extract import extract_layout
 ```

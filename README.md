@@ -54,7 +54,7 @@ You also need:
 The most common workflow. Point the pipeline at a directory of HTML files:
 
 ```bash
-python slide-pipeline/scripts/slide_pipeline.py \
+python skills/slide-pipeline/scripts/slide_pipeline.py \
   --input-dir ./slides \
   --output deck.pptx
 ```
@@ -64,7 +64,7 @@ This runs all five stages: standardize, convert, validate, render, compare.
 ### Convert without QA (just the PPTX)
 
 ```bash
-python slide-html-to-pptx/scripts/html_to_pptx.py \
+python skills/slide-html-to-pptx/scripts/html_to_pptx.py \
   --input-dir ./slides \
   --output deck.pptx
 ```
@@ -129,7 +129,7 @@ Claude will use `slide-outline` to structure the narrative, `slide-theme` to app
 ## Pipeline options
 
 ```bash
-python slide-pipeline/scripts/slide_pipeline.py \
+python skills/slide-pipeline/scripts/slide_pipeline.py \
   --input-dir ./slides \
   --output deck.pptx \
   --viewport 1920x1080 \          # Custom viewport (default: 1280x720)
@@ -145,7 +145,7 @@ python slide-pipeline/scripts/slide_pipeline.py \
 
 ## Themes
 
-Three built-in themes in `slide-theme/themes/`:
+Three built-in themes in `skills/slide-theme/themes/`:
 
 - **midnight-purple** (default) - Dark bg `#0A0A0F`, purple primary `#A100FF`, amber accent
 - **corporate-light** - White bg, navy primary `#1E3A5F`, teal accent
@@ -154,8 +154,8 @@ Three built-in themes in `slide-theme/themes/`:
 Create your own:
 
 ```bash
-python slide-theme/scripts/slide_theme.py create my-brand
-python slide-theme/scripts/slide_theme.py activate my-brand
+python skills/slide-theme/scripts/slide_theme.py create my-brand
+python skills/slide-theme/scripts/slide_theme.py activate my-brand
 ```
 
 Or tell Claude: "Use our brand colors: primary #2563EB, accent #F59E0B, dark background."
@@ -175,30 +175,31 @@ Slides below 75 are flagged. The overall deck score is the average.
 
 ```bash
 # Fast static check
-python slide-validate/scripts/slide_validate.py deck.pptx
+python skills/slide-validate/scripts/slide_validate.py deck.pptx
 
 # With pixel-level overflow detection
-python slide-validate/scripts/slide_validate.py deck.pptx --render
+python skills/slide-validate/scripts/slide_validate.py deck.pptx --render
 ```
 
 ## Project structure
 
 ```
 wicked-prezzie/
-  slide-theme/               Brand/style definitions
-  slide-outline/             Topic to structured outline
-  slide-generate/            Outline to themed HTML slides
-  slide-html-standardize/    Normalize AI-generated HTML
-  chrome-extract/            Chrome headless layout extraction
-  slide-pptx-builder/        Layout JSON to native PPTX shapes
-  slide-html-to-pptx/        Batch HTML to PPTX conversion
-  slide-validate/            Post-conversion quality assurance
-  slide-render/              PPTX to PNG rendering
-  slide-compare/             HTML vs PPTX visual comparison
-  slide-design/              Design principles (reference only)
-  slide-pipeline/            End-to-end orchestrator
-  slide-config/              Project settings
-  tests/                     Test fixtures and trigger evals
+  skills/
+    slide-theme/               Brand/style definitions
+    slide-outline/             Topic to structured outline
+    slide-generate/            Outline to themed HTML slides
+    slide-html-standardize/    Normalize AI-generated HTML
+    chrome-extract/            Chrome headless layout extraction
+    slide-pptx-builder/        Layout JSON to native PPTX shapes
+    slide-html-to-pptx/        Batch HTML to PPTX conversion
+    slide-validate/            Post-conversion quality assurance
+    slide-render/              PPTX to PNG rendering
+    slide-compare/             HTML vs PPTX visual comparison
+    slide-design/              Design principles (reference only)
+    slide-pipeline/            End-to-end orchestrator
+    slide-config/              Project settings
+  tests/                       Test fixtures and trigger evals
 ```
 
 Each skill directory contains:

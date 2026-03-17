@@ -144,23 +144,23 @@ The outline is stored as JSON consumed by slide-generate:
 
 ```bash
 # Generate outline from a topic
-python slide-outline/scripts/slide_outline.py --topic "Q1 Sales Results" \
+python skills/slide-outline/scripts/slide_outline.py --topic "Q1 Sales Results" \
   --audience "Sales leadership" \
   --key-message "We exceeded target by 15%" \
   --output outline.json
 
 # Generate outline from a brief/document
-python slide-outline/scripts/slide_outline.py --brief brief.txt \
+python skills/slide-outline/scripts/slide_outline.py --brief brief.txt \
   --output outline.json
 
 # Validate an existing outline
-python slide-outline/scripts/slide_outline.py --validate outline.json
+python skills/slide-outline/scripts/slide_outline.py --validate outline.json
 
 # Show outline summary
-python slide-outline/scripts/slide_outline.py --summary outline.json
+python skills/slide-outline/scripts/slide_outline.py --summary outline.json
 
 # Set the theme for the outline
-python slide-outline/scripts/slide_outline.py --outline outline.json \
+python skills/slide-outline/scripts/slide_outline.py --outline outline.json \
   --set-theme corporate-light
 ```
 

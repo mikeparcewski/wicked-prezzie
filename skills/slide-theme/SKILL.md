@@ -97,25 +97,25 @@ this structure:
 
 ```bash
 # List available themes
-python slide-theme/scripts/slide_theme.py list
+python skills/slide-theme/scripts/slide_theme.py list
 
 # Show theme details
-python slide-theme/scripts/slide_theme.py show midnight-purple
+python skills/slide-theme/scripts/slide_theme.py show midnight-purple
 
 # Create a new theme interactively (outputs JSON to edit)
-python slide-theme/scripts/slide_theme.py create my-brand
+python skills/slide-theme/scripts/slide_theme.py create my-brand
 
 # Set the active theme (writes to slide-config)
-python slide-theme/scripts/slide_theme.py activate midnight-purple
+python skills/slide-theme/scripts/slide_theme.py activate midnight-purple
 
 # Show the currently active theme
-python slide-theme/scripts/slide_theme.py active
+python skills/slide-theme/scripts/slide_theme.py active
 
 # Export theme as CSS variables (for HTML slide generation)
-python slide-theme/scripts/slide_theme.py css midnight-purple
+python skills/slide-theme/scripts/slide_theme.py css midnight-purple
 
 # Validate a theme against design principles
-python slide-theme/scripts/slide_theme.py validate midnight-purple
+python skills/slide-theme/scripts/slide_theme.py validate midnight-purple
 ```
 
 ## Built-in Themes
@@ -182,7 +182,7 @@ References the theme's color palette when assigning section colors in the
 outline structure. Ensures the outline's visual plan matches the final output.
 
 ### slide-config
-The active theme name is stored as `active_theme` in `slide-config/config.json`.
+The active theme name is stored as `active_theme` in `skills/slide-config/config.json`.
 If no theme is activated, `midnight-purple` is used as the default.
 
 ## Creating Themes from Existing Assets

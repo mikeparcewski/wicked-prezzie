@@ -39,16 +39,16 @@ Run the script directly from the command line.
 
 ```bash
 # Static validation (fast)
-python slide-validate/scripts/slide_validate.py output.pptx
+python skills/slide-validate/scripts/slide_validate.py output.pptx
 
 # Static + visual overflow detection
-python slide-validate/scripts/slide_validate.py output.pptx --render
+python skills/slide-validate/scripts/slide_validate.py output.pptx --render
 
 # JSON output for programmatic consumption
-python slide-validate/scripts/slide_validate.py output.pptx --json
+python skills/slide-validate/scripts/slide_validate.py output.pptx --json
 
 # Custom rubric (reserved for future use)
-python slide-validate/scripts/slide_validate.py output.pptx --rubric my_rubric.json
+python skills/slide-validate/scripts/slide_validate.py output.pptx --rubric my_rubric.json
 ```
 
 ### Arguments

@@ -25,26 +25,26 @@ preferences that persist across sessions and are read by other skills.
 
 ## Configuration File
 
-Settings are stored in `slide-config/config.json` at the project root.
+Settings are stored in `skills/slide-config/config.json` at the project root.
 Other skills read this file automatically when it exists.
 
 ## Usage
 
 ```bash
 # View current config
-python slide-config/scripts/slide_config.py show
+python skills/slide-config/scripts/slide_config.py show
 
 # Set quality threshold
-python slide-config/scripts/slide_config.py set quality_threshold 90
+python skills/slide-config/scripts/slide_config.py set quality_threshold 90
 
 # Set default viewport
-python slide-config/scripts/slide_config.py set viewport 1920x1080
+python skills/slide-config/scripts/slide_config.py set viewport 1920x1080
 
 # Set default hide selectors
-python slide-config/scripts/slide_config.py set hide_selectors ".slide-nav,.footer"
+python skills/slide-config/scripts/slide_config.py set hide_selectors ".slide-nav,.footer"
 
 # Reset to defaults
-python slide-config/scripts/slide_config.py reset
+python skills/slide-config/scripts/slide_config.py reset
 ```
 
 ## Settings
@@ -61,7 +61,7 @@ python slide-config/scripts/slide_config.py reset
 ## How Other Skills Read Config
 
 Skills use `_load_threshold()` or similar helpers that check for
-`slide-config/config.json` at the project root:
+`skills/slide-config/config.json` at the project root:
 
 ```python
 config_path = Path(__file__).parent.parent.parent / "slide-config" / "config.json"
