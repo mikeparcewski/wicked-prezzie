@@ -1,0 +1,20 @@
+{
+  "name": "wicked-prezzie",
+  "version": "1.0.0",
+  "description": "HTML slide decks to editable PowerPoint — topic planning, themed generation, Chrome extraction, native PPTX building, and quality validation",
+  "author": {
+    "name": "Mike Parcewski",
+    "url": "https://github.com/mikeparcewski"
+  },
+  "repository": "https://github.com/mikeparcewski/wicked-prezzie",
+  "license": "MIT",
+  "keywords": [
+    "powerpoint",
+    "pptx",
+    "slides",
+    "presentation",
+    "html-to-pptx",
+    "conversion",
+    "chrome-headless"
+  ]
+}
