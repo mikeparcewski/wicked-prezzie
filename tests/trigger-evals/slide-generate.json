@@ -1,0 +1,19 @@
+[
+  {"query": "I have an outline.json ready. Generate the HTML slides from it using the midnight-purple theme", "should_trigger": true},
+  {"query": "create the HTML slide files from this outline — I want individual .html files in slides/ that I can convert to PPTX", "should_trigger": true},
+  {"query": "build slides from the outline. I want a title slide, 5 content slides, and a CTA at the end", "should_trigger": true},
+  {"query": "render the outline into themed HTML. Use the corporate-light theme and 1920x1080 viewport", "should_trigger": true},
+  {"query": "generate a single stats slide with these three metrics: revenue $4.2M, growth 23%, retention 91%", "should_trigger": true},
+  {"query": "I updated the outline — regenerate just slides 3 through 6 with the new content", "should_trigger": true},
+  {"query": "list available slide templates — I want to see what types I can use in my outline", "should_trigger": true},
+  {"query": "I have bullet points about our product launch. Turn them into individual HTML slide files", "should_trigger": true},
+  {"query": "plan a presentation about AI trends — I need the structure and outline first", "should_trigger": false},
+  {"query": "convert these existing HTML slides to PowerPoint", "should_trigger": false},
+  {"query": "the slides look wrong in PPTX — text is overlapping and colors are off", "should_trigger": false},
+  {"query": "set up a navy blue theme with gold accents for my company brand", "should_trigger": false},
+  {"query": "validate the generated deck and show me quality scores", "should_trigger": false},
+  {"query": "normalize these AI-generated HTML files before conversion", "should_trigger": false},
+  {"query": "compare the HTML originals with the PPTX output side by side", "should_trigger": false},
+  {"query": "what font size should I use for body text? What are the design rules?", "should_trigger": false},
+  {"query": "I need to edit the CSS in slide-04.html to fix the card layout manually", "should_trigger": false}
+]

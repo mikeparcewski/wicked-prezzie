@@ -1,0 +1,19 @@
+[
+  {"query": "what are the design rules for slides? I want to understand the typography hierarchy, color weight ratios, and whitespace targets", "should_trigger": true},
+  {"query": "explain the 100-point quality rubric — what categories does it score and how many points per category?", "should_trigger": true},
+  {"query": "what contrast ratio do I need for body text on a dark background to meet WCAG AA?", "should_trigger": true},
+  {"query": "how does the scoring system work? What makes a slide pass or fail validation?", "should_trigger": true},
+  {"query": "what's the recommended margin, element count, and whitespace percentage per slide?", "should_trigger": true},
+  {"query": "what are the rules for card shapes — border radius, shadow parameters, padding?", "should_trigger": true},
+  {"query": "make these slides look better — they feel amateur and cluttered", "should_trigger": false},
+  {"query": "improve the design of slide 3 — it has too many elements", "should_trigger": false},
+  {"query": "fix the layout on my slides — text is overlapping", "should_trigger": false},
+  {"query": "regenerate the slides with better typography and spacing", "should_trigger": false},
+  {"query": "validate deck.pptx and give me per-slide quality scores", "should_trigger": false},
+  {"query": "convert these HTML slides to PowerPoint", "should_trigger": false},
+  {"query": "create a brand theme with our company colors", "should_trigger": false},
+  {"query": "Chrome headless extraction returns empty results", "should_trigger": false},
+  {"query": "render my PPTX to PNG images for review", "should_trigger": false},
+  {"query": "plan a presentation about Q1 results for the board", "should_trigger": false},
+  {"query": "set the quality threshold to 70 for this project", "should_trigger": false}
+]

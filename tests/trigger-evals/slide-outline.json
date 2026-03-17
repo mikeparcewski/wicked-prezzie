@@ -1,0 +1,19 @@
+[
+  {"query": "I need to put together a 15-minute presentation about our Q1 results for the executive team. Help me plan the structure", "should_trigger": true},
+  {"query": "make me a presentation about machine learning in healthcare — outline it first before we build any slides", "should_trigger": true},
+  {"query": "I have a 2-page brief about our product launch. Turn it into a slide deck outline with proper narrative flow", "should_trigger": true},
+  {"query": "how many slides do I need for a 30-minute talk? Help me structure the content into setup, argument, and close", "should_trigger": true},
+  {"query": "plan the slides for a board deck. Key message: we need to expand into APAC by Q3. Supporting points: market size, competitor analysis, resource plan", "should_trigger": true},
+  {"query": "I have a wall of bullet points from the strategy meeting. Can you organize them into a coherent deck structure?", "should_trigger": true},
+  {"query": "validate my outline.json — check that every slide has a title assertion, not just topic labels", "should_trigger": true},
+  {"query": "restructure my existing deck — the flow doesn't make sense. The conclusion should come first per the Pyramid Principle", "should_trigger": true},
+  {"query": "generate the HTML slides from my outline using the corporate-light theme", "should_trigger": false},
+  {"query": "convert these HTML files to PowerPoint", "should_trigger": false},
+  {"query": "set up a brand theme with our company colors", "should_trigger": false},
+  {"query": "the text in slide 3 is overflowing — fix the PPTX layout", "should_trigger": false},
+  {"query": "validate the PPTX output for quality issues and overflow", "should_trigger": false},
+  {"query": "render my deck to PNG images for review", "should_trigger": false},
+  {"query": "what are the typography rules for slide design?", "should_trigger": false},
+  {"query": "I already have the outline and the HTML slides. Just convert to PowerPoint please", "should_trigger": false},
+  {"query": "standardize these AI-generated slides — they're missing viewport meta tags", "should_trigger": false}
+]

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=1280">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0A0A0F; font-family: Calibri, sans-serif; }
+        .slide {
+            width: 1280px; height: 720px;
+            position: relative; overflow: hidden;
+            background: #0A0A0F;
+        }
+        h2 {
+            color: #FFFFFF; font-size: 36px; font-weight: 600;
+            padding: 48px 64px 0;
+        }
+        .card-grid {
+            display: flex; gap: 24px;
+            padding: 32px 64px;
+        }
+        .card {
+            flex: 1;
+            background: rgba(161, 0, 255, 0.06);
+            border-radius: 12px;
+            border-left: 3px solid #A100FF;
+            padding: 24px;
+        }
+        .card h3 {
+            color: #FFFFFF; font-size: 20px;
+            font-weight: 600; margin-bottom: 12px;
+        }
+        .card p {
+            color: #B0B0C0; font-size: 16px;
+            line-height: 1.5;
+        }
+        .stat {
+            color: #A100FF; font-size: 32px;
+            font-weight: 700; margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body class="standalone">
+    <div class="slide">
+        <h2>Key Performance Metrics</h2>
+        <div class="card-grid">
+            <div class="card">
+                <div class="stat">3.2x</div>
+                <h3>Faster Insights</h3>
+                <p>AI models process data 3.2x faster than traditional analytics pipelines.</p>
+            </div>
+            <div class="card">
+                <div class="stat">94%</div>
+                <h3>Accuracy Rate</h3>
+                <p>Prediction accuracy across all deployed models in production environments.</p>
+            </div>
+            <div class="card">
+                <div class="stat">$2.1M</div>
+                <h3>Cost Savings</h3>
+                <p>Annual reduction in manual analysis and decision-making overhead costs.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

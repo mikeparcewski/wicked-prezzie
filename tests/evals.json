@@ -1,0 +1,75 @@
+{
+  "skill_name": "wicked-pptx",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I have 3 HTML slides that ChatGPT made for me in tests/. Can you turn them into a PowerPoint? They're about AI analytics.",
+      "expected_output": "Should trigger slide-pipeline (AI-generated HTML needs full workflow: standardize + convert + validate), produce deck.pptx from tests/test-slide-*.html",
+      "target_skills": ["slide-pipeline"],
+      "files": ["tests/test-slide-01.html", "tests/test-slide-02.html", "tests/test-slide-03.html"]
+    },
+    {
+      "id": 2,
+      "prompt": "The colors in my PPTX look way too dark compared to the HTML. The cards that should be slightly purple are basically black.",
+      "expected_output": "Should trigger slide-pptx-builder (owns color rendering pipeline including color_utils), diagnose alpha blending issue with rgba() on dark background",
+      "target_skills": ["slide-pptx-builder"],
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Can you check if the deck I just generated has any layout problems? Some of the text might be overflowing.",
+      "expected_output": "Should trigger slide-validate, run bounds checking and suggest --render for visual overflow",
+      "target_skills": ["slide-validate"],
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "I need to see what the PowerPoint actually looks like as images. Can you render it to PNGs and make a contact sheet?",
+      "expected_output": "Should trigger slide-render with --montage flag",
+      "target_skills": ["slide-render"],
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "The HTML extraction is returning empty results for some slides. Chrome seems to not be finding any elements.",
+      "expected_output": "Should trigger chrome-extract first (for debugging), then suggest slide-html-standardize if HTML is missing .slide wrapper",
+      "target_skills": ["chrome-extract", "slide-html-standardize"],
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "What are the design rules for these slides? I want to make sure the typography and colors follow best practices.",
+      "expected_output": "Should trigger slide-design, reference design-principles.md and quality-rubric.md",
+      "target_skills": ["slide-design"],
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "The quality threshold is too strict at 85. Can we lower it to 70 for this project?",
+      "expected_output": "Should trigger slide-config, run set quality_threshold 70",
+      "target_skills": ["slide-config"],
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "Does the PPTX look close to the original HTML? Can you show me a comparison?",
+      "expected_output": "Should trigger slide-compare for visual fidelity check",
+      "target_skills": ["slide-compare"],
+      "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "The headings in the PowerPoint are wrapping differently than in the browser. The text boxes seem too narrow.",
+      "expected_output": "Should trigger slide-pptx-builder, reference text-clamping.md and width multiplier logic",
+      "target_skills": ["slide-pptx-builder"],
+      "files": []
+    },
+    {
+      "id": 10,
+      "prompt": "I just got some HTML slides from Gemini. They look fine in the browser but I need them as an editable PowerPoint deck with all the shapes and text as native elements, not screenshots. Can you run the whole process and make sure the output is solid?",
+      "expected_output": "Should trigger slide-pipeline with full flow: standardize (AI-generated), convert, validate, render",
+      "target_skills": ["slide-pipeline", "slide-html-standardize"],
+      "files": []
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+[
+  {"query": "does the PPTX look close to the original HTML? Show me a side-by-side comparison so I can spot differences", "should_trigger": true},
+  {"query": "compare my HTML slides in slides/ with the converted deck.pptx — I want to check conversion fidelity", "should_trigger": true},
+  {"query": "generate comparison images for slides 1, 5, and 8 so I can see where the PPTX diverges from the HTML", "should_trigger": true},
+  {"query": "how close is the PowerPoint to the original? I want paired screenshots — HTML on one side, PPTX on the other", "should_trigger": true},
+  {"query": "do a visual diff between the HTML source and the generated PowerPoint. Focus on slides 3 and 7 where I noticed issues", "should_trigger": true},
+  {"query": "after the conversion, check if the PPTX matches the HTML. I want to catch any visual regressions", "should_trigger": true},
+  {"query": "is the output faithful to the source? Compare and show me where it drifts", "should_trigger": true},
+  {"query": "validate my deck for overflow and quality issues — check bounds and text overflow", "should_trigger": false},
+  {"query": "check my deck for overflow and give me a per-slide quality score", "should_trigger": false},
+  {"query": "render deck.pptx to PNG images for review — I just want thumbnails, not a comparison", "should_trigger": false},
+  {"query": "create a contact sheet montage of all slides", "should_trigger": false},
+  {"query": "convert these HTML slides to PowerPoint — just the conversion step", "should_trigger": false},
+  {"query": "run the full end-to-end pipeline including standardize, convert, validate, render", "should_trigger": false},
+  {"query": "the colors are wrong in the PPTX — alpha blending issue", "should_trigger": false},
+  {"query": "take a Chrome headless screenshot of slide-01.html", "should_trigger": false},
+  {"query": "create a presentation outline about our product roadmap", "should_trigger": false},
+  {"query": "normalize these AI-generated slides before conversion", "should_trigger": false},
+  {"query": "change the quality threshold to 90", "should_trigger": false}
+]

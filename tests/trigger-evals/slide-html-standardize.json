@@ -1,0 +1,20 @@
+[
+  {"query": "I have some HTML slides that ChatGPT generated but Chrome extraction is returning empty results. The HTML might be missing the right structure", "should_trigger": true},
+  {"query": "these AI-generated slides need to be cleaned up before conversion — strip out the animations and external font links", "should_trigger": true},
+  {"query": "normalize the HTML in slides/ so they all have consistent viewport and .slide wrappers", "should_trigger": true},
+  {"query": "prepare these HTML files for extraction. They came from Claude and might not have the right structure for chrome-extract to work", "should_trigger": true},
+  {"query": "my slides have CSS animations and Google Fonts links that break headless Chrome. Can you strip those out?", "should_trigger": true},
+  {"query": "standardize all the HTML slides in my-deck/ directory before running the conversion pipeline", "should_trigger": true},
+  {"query": "the HTML doesn't have a .slide class wrapper and the viewport is wrong. Fix the structure so extraction works", "should_trigger": true},
+  {"query": "clean up these Gemini-generated slides — they have external CDN scripts and inconsistent structure", "should_trigger": true},
+  {"query": "convert these HTML slides to PowerPoint", "should_trigger": false},
+  {"query": "the PPTX output has text overlapping. Can you fix the layout?", "should_trigger": false},
+  {"query": "check my deck for quality issues and overflow", "should_trigger": false},
+  {"query": "render the PPTX to PNG images for review", "should_trigger": false},
+  {"query": "what are the color rules for slide design?", "should_trigger": false},
+  {"query": "the Chrome extraction is finding elements but they're at wrong positions. Viewport is correct at 1280x720", "should_trigger": false},
+  {"query": "write me some HTML slides about our product launch — clean, modern dark theme", "should_trigger": false},
+  {"query": "can you edit my existing PowerPoint to fix the formatting?", "should_trigger": false},
+  {"query": "fix the JavaScript DOM walker to handle a new element type", "should_trigger": false},
+  {"query": "my slides already have proper .slide wrappers and viewports but the colors are wrong in PPTX", "should_trigger": false}
+]

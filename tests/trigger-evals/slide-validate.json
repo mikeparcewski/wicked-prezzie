@@ -1,0 +1,22 @@
+[
+  {"query": "I just generated deck.pptx from the HTML slides. Can you check if there are any layout problems? Some text might be running off the edges", "should_trigger": true},
+  {"query": "run validation on output/presentation.pptx and tell me the quality score", "should_trigger": true},
+  {"query": "is this pptx any good? I want to know if elements are overflowing or if the layout has issues before I send it to my boss", "should_trigger": true},
+  {"query": "check my deck for overflow and give me a per-slide breakdown of what's wrong", "should_trigger": true},
+  {"query": "can you QA this PowerPoint? specifically looking for text that's too long for its text boxes and shapes that go past the slide edges", "should_trigger": true},
+  {"query": "validate the conversion output at ./deck.pptx with visual overflow detection enabled", "should_trigger": true},
+  {"query": "how did the generated deck score against the quality rubric? any slides below 85?", "should_trigger": true},
+  {"query": "are there any problems with the slides? anything that needs fixing before presenting?", "should_trigger": true},
+  {"query": "I want to see what the PPTX looks like as images. Can you render it to PNGs?", "should_trigger": false},
+  {"query": "create a contact sheet montage of all slides so I can get a quick overview", "should_trigger": false},
+  {"query": "compare my HTML originals with the PPTX output side by side", "should_trigger": false},
+  {"query": "does the PPTX look close to the original HTML? Show me a visual diff", "should_trigger": false},
+  {"query": "convert these HTML slides to PowerPoint — just the conversion, no QA", "should_trigger": false},
+  {"query": "run the full end-to-end pipeline: standardize, convert, validate, render, compare", "should_trigger": false},
+  {"query": "the heading font is too small, can you make it 44pt instead of 36pt?", "should_trigger": false},
+  {"query": "set the quality threshold to 90 for this project", "should_trigger": false},
+  {"query": "the alpha blending is wrong on the card backgrounds — they should be slightly purple not black", "should_trigger": false},
+  {"query": "fix the text wrapping issue on slide 3 where the heading breaks differently than in Chrome", "should_trigger": false},
+  {"query": "standardize these AI-generated HTML files before I convert them", "should_trigger": false},
+  {"query": "create a new presentation about machine learning trends from scratch", "should_trigger": false}
+]

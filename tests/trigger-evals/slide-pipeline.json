@@ -1,0 +1,22 @@
+[
+  {"query": "ok so my team lead just sent me a folder of HTML slides that our AI content writer spit out. They look fine in Chrome but she needs them in PowerPoint by tomorrow for the board meeting. Can you convert them all and make sure they look good?", "should_trigger": true},
+  {"query": "I need to take these 20 HTML files in slides/ and turn them into one PowerPoint deck, validate the output has no overflow, and give me a montage so I can eyeball them quickly", "should_trigger": true},
+  {"query": "run the whole standardize-convert-validate workflow on the HTML in my presentation/ directory please", "should_trigger": true},
+  {"query": "got a bunch of slides from Claude that I need as a .pptx. they're AI-generated so probably need cleanup first. do the whole thing end to end", "should_trigger": true},
+  {"query": "can you convert slides/deck-v2/ to PowerPoint and check for any layout issues? I want to see renders too", "should_trigger": true},
+  {"query": "take everything in the tests/ folder and produce a PowerPoint with validation report and comparison images", "should_trigger": true},
+  {"query": "convert my reveal.js presentation to PowerPoint", "should_trigger": true},
+  {"query": "make these HTML slides into a deck — I want the works: standardize, convert, validate, render, compare", "should_trigger": true},
+  {"query": "I have this single HTML file I want to quickly convert to a slide. It's already well-structured, just need the PPTX", "should_trigger": false},
+  {"query": "convert slide-01.html through slide-08.html into deck.pptx. I've already standardized them so skip that step", "should_trigger": false},
+  {"query": "I need to re-export the deck after editing slide-05.html. Just reconvert that one slide if possible", "should_trigger": false},
+  {"query": "just convert, no validation or rendering needed — I already know it's fine", "should_trigger": false},
+  {"query": "can you just render my existing deck.pptx to PNGs? I don't need to convert anything, just want images", "should_trigger": false},
+  {"query": "validate deck.pptx and show me the quality score per slide", "should_trigger": false},
+  {"query": "the text in slide 5 is overlapping the card border. Can you fix the text clamping logic?", "should_trigger": false},
+  {"query": "compare my HTML slides side-by-side with the PPTX I already have", "should_trigger": false},
+  {"query": "the colors in my PowerPoint are way too dark compared to the HTML version", "should_trigger": false},
+  {"query": "write me a Python script that creates a PowerPoint from scratch with charts and graphs using python-pptx", "should_trigger": false},
+  {"query": "help me make a pitch deck about our Q4 results. I don't have any HTML — just start from scratch", "should_trigger": false},
+  {"query": "can you export my Google Slides to PowerPoint?", "should_trigger": false}
+]

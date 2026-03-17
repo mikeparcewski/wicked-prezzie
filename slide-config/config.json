@@ -1,0 +1,10 @@
+{
+  "quality_threshold": 85,
+  "viewport": "1280x720",
+  "hide_selectors": [
+    ".slide-nav"
+  ],
+  "default_font": "Calibri",
+  "slide_width_inches": 13.333,
+  "slide_height_inches": 7.5
+}

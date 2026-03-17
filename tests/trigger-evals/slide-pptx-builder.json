@@ -1,0 +1,19 @@
+[
+  {"query": "the headings in my PPTX are wrapping to two lines but they fit on one line in the HTML. The text boxes seem too narrow", "should_trigger": true},
+  {"query": "text inside card shapes is overflowing past the card border in PowerPoint. The card text clamping isn't working right", "should_trigger": true},
+  {"query": "some shapes are invisible in the PPTX even though they have background colors in HTML. The fill isn't being applied", "should_trigger": true},
+  {"query": "the coordinate mapping from Chrome pixels to PPTX EMU units seems off — shapes are slightly shifted", "should_trigger": true},
+  {"query": "centered h1 headings aren't actually centered in the PPTX — they're positioned at the Chrome bounding box instead of full width", "should_trigger": true},
+  {"query": "the Go Faster text has each word in its own text box instead of being one box with inline formatting", "should_trigger": true},
+  {"query": "SVG charts above 60px aren't being included as images. I need to adjust the SVG size threshold", "should_trigger": true},
+  {"query": "the speaker notes from my HTML aren't showing up in the PowerPoint slides", "should_trigger": true},
+  {"query": "Chrome extraction returns empty — no elements found", "should_trigger": false},
+  {"query": "convert my HTML slides to PowerPoint", "should_trigger": false},
+  {"query": "the rgba colors are blending wrong on dark backgrounds", "should_trigger": false},
+  {"query": "validate my deck for layout issues", "should_trigger": false},
+  {"query": "create a theme with my brand colors", "should_trigger": false},
+  {"query": "normalize AI-generated slides before conversion", "should_trigger": false},
+  {"query": "render deck.pptx to PNG for review", "should_trigger": false},
+  {"query": "plan a 15-minute presentation on our Q4 results", "should_trigger": false},
+  {"query": "compare HTML originals with PPTX output side by side", "should_trigger": false}
+]

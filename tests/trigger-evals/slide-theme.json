@@ -1,0 +1,20 @@
+[
+  {"query": "I want to create a custom theme for our company — navy blue primary with gold accents and Inter font", "should_trigger": true},
+  {"query": "use my brand colors: primary #2563EB, secondary #7C3AED, background white. Set up a theme from those", "should_trigger": true},
+  {"query": "what themes are available? I want to switch from the dark one to something lighter for a client presentation", "should_trigger": true},
+  {"query": "can you extract the color palette from our company website and create a slide theme from it?", "should_trigger": true},
+  {"query": "the slides should match our brand guide — here are the hex codes and font choices. Set that up as a reusable theme", "should_trigger": true},
+  {"query": "change the font from Calibri to Helvetica across all slides. I also want to bump the title size to 52px", "should_trigger": true},
+  {"query": "validate that my theme has sufficient contrast ratios for accessibility", "should_trigger": true},
+  {"query": "activate the corporate-light theme for the next batch of slides I generate", "should_trigger": true},
+  {"query": "export the current theme as CSS variables so I can preview it in a browser", "should_trigger": true},
+  {"query": "convert these HTML slides to PowerPoint", "should_trigger": false},
+  {"query": "the colors in my PPTX look wrong — the alpha blending is off on dark backgrounds", "should_trigger": false},
+  {"query": "create an outline for a 15-minute presentation about Q4 results", "should_trigger": false},
+  {"query": "validate my deck and check for overflow issues", "should_trigger": false},
+  {"query": "what are the design best practices for whitespace and element count per slide?", "should_trigger": false},
+  {"query": "render deck.pptx to PNG so I can review it", "should_trigger": false},
+  {"query": "I need to debug why Chrome extraction is returning empty layouts", "should_trigger": false},
+  {"query": "generate the slides from my outline.json using the midnight-purple theme", "should_trigger": false},
+  {"query": "set the quality threshold to 90", "should_trigger": false}
+]

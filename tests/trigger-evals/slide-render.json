@@ -1,0 +1,20 @@
+[
+  {"query": "I want to see what my deck.pptx actually looks like. Can you render all slides to PNG images?", "should_trigger": true},
+  {"query": "create a contact sheet montage of all slides in my presentation so I can get a quick overview", "should_trigger": true},
+  {"query": "render slides 1, 5, and 10 at 300 DPI for print-quality review", "should_trigger": true},
+  {"query": "export my PowerPoint slides as individual PNG files in a renders/ directory", "should_trigger": true},
+  {"query": "show me what the slides look like — I want thumbnails of every slide in the deck", "should_trigger": true},
+  {"query": "generate PNG images from deck.pptx with a 3-column montage for the team to review", "should_trigger": true},
+  {"query": "I need slide images for a preview email — render at 150 DPI with 480px thumb width", "should_trigger": true},
+  {"query": "validate my PPTX for layout issues and overflow — check bounds and text overflow", "should_trigger": false},
+  {"query": "check my deck for overflow and give me a per-slide quality breakdown", "should_trigger": false},
+  {"query": "compare HTML originals with PPTX output side by side to check fidelity", "should_trigger": false},
+  {"query": "does the PPTX match the original HTML? Show me a visual diff", "should_trigger": false},
+  {"query": "convert HTML slides to PowerPoint", "should_trigger": false},
+  {"query": "run the full end-to-end pipeline including validation and comparison", "should_trigger": false},
+  {"query": "the colors in my slides are wrong — the alpha blending is off", "should_trigger": false},
+  {"query": "normalize AI-generated HTML before conversion", "should_trigger": false},
+  {"query": "take a screenshot of an HTML file using Chrome headless", "should_trigger": false},
+  {"query": "set the quality threshold to 90 for this project", "should_trigger": false},
+  {"query": "what design rules should I follow for typography and color?", "should_trigger": false}
+]

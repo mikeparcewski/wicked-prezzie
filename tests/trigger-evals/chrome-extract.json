@@ -1,0 +1,19 @@
+[
+  {"query": "Chrome headless is returning empty layout results for slide-04.html — no elements detected. The HTML looks fine in a browser", "should_trigger": true},
+  {"query": "the extracted bounding boxes are at wrong positions. Elements are shifted down about 100px from where they should be", "should_trigger": true},
+  {"query": "I need to debug the JavaScript DOM walker — it's not picking up some div elements that have background colors", "should_trigger": true},
+  {"query": "take a screenshot of slide-01.html at 1280x720 using Chrome headless", "should_trigger": true},
+  {"query": "the SVG chart in my slide isn't showing up in the layout JSON. How does the SVG detection work?", "should_trigger": true},
+  {"query": "Chrome extraction is classifying my h2 heading as a simple text node instead of richtext. Why?", "should_trigger": true},
+  {"query": "I need to crop a specific region from the full-page screenshot to extract just the chart area", "should_trigger": true},
+  {"query": "set CHROME_PATH because Chrome is installed in a non-standard location on my Linux box", "should_trigger": true},
+  {"query": "convert these HTML slides to PowerPoint", "should_trigger": false},
+  {"query": "the colors in my PPTX look wrong — alpha blending issue", "should_trigger": false},
+  {"query": "text boxes are too narrow in the PPTX output and headings are wrapping", "should_trigger": false},
+  {"query": "validate my deck for quality issues", "should_trigger": false},
+  {"query": "normalize these AI-generated slides — they're missing viewport tags", "should_trigger": false},
+  {"query": "render deck.pptx to PNG images", "should_trigger": false},
+  {"query": "create a presentation outline about quarterly results", "should_trigger": false},
+  {"query": "set up a custom theme with my brand colors", "should_trigger": false},
+  {"query": "what are the slide design best practices for typography?", "should_trigger": false}
+]
