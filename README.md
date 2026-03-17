@@ -1,79 +1,79 @@
 # wicked-prezzie
 
-**Your HTML slides deserve better than screenshots glued to PowerPoint.**
+**From blank page to polished PowerPoint. Or from messy HTML to clean PPTX. Or anything in between.**
 
-wicked-prezzie takes HTML slide decks and converts them into *actually editable* PowerPoint files. Real shapes. Real text boxes. Real formatting. The kind of `.pptx` where your boss can change the title without calling IT.
-
-It's also a Claude Code plugin, so you can just *tell it what you want*.
+wicked-prezzie is a Claude Code plugin that handles the entire presentation lifecycle — brainstorm an idea, build a branded deck, convert existing HTML slides, validate the output, and iterate until it's right. Every slide produces *native, editable* PowerPoint with real shapes and formatted text. Not screenshots. Not images. The real thing.
 
 ---
 
-## The 30-second version
+## Three ways to use it
+
+### 1. Ideation — start from nothing
+
+Got a topic, a meeting, a vague idea? Just say what you need.
 
 ```
-"Hey Claude, make me a board deck about AI-powered analytics.
- Use our brand colors. Make it look sharp."
+"I'm presenting to the board next week about our AI platform.
+ 15 minutes. They care about ROI and timeline. Help me plan it."
 ```
 
-That's it. Claude plans the narrative, generates themed HTML slides, runs them through Chrome headless to extract pixel-perfect layout data, builds native PPTX shapes, validates the output, and hands you a polished deck. If a slide looks off, it tells you which ones and why.
+Claude structures your content using the **Pyramid Principle** — lead with the conclusion, group by argument, one message per slide. You get a narrative arc (setup → evidence → close) with speaker notes, not a pile of bullet points.
 
-## Or bring your own HTML
-
-Already have slides from ChatGPT, Claude, Gemini, or your own tooling?
-
-```bash
-python skills/slide-pipeline/scripts/slide_pipeline.py \
-  --input-dir ./my-slides \
-  --output deck.pptx
+```
+"Now generate the slides. Use our brand colors — navy and gold."
 ```
 
-Five stages run automatically: **standardize** (clean up AI quirks) **convert** (Chrome extraction + PPTX building) **validate** (quality scoring) **render** (PPTX to PNG) **compare** (side-by-side fidelity check).
+Themed HTML slides appear, ready for conversion. Each slide follows design principles: proper typography hierarchy, 30%+ whitespace, WCAG-compliant contrast, max 6-7 elements per slide.
+
+### 2. Creation — build from content
+
+Have bullet points, a doc, or talking points? Skip the blank page.
+
+```
+"Here are my Q4 results. Turn these into a deck."
+
+"I have an outline.json — generate slides from it with the corporate-light theme."
+
+"Create a stats slide with these three metrics: revenue $4.2M, growth 23%, retention 91%."
+```
+
+Eight slide types out of the box: **title, content, stats, comparison, quote, section divider, CTA, blank.** Each one follows the active theme's colors, fonts, and spacing.
+
+### 3. Migration — convert existing HTML
+
+Already have slides from ChatGPT, Claude, Gemini, reveal.js, or your own tooling? Bring them.
+
+```
+"Convert the HTML slides in my-deck/ to PowerPoint."
+```
+
+The pipeline handles the ugly parts automatically:
+- **Standardize** — fix viewports, add `.slide` wrappers, strip animations and CDN dependencies
+- **Extract** — Chrome headless captures every element's computed position, color, and formatting
+- **Build** — layout JSON maps to native PPTX shapes, richtext, and embedded SVG images
+- **Validate** — 100-point quality rubric catches overflow, bounds errors, empty slides
+- **Render** — PPTX to PNG via PowerPoint for visual review
+- **Compare** — side-by-side HTML vs PPTX fidelity check
+
+Slides extract in **parallel** — one Chrome instance per slide, all concurrent. A 10-slide deck that took 30 seconds now takes ~8.
 
 ---
 
-## How it actually works
+## What makes it different
 
-Most HTML-to-PPTX tools take a screenshot and call it a day. This one doesn't.
+**Native shapes, not screenshots.** Most HTML-to-PPTX tools paste an image and call it done. wicked-prezzie extracts every heading, paragraph, card, and container as a real PowerPoint object. Your boss can select the title and change it. As intended.
 
-1. **Chrome does the hard part.** Each slide renders in Chrome headless at 1280x720. JavaScript walks the DOM and captures every element's computed position, color, font, and inline formatting as structured JSON.
+**Parallel extraction.** Each slide gets its own Chrome headless process running concurrently. Screenshots are cached once — reused for SVG cropping and fallback slides. No duplicate Chrome launches.
 
-2. **Shapes become shapes.** That JSON maps to native python-pptx objects. Headings are text boxes with formatted runs. Cards are rectangles with fills. SVG charts get cropped as images. Everything is editable in PowerPoint.
+**Quality gate built in.** Every slide is scored against a 100-point rubric. The validator tells you *which* slides have problems and *what's wrong* — bounds overflow, text clipping, empty content. Fix and re-run.
 
-3. **Colors stay honest.** CSS `rgba(161,0,255,0.06)` on a dark background? That gets pre-blended to `#13091D` because PowerPoint doesn't do CSS-style transparency. The math is handled so the output matches what you see in the browser.
+**Always builds.** Bad HTML? Chrome crash? Malformed CSS? The fallback drops a full-page screenshot onto the slide. You get a deck every time, even if some slides need manual attention.
 
-4. **If extraction fails, you still get a deck.** Bad HTML? Chrome crash? The fallback drops a full-page screenshot onto the slide. The deck always builds. Always.
-
----
-
-## The pipeline
-
-```
-  Your topic          "AI reduced decision latency by 60%"
-       |
-  slide-outline       Pyramid Principle narrative structure
-       |
-  slide-generate      Themed HTML files (8 slide types)
-       |
-  slide-html-         Strip animations, fix viewports,
-  standardize         remove CDN deps
-       |
-  chrome-extract      Headless Chrome -> layout JSON
-       |
-  slide-pptx-         JSON -> native PPTX shapes + richtext
-  builder
-       |
-  slide-validate      100-point quality rubric per slide
-       |
-  slide-render        PPTX -> PNG via PowerPoint
-       |
-  slide-compare       HTML vs PPTX side-by-side
-```
-
-Every box is an independent skill. Run the full chain or pick the one you need.
+**Brand-aware.** Themes aren't cosmetic — they drive the entire generation pipeline. Colors, fonts, spacing, contrast ratios. Three built-in themes, or create your own from hex codes, a logo, or a website.
 
 ---
 
-## Install as a Claude Code plugin
+## Install
 
 ```bash
 git clone https://github.com/mikeparcewski/wicked-prezzie.git
@@ -81,20 +81,59 @@ cd wicked-prezzie
 claude
 ```
 
-Claude discovers all 13 skills automatically. Then just talk to it:
+Claude discovers all 13 skills automatically. Then talk to it:
 
 - *"Make me a presentation about Q1 results"*
-- *"Convert the HTML slides in my-deck/ to PowerPoint"*
+- *"I have bullet points — turn them into slides"*
+- *"Convert the HTML in slides/ to PowerPoint"*
+- *"Use our brand: primary #2563EB, accent #F59E0B, dark bg"*
 - *"The headings are wrapping weird in the PPTX"*
 - *"Check my deck for layout issues"*
 - *"Does the PowerPoint match the original HTML?"*
-- *"Use our brand colors: navy primary, gold accent"*
+- *"Show me what the slides look like"*
+- *"Lower the quality threshold to 70 for this project"*
+
+---
+
+## The full pipeline
+
+```
+  Ideation              "What should this deck say?"
+       |
+  slide-outline         Pyramid Principle → narrative structure
+       |
+  Creation              "Build the slides"
+       |
+  slide-theme           Brand colors, fonts, spacing tokens
+       |
+  slide-generate        Outline → themed HTML (8 slide types)
+       |
+  Migration             "Convert to PowerPoint"
+       |
+  slide-html-           Normalize AI-generated HTML
+  standardize
+       |
+  chrome-extract        Parallel Chrome headless → layout JSON
+       |
+  slide-pptx-           JSON → native PPTX shapes + richtext
+  builder
+       |
+  Quality               "Is it any good?"
+       |
+  slide-validate        100-point quality rubric per slide
+       |
+  slide-render          PPTX → PNG via PowerPoint
+       |
+  slide-compare         HTML vs PPTX fidelity check
+```
+
+Every box is an independent skill. Use the full chain, or just the piece you need.
 
 ---
 
 ## Themes
 
-Three built-in, create your own, or let Claude extract one from your brand assets.
+Three built-in. Create your own. Or let Claude extract one from your brand.
 
 | Theme | Vibe |
 |---|---|
@@ -103,30 +142,29 @@ Three built-in, create your own, or let Claude extract one from your brand asset
 | **warm-dark** | Charcoal `#1A1A2E` + coral `#FF6B6B` + gold |
 
 ```bash
-# Roll your own
 python skills/slide-theme/scripts/slide_theme.py create my-brand
 python skills/slide-theme/scripts/slide_theme.py activate my-brand
 ```
 
-Or just: *"Use our brand colors: primary #2563EB, accent #F59E0B, dark background."*
+Themes validate automatically — contrast ratios, palette size, font limits, size hierarchy.
 
 ---
 
 ## Quality gate
 
-Every slide gets scored out of 100:
+Every slide is scored out of 100:
 
-| What went wrong | Points lost |
+| Issue | Deduction |
 |---|---|
 | Shape bleeds past slide edge | -10 |
 | Visual overflow (pixel check) | -10 |
 | Empty slide | -15 |
-| Text probably overflows its box | -3 |
+| Text overflow estimate | -3 |
 
-Below 75? Flagged. The validator tells you *which* slides and *what's wrong* so you can fix and re-run.
+Below 75? Flagged with specific issues and fix guidance.
 
 ```bash
-# Quick check
+# Fast static check
 python skills/slide-validate/scripts/slide_validate.py deck.pptx
 
 # Pixel-level overflow detection (renders through PowerPoint)
@@ -135,7 +173,7 @@ python skills/slide-validate/scripts/slide_validate.py deck.pptx --render
 
 ---
 
-## All the knobs
+## Pipeline options
 
 ```bash
 python skills/slide-pipeline/scripts/slide_pipeline.py \
@@ -143,6 +181,7 @@ python skills/slide-pipeline/scripts/slide_pipeline.py \
   --output deck.pptx \
   --viewport 1920x1080 \          # Default: 1280x720
   --hide ".nav,.footer" \          # CSS selectors to hide
+  --workers 8 \                    # Parallel Chrome instances
   --no-standardize \               # HTML already clean
   --no-validate \                  # Skip quality scoring
   --no-render \                    # Skip PNG output
@@ -162,8 +201,8 @@ brew install poppler    # pdftoppm for PDF->PNG
 ```
 
 Plus:
-- **Google Chrome** (headless layout extraction)
-- **Microsoft PowerPoint** (the definitive renderer -- AppleScript on macOS, COM on Windows)
+- **Google Chrome** — headless layout extraction
+- **Microsoft PowerPoint** — the definitive renderer (AppleScript on macOS, COM on Windows)
 
 ---
 
@@ -175,13 +214,13 @@ wicked-prezzie/
   skills/
     slide-theme/               Brand palettes + fonts
     slide-outline/             Pyramid Principle outlines
-    slide-generate/            Outline -> themed HTML
+    slide-generate/            Outline → themed HTML
     slide-html-standardize/    Clean up AI-generated HTML
-    chrome-extract/            Chrome headless -> layout JSON
-    slide-pptx-builder/        Layout JSON -> native PPTX
-    slide-html-to-pptx/        Batch conversion orchestrator
+    chrome-extract/            Chrome headless → layout JSON
+    slide-pptx-builder/        Layout JSON → native PPTX
+    slide-html-to-pptx/        Parallel batch conversion
     slide-validate/            Quality scoring + overflow detection
-    slide-render/              PPTX -> PNG rendering
+    slide-render/              PPTX → PNG rendering
     slide-compare/             HTML vs PPTX visual diff
     slide-design/              Design principles (reference)
     slide-pipeline/            End-to-end orchestrator
@@ -193,13 +232,13 @@ wicked-prezzie/
 
 ## Known tradeoffs
 
-These are deliberate, not bugs:
+These are deliberate:
 
-- **Gradients** become solid blended colors (PPTX gradient support is... limited)
+- **Gradients** become solid blended colors (PPTX gradient support is limited)
 - **Animations** are stripped (we capture the final state, not the journey)
-- **Font metrics** differ between CSS and Calibri (compensated with width multipliers, but not perfect)
-- **Small SVGs** under 60px are skipped (they're decorative noise that captures surrounding text)
-- **You need Chrome and PowerPoint** installed locally (no way around the definitive renderers)
+- **Font metrics** differ between CSS and Calibri (compensated with width multipliers, not perfect)
+- **Small SVGs** under 60px are skipped (decorative noise that captures surrounding text)
+- **Chrome + PowerPoint required** locally (no substitute for the definitive renderers)
 
 ---
 
