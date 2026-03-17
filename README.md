@@ -97,44 +97,9 @@ Claude discovers all 13 skills automatically. Then talk to it:
 
 ## The full pipeline
 
-```mermaid
-graph TD
-    subgraph Ideation["💡 Ideation"]
-        A[Topic / Brief] --> B[slide-outline]
-        B -->|Pyramid Principle| C[Structured Outline JSON]
-    end
+**[View pipeline architecture diagram →](PIPELINE.md)**
 
-    subgraph Creation["🎨 Creation"]
-        C --> D[slide-theme]
-        D -->|Colors, fonts, spacing| E[slide-generate]
-        E -->|8 slide types| F[Themed HTML Files]
-    end
-
-    subgraph Migration["⚡ Migration — parallel"]
-        F --> G[slide-html-standardize]
-        G -->|Fix viewports, strip animations| H[chrome-extract]
-        H -->|One Chrome instance per slide| I[Layout JSON + cached screenshots]
-        I --> J[slide-pptx-builder]
-        J -->|Native shapes + richtext| K[deck.pptx]
-    end
-
-    subgraph Quality["✅ Quality"]
-        K --> L[slide-validate]
-        L -->|100-point rubric| M{Pass?}
-        M -->|Yes| N[slide-render]
-        M -->|No| O[Fix + re-run]
-        O --> G
-        N -->|PPTX → PNG| P[slide-compare]
-        P -->|HTML vs PPTX diff| Q[✔ Ship it]
-    end
-
-    style Ideation fill:#1a1a2e,stroke:#a100ff,color:#fff
-    style Creation fill:#1a1a2e,stroke:#f59e0b,color:#fff
-    style Migration fill:#1a1a2e,stroke:#0891b2,color:#fff
-    style Quality fill:#1a1a2e,stroke:#10b981,color:#fff
-```
-
-> Every box is an independent skill. Jump in at any stage — bring your own HTML, start from an outline, or go from blank page to polished deck.
+> 13 independent skills across four stages: **Ideation** → **Creation** → **Migration** → **Quality**. Jump in at any stage — bring your own HTML, start from an outline, or go from blank page to polished deck.
 
 ---
 
