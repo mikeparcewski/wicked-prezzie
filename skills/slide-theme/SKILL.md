@@ -97,25 +97,25 @@ this structure:
 
 ```bash
 # List available themes
-python skills/slide-theme/scripts/slide_theme.py list
+python ${CLAUDE_SKILL_DIR}/scripts/slide_theme.py list
 
 # Show theme details
-python skills/slide-theme/scripts/slide_theme.py show midnight-purple
+python ${CLAUDE_SKILL_DIR}/scripts/slide_theme.py show midnight-purple
 
 # Create a new theme interactively (outputs JSON to edit)
-python skills/slide-theme/scripts/slide_theme.py create my-brand
+python ${CLAUDE_SKILL_DIR}/scripts/slide_theme.py create my-brand
 
 # Set the active theme (writes to slide-config)
-python skills/slide-theme/scripts/slide_theme.py activate midnight-purple
+python ${CLAUDE_SKILL_DIR}/scripts/slide_theme.py activate midnight-purple
 
 # Show the currently active theme
-python skills/slide-theme/scripts/slide_theme.py active
+python ${CLAUDE_SKILL_DIR}/scripts/slide_theme.py active
 
 # Export theme as CSS variables (for HTML slide generation)
-python skills/slide-theme/scripts/slide_theme.py css midnight-purple
+python ${CLAUDE_SKILL_DIR}/scripts/slide_theme.py css midnight-purple
 
 # Validate a theme against design principles
-python skills/slide-theme/scripts/slide_theme.py validate midnight-purple
+python ${CLAUDE_SKILL_DIR}/scripts/slide_theme.py validate midnight-purple
 ```
 
 ## Built-in Themes

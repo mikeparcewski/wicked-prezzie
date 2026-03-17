@@ -37,11 +37,11 @@ Run the comparison script at `scripts/slide_compare.py`:
 
 ```bash
 # Compare all slides
-python skills/slide-compare/scripts/slide_compare.py \
+python ${CLAUDE_SKILL_DIR}/scripts/slide_compare.py \
   --html-dir ./slides --pptx deck.pptx --output-dir ./compare
 
 # Compare specific slides (1-based indices)
-python skills/slide-compare/scripts/slide_compare.py \
+python ${CLAUDE_SKILL_DIR}/scripts/slide_compare.py \
   --html-dir ./slides --pptx deck.pptx --slides 1,5,10
 ```
 

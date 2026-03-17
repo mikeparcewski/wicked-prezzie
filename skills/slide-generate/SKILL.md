@@ -44,19 +44,19 @@ outline.json + theme → slide-generate → slide-01.html, slide-02.html, ...
 
 ```bash
 # Generate slides from an outline
-python skills/slide-generate/scripts/slide_generate.py --outline outline.json --output-dir ./slides/
+python ${CLAUDE_SKILL_DIR}/scripts/slide_generate.py --outline outline.json --output-dir ./slides/
 
 # Generate with a specific theme (overrides outline's theme field)
-python skills/slide-generate/scripts/slide_generate.py --outline outline.json --theme corporate-light --output-dir ./slides/
+python ${CLAUDE_SKILL_DIR}/scripts/slide_generate.py --outline outline.json --theme corporate-light --output-dir ./slides/
 
 # Generate a single slide type for testing
-python skills/slide-generate/scripts/slide_generate.py --type title --title "Test Title" --subtitle "Subtitle" --output slide-test.html
+python ${CLAUDE_SKILL_DIR}/scripts/slide_generate.py --type title --title "Test Title" --subtitle "Subtitle" --output slide-test.html
 
 # List available slide templates
-python skills/slide-generate/scripts/slide_generate.py --list-templates
+python ${CLAUDE_SKILL_DIR}/scripts/slide_generate.py --list-templates
 
 # Generate with custom viewport
-python skills/slide-generate/scripts/slide_generate.py --outline outline.json --output-dir ./slides/ --viewport 1920x1080
+python ${CLAUDE_SKILL_DIR}/scripts/slide_generate.py --outline outline.json --output-dir ./slides/ --viewport 1920x1080
 ```
 
 ## Slide Templates

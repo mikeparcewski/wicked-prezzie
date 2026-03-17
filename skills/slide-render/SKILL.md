@@ -29,16 +29,16 @@ optional contact-sheet montages using PowerPoint's native PDF export.
 
 ```bash
 # Render all slides to PNG
-python skills/slide-render/scripts/slide_render.py deck.pptx -o ./renders/
+python ${CLAUDE_SKILL_DIR}/scripts/slide_render.py deck.pptx -o ./renders/
 
 # Render specific slides at high DPI
-python skills/slide-render/scripts/slide_render.py deck.pptx --slides 1,5,10 --dpi 300
+python ${CLAUDE_SKILL_DIR}/scripts/slide_render.py deck.pptx --slides 1,5,10 --dpi 300
 
 # Create a contact sheet montage
-python skills/slide-render/scripts/slide_render.py deck.pptx --montage montage.png
+python ${CLAUDE_SKILL_DIR}/scripts/slide_render.py deck.pptx --montage montage.png
 
 # Custom montage grid
-python skills/slide-render/scripts/slide_render.py deck.pptx --montage overview.png --cols 3 --thumb-width 640
+python ${CLAUDE_SKILL_DIR}/scripts/slide_render.py deck.pptx --montage overview.png --cols 3 --thumb-width 640
 ```
 
 ### Options

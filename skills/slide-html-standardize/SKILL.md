@@ -39,31 +39,31 @@ Do not run this skill on HTML that has already been normalized unless the source
 Normalize a single HTML file in place (overwrites the original):
 
 ```bash
-python skills/slide-html-standardize/scripts/html_standardize.py slide.html
+python ${CLAUDE_SKILL_DIR}/scripts/html_standardize.py slide.html
 ```
 
 Normalize a single file and write the result to a new path:
 
 ```bash
-python skills/slide-html-standardize/scripts/html_standardize.py slide.html -o slide_clean.html
+python ${CLAUDE_SKILL_DIR}/scripts/html_standardize.py slide.html -o slide_clean.html
 ```
 
 Normalize every `.html` file in a directory (each file is overwritten in place):
 
 ```bash
-python skills/slide-html-standardize/scripts/html_standardize.py --dir ./slides/
+python ${CLAUDE_SKILL_DIR}/scripts/html_standardize.py --dir ./slides/
 ```
 
 Normalize with a custom viewport size (default is 1280x720):
 
 ```bash
-python skills/slide-html-standardize/scripts/html_standardize.py slide.html --width 1920 --height 1080
+python ${CLAUDE_SKILL_DIR}/scripts/html_standardize.py slide.html --width 1920 --height 1080
 ```
 
 Combine directory mode with a custom viewport:
 
 ```bash
-python skills/slide-html-standardize/scripts/html_standardize.py --dir ./slides/ --width 1920 --height 1080
+python ${CLAUDE_SKILL_DIR}/scripts/html_standardize.py --dir ./slides/ --width 1920 --height 1080
 ```
 
 The script prints the path of each normalized file to stdout. Exit code 0 indicates success; nonzero indicates at least one file failed.

@@ -32,19 +32,19 @@ Other skills read this file automatically when it exists.
 
 ```bash
 # View current config
-python skills/slide-config/scripts/slide_config.py show
+python ${CLAUDE_SKILL_DIR}/scripts/slide_config.py show
 
 # Set quality threshold
-python skills/slide-config/scripts/slide_config.py set quality_threshold 90
+python ${CLAUDE_SKILL_DIR}/scripts/slide_config.py set quality_threshold 90
 
 # Set default viewport
-python skills/slide-config/scripts/slide_config.py set viewport 1920x1080
+python ${CLAUDE_SKILL_DIR}/scripts/slide_config.py set viewport 1920x1080
 
 # Set default hide selectors
-python skills/slide-config/scripts/slide_config.py set hide_selectors ".slide-nav,.footer"
+python ${CLAUDE_SKILL_DIR}/scripts/slide_config.py set hide_selectors ".slide-nav,.footer"
 
 # Reset to defaults
-python skills/slide-config/scripts/slide_config.py reset
+python ${CLAUDE_SKILL_DIR}/scripts/slide_config.py reset
 ```
 
 ## Settings

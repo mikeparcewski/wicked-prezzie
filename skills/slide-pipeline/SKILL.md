@@ -41,19 +41,19 @@ Each stage is optional and can be skipped via flags.
 
 ```bash
 # Full pipeline
-python skills/slide-pipeline/scripts/slide_pipeline.py --input-dir ./slides --output deck.pptx
+python ${CLAUDE_SKILL_DIR}/scripts/slide_pipeline.py --input-dir ./slides --output deck.pptx
 
 # Skip standardization (HTML already clean)
-python skills/slide-pipeline/scripts/slide_pipeline.py --input-dir ./slides --output deck.pptx --no-standardize
+python ${CLAUDE_SKILL_DIR}/scripts/slide_pipeline.py --input-dir ./slides --output deck.pptx --no-standardize
 
 # Convert + validate only (no render/compare)
-python skills/slide-pipeline/scripts/slide_pipeline.py --input-dir ./slides --output deck.pptx --no-render --no-compare
+python ${CLAUDE_SKILL_DIR}/scripts/slide_pipeline.py --input-dir ./slides --output deck.pptx --no-render --no-compare
 
 # Full pipeline with visual overflow detection
-python skills/slide-pipeline/scripts/slide_pipeline.py --input-dir ./slides --output deck.pptx --visual-overflow
+python ${CLAUDE_SKILL_DIR}/scripts/slide_pipeline.py --input-dir ./slides --output deck.pptx --visual-overflow
 
 # Full pipeline with montage
-python skills/slide-pipeline/scripts/slide_pipeline.py --input-dir ./slides --output deck.pptx --montage montage.png
+python ${CLAUDE_SKILL_DIR}/scripts/slide_pipeline.py --input-dir ./slides --output deck.pptx --montage montage.png
 ```
 
 ### Options
