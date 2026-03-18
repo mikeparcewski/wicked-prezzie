@@ -105,7 +105,7 @@ Claude discovers all 13 skills automatically. Then talk to it:
 
 ## The full pipeline
 
-**[View pipeline architecture diagram →](PIPELINE.md)**
+**[View pipeline architecture diagram →](PIPELINE.md)** | **[Browse use cases →](USE-CASES.md)**
 
 > 13 independent skills across four stages: **Ideation** → **Creation** → **Migration** → **Quality**. Jump in at any stage — bring your own HTML, start from an outline, or go from blank page to polished deck.
 
