@@ -13,6 +13,8 @@ from pptx.util import Inches, Pt, Emu
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN
 from pptx.enum.shapes import MSO_SHAPE
+from pptx.oxml.ns import qn
+from lxml import etree
 
 # Color utilities (bundled in this skill)
 from color_utils import parse_css_color, is_bold, decode_entities
@@ -25,6 +27,59 @@ def pp_align(css_align):
     if css_align == 'center': return PP_ALIGN.CENTER
     if css_align == 'right': return PP_ALIGN.RIGHT
     return PP_ALIGN.LEFT
+
+
+import re as _re
+import math as _math
+
+def _parse_css_gradient(grad_str):
+    """Parse a CSS linear-gradient string into angle and color stops."""
+    if not grad_str or 'linear-gradient' not in str(grad_str):
+        return None, []
+    angle_match = _re.search(r'(\d+)deg', grad_str)
+    angle = float(angle_match.group(1)) if angle_match else 180.0
+    stops = _re.findall(r'rgba?\(([^)]+)\)', grad_str)
+    parsed = []
+    for s in stops:
+        parts = [x.strip() for x in s.split(',')]
+        r, g, b = int(parts[0]), int(parts[1]), int(parts[2])
+        a = float(parts[3]) if len(parts) == 4 else 1.0
+        parsed.append((r, g, b, a))
+    return angle, parsed
+
+
+def _apply_gradient_fill(shape, angle_css, stops, bg_rgb):
+    """Apply OOXML gradient fill if stops differ enough."""
+    blended = []
+    for r, g, b, a in stops:
+        br, bg_g, bb = bg_rgb
+        blended.append((
+            int(r * a + br * (1 - a)),
+            int(g * a + bg_g * (1 - a)),
+            int(b * a + bb * (1 - a))
+        ))
+    if len(blended) < 2:
+        return False
+    dist = _math.sqrt(sum((a - b) ** 2 for a, b in zip(blended[0], blended[-1])))
+    if dist < 20:
+        return False  # imperceptible gradient, use solid
+    spPr = shape._element.spPr
+    for child in list(spPr):
+        if child.tag.endswith('}solidFill') or child.tag.endswith('}gradFill') or child.tag.endswith('}noFill'):
+            spPr.remove(child)
+    gradFill = etree.SubElement(spPr, qn('a:gradFill'))
+    gsLst = etree.SubElement(gradFill, qn('a:gsLst'))
+    for i, (cr, cg, cb) in enumerate(blended):
+        pos = int(i / max(1, len(blended) - 1) * 100000)
+        gs = etree.SubElement(gsLst, qn('a:gs'))
+        gs.set('pos', str(pos))
+        srgbClr = etree.SubElement(gs, qn('a:srgbClr'))
+        srgbClr.set('val', f'{cr:02X}{cg:02X}{cb:02X}')
+    lin = etree.SubElement(gradFill, qn('a:lin'))
+    ooxml_deg = (90 - angle_css) % 360
+    lin.set('ang', str(int(ooxml_deg * 60000)))
+    lin.set('scaled', '0')
+    return True
 
 
 class SlideBuilder:
@@ -48,6 +103,17 @@ class SlideBuilder:
 
     def px2emu_y(self, px):
         return int(px / self.src_h * self.sh * 914400)
+
+    def _apply_margins(self, tf, styles=None):
+        """Apply CSS padding as text frame margins, or zero margins if no padding."""
+        PX_TO_EMU = 9525  # 1px at 96 DPI
+        if styles and any(styles.get(k, 0) for k in ('paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft')):
+            tf.margin_top = Emu(int(styles.get('paddingTop', 0) * PX_TO_EMU))
+            tf.margin_bottom = Emu(int(styles.get('paddingBottom', 0) * PX_TO_EMU))
+            tf.margin_left = Emu(int(styles.get('paddingLeft', 0) * PX_TO_EMU))
+            tf.margin_right = Emu(int(styles.get('paddingRight', 0) * PX_TO_EMU))
+        else:
+            tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = Emu(0)
 
     def build_slide(self, prs, layout_data, screenshot_fn=None, notes_text=None):
         """
@@ -92,7 +158,8 @@ class SlideBuilder:
         for s in shapes_data:
             r = s['rect']
             if r['w'] > 1250 and r['h'] > 680: continue
-            if r['w'] < 4 or r['h'] < 4: continue
+            if r['w'] * r['h'] < 16: continue  # truly tiny
+            if r['w'] < 2 and r['h'] < 2: continue
             if r['x'] > self.src_w or r['y'] > self.src_h: continue
             if r['x'] + r['w'] < 0 or r['y'] + r['h'] < 0: continue
             filtered_shapes.append(s)
@@ -112,6 +179,12 @@ class SlideBuilder:
                         best_area = area
             return best
 
+        def find_containment_rect(text_node):
+            """Tightest ancestor rect: explicit flex/grid slot, or card ancestor."""
+            if text_node.get('parentSlotRect'):
+                return text_node['parentSlotRect']
+            return find_parent_card(text_node['rect'])
+
         # Render shapes
         for s in filtered_shapes:
             r = s['rect']
@@ -120,7 +193,7 @@ class SlideBuilder:
             y = self.px2emu_y(max(0, r['y']))
             w = self.px2emu_x(min(r['w'], self.src_w - max(0, r['x'])))
             h = self.px2emu_y(min(r['h'], self.src_h - max(0, r['y'])))
-            if w < 10000 or h < 8000: continue
+            if w < 10000 and h < 8000: continue  # allow thin decorative lines
 
             br = st.get('borderRadius', 0)
             if br > 5:
@@ -138,6 +211,13 @@ class SlideBuilder:
             else:
                 shape.fill.background()
 
+            # Try gradient fill from raw CSS background
+            bg_raw = st.get('background', '')
+            if bg_raw and 'linear-gradient' in str(bg_raw):
+                angle, stops = _parse_css_gradient(bg_raw)
+                if stops:
+                    _apply_gradient_fill(shape, angle, stops, slide_bg_rgb)
+
             border_c = parse_css_color(st.get('borderColor'), slide_bg_rgb)
             bw = st.get('borderWidth', 0)
             blw = st.get('borderLeftWidth', 0)
@@ -147,7 +227,7 @@ class SlideBuilder:
                 shape.line.width = Pt(max(1, min(blw, 4)))
             elif border_c and bw > 0.3:
                 shape.line.color.rgb = border_c
-                shape.line.width = Pt(max(0.5, min(bw, 3)))
+                shape.line.width = Pt(max(0.25, bw * 0.75))  # CSS px → PPTX pt at 96 DPI
             else:
                 shape.line.fill.background()
             shape.text_frame.clear()
@@ -167,6 +247,22 @@ class SlideBuilder:
                     try:
                         slide.shapes.add_picture(png_path, x, y, w, h)
                     except: pass
+
+        # Render native tables
+        table_data = [e for e in elements if e['type'] == 'table']
+        for td in table_data:
+            try:
+                self.build_table(slide, td, slide_bg_rgb)
+            except Exception:
+                pass
+
+        # Render badges and circles
+        badge_data = [e for e in elements if e['type'] in ('badge', 'circle')]
+        for bd in badge_data:
+            try:
+                self.build_badge(slide, bd, slide_bg_rgb)
+            except Exception:
+                pass
 
         # Separate richtext and simple text
         richtext_data = [e for e in elements if e['type'] == 'richtext']
@@ -214,7 +310,7 @@ class SlideBuilder:
 
             align = rt.get('styles', {}).get('textAlign', 'left')
             tag = rt.get('tag', '')
-            parent = find_parent_card(r)
+            parent = find_containment_rect(rt)
 
             if parent and tag not in ('h1',):
                 px = parent['x'] + 4
@@ -240,7 +336,10 @@ class SlideBuilder:
             tb.line.fill.background()
             tf = tb.text_frame
             tf.word_wrap = True
-            tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = Emu(0)
+            ws = rt.get('styles', {}).get('whiteSpace', '')
+            if ws == 'nowrap':
+                tf.word_wrap = False
+            self._apply_margins(tf, rt.get('styles', {}))
 
             p = tf.paragraphs[0]
             p.alignment = pp_align(align)
@@ -280,7 +379,7 @@ class SlideBuilder:
             if tt == 'uppercase':
                 text = text.upper()
 
-            parent = find_parent_card(r)
+            parent = find_containment_rect(t)
             if parent:
                 px = parent['x'] + 4
                 pw = parent['w'] - 8
@@ -298,7 +397,7 @@ class SlideBuilder:
             tb.line.fill.background()
             tf = tb.text_frame
             tf.word_wrap = True
-            tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = Emu(0)
+            self._apply_margins(tf, st)
 
             p = tf.paragraphs[0]
             p.alignment = pp_align(st.get('textAlign', 'left'))
@@ -336,7 +435,120 @@ class SlideBuilder:
         run.font.size = Pt(round(max(6, min(52, fs * 0.75)), 1))
         run.font.bold = is_bold(run_data.get('fontWeight'))
         run.font.italic = run_data.get('fontStyle') == 'italic'
+        ls = run_data.get('letterSpacing')
+        if ls and ls != 'normal':
+            try:
+                px = float(ls) if isinstance(ls, (int, float)) else float(str(ls).replace('px', ''))
+                if abs(px) >= 0.1:
+                    rPr = run._r.get_or_add_rPr()
+                    rPr.set('spc', str(int(px * 75)))  # px → 100ths of pt
+            except (ValueError, TypeError):
+                pass
         color = parse_css_color(run_data.get('color'), (255, 255, 255))
         if color:
             run.font.color.rgb = color
         return run
+
+    def build_table(self, slide, table_node, slide_bg_rgb):
+        """Build a native PPTX table from extracted table data."""
+        rows = table_node.get('rows', [])
+        if not rows:
+            return None
+        num_rows = len(rows)
+        num_cols = max(len(row) for row in rows) if rows else 0
+        if num_cols == 0:
+            return None
+        r = table_node['rect']
+        x = self.px2emu_x(max(0, r['x']))
+        y = self.px2emu_y(max(0, r['y']))
+        w = self.px2emu_x(min(r['w'], self.src_w - max(0, r['x'])))
+        h = self.px2emu_y(min(r['h'], self.src_h - max(0, r['y'])))
+
+        table_shape = slide.shapes.add_table(num_rows, num_cols, x, y, w, h)
+        table = table_shape.table
+
+        # Set column widths from first row cell widths
+        tbl = table._tbl
+        if rows[0]:
+            for ci, cell_data in enumerate(rows[0]):
+                if ci < num_cols:
+                    col_w = self.px2emu_x(cell_data['rect']['w'])
+                    tbl.tblGrid[ci].set('w', str(col_w))
+
+        for ri, row in enumerate(rows):
+            for ci, cell_data in enumerate(row):
+                if ci >= num_cols or ri >= num_rows:
+                    continue
+                cell = table.cell(ri, ci)
+                bg = parse_css_color(cell_data['styles'].get('backgroundColor'), slide_bg_rgb)
+                if bg:
+                    cell.fill.solid()
+                    cell.fill.fore_color.rgb = bg
+                tf = cell.text_frame
+                tf.word_wrap = True
+                runs = cell_data.get('runs', [])
+                first_run = True
+                for run_data in runs:
+                    if run_data.get('br'):
+                        tf.add_paragraph()
+                        continue
+                    text = run_data.get('text', '').strip()
+                    if not text:
+                        continue
+                    if first_run:
+                        p = tf.paragraphs[0]
+                        first_run = False
+                    else:
+                        p = tf.paragraphs[-1]
+                    run = p.add_run()
+                    run.text = text
+                    run.font.name = self.font
+                    run.font.size = Pt(round(max(6, min(52, run_data.get('fontSize', 12) * 0.75)), 1))
+                    color = parse_css_color(run_data.get('color'), (255, 255, 255))
+                    if color:
+                        run.font.color.rgb = color
+                    if is_bold(run_data.get('fontWeight')):
+                        run.font.bold = True
+        return table_shape
+
+    def build_badge(self, slide, node, slide_bg_rgb):
+        """Build a pill/circle badge shape."""
+        r = node['rect']
+        x = self.px2emu_x(max(0, r['x']))
+        y = self.px2emu_y(max(0, r['y']))
+        w = self.px2emu_x(r['w'])
+        h = self.px2emu_y(r['h'])
+        st = node.get('styles', {})
+        br = st.get('borderRadius', 0)
+        if br >= min(r['w'], r['h']) / 2:
+            shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, w, h)
+            try:
+                shape.adjustments[0] = 0.5  # max rounding = pill
+            except Exception:
+                pass
+        else:
+            shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, w, h)
+            try:
+                shape.adjustments[0] = min(0.15, br / max(1, min(r['w'], r['h'])))
+            except Exception:
+                pass
+        bg = parse_css_color(st.get('backgroundColor'), slide_bg_rgb)
+        if bg:
+            shape.fill.solid()
+            shape.fill.fore_color.rgb = bg
+        else:
+            shape.fill.background()
+        shape.line.fill.background()
+        text = node.get('text', '').strip()
+        if text:
+            tf = shape.text_frame
+            tf.word_wrap = False
+            tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = Emu(0)
+            tf.paragraphs[0].alignment = PP_ALIGN.CENTER
+            run = tf.paragraphs[0].add_run()
+            run.text = text
+            run.font.name = self.font
+            run.font.size = Pt(round(max(6, st.get('fontSize', 12) * 0.75), 1))
+            color = parse_css_color(st.get('color'), (255, 255, 255))
+            if color:
+                run.font.color.rgb = color

@@ -47,11 +47,10 @@ def _export_pdf_macos(pptx_abs, pdf_abs):
     """Export PPTX to PDF using PowerPoint AppleScript (macOS)."""
     script = f'''tell application "Microsoft PowerPoint"
     activate
-    open (POSIX file "{pptx_abs}" as alias)
+    open POSIX file "{pptx_abs}"
     delay 4
-    tell active presentation
-        save in (POSIX file "{pdf_abs}" as text) as save as PDF
-    end tell
+    set thePresentation to active presentation
+    save thePresentation in POSIX file "{pdf_abs}" as save as PDF
 end tell'''
 
     subprocess.run(

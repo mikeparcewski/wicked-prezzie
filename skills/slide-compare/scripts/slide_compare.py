@@ -10,7 +10,7 @@ Usage:
     python skills/slide_compare.py --html-dir ./slides --pptx deck.pptx --slides 1,5,10
 """
 
-import argparse, os, sys, subprocess, glob
+import argparse, os, sys, subprocess, glob, shutil
 from pathlib import Path
 
 # Import from sibling skills
@@ -65,6 +65,16 @@ def compare_slides(html_dir, pptx_path, output_dir, slide_indices=None,
 
     # Screenshot HTML files
     html_files = sorted(glob.glob(os.path.join(html_dir, 'slide-*.html')))
+
+    # Build mapping: sequential PPTX page → HTML source filename
+    # pptx_pngs[i] corresponds to html_files[i]
+    for i, pptx_png in enumerate(pptx_pngs):
+        if i < len(html_files):
+            name = os.path.splitext(os.path.basename(html_files[i]))[0]
+            mapped_path = os.path.join(pptx_dir_path, f'{name}.png')
+            if str(pptx_png) != mapped_path:
+                shutil.move(str(pptx_png), mapped_path)
+
     if not html_files:
         print(f"No slide HTML files found in {html_dir}")
         return
@@ -84,8 +94,8 @@ def compare_slides(html_dir, pptx_path, output_dir, slide_indices=None,
             screenshot_html(html_file, html_png, tmpdir, viewport_w, viewport_h,
                           hide_selectors=hide)
 
-            pptx_png = pptx_pngs[i] if i < len(pptx_pngs) else None
-            status = "OK" if pptx_png and os.path.exists(pptx_png) else "MISSING PPTX"
+            pptx_png = os.path.join(pptx_dir_path, f'{name}.png')
+            status = "OK" if os.path.exists(pptx_png) else "MISSING PPTX"
             print(f" [{status}]")
 
     print(f"\nComparison images saved to {output_dir}/")

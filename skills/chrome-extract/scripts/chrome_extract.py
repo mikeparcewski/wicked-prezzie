@@ -42,11 +42,12 @@ JS_EXTRACT = r'''
         return {
             color: cs.color,
             backgroundColor: cs.backgroundColor,
+            background: cs.background,
             fontSize: parseFloat(cs.fontSize),
             fontWeight: cs.fontWeight,
             fontStyle: cs.fontStyle,
             textAlign: cs.textAlign,
-            borderColor: cs.borderColor,
+            borderColor: cs.borderTopColor,
             borderWidth: parseFloat(cs.borderWidth),
             borderRadius: parseFloat(cs.borderRadius),
             opacity: parseFloat(cs.opacity),
@@ -54,7 +55,12 @@ JS_EXTRACT = r'''
             letterSpacing: cs.letterSpacing,
             textTransform: cs.textTransform,
             borderLeftColor: cs.borderLeftColor,
-            borderLeftWidth: parseFloat(cs.borderLeftWidth)
+            borderLeftWidth: parseFloat(cs.borderLeftWidth),
+            paddingTop: parseFloat(cs.paddingTop),
+            paddingRight: parseFloat(cs.paddingRight),
+            paddingBottom: parseFloat(cs.paddingBottom),
+            paddingLeft: parseFloat(cs.paddingLeft),
+            whiteSpace: cs.whiteSpace
         };
     }
 
@@ -93,6 +99,28 @@ JS_EXTRACT = r'''
         return runs;
     }
 
+    function capturePseudo(el, pseudo, depth) {
+        var cs = window.getComputedStyle(el, pseudo);
+        if (!cs.content || cs.content === 'none' || cs.content === 'normal' || cs.content === '""') return null;
+        var pseudoW = parseFloat(cs.width) || 0;
+        var pseudoH = parseFloat(cs.height) || 0;
+        if (pseudoW < 2 || pseudoH < 2) return null;
+        var parentRect = el.getBoundingClientRect();
+        var pseudoLeft = parseFloat(cs.left) || 0;
+        var pseudoTop = parseFloat(cs.top) || 0;
+        var x = (parentRect.left - slideRect.left + pseudoLeft) * scaleX;
+        var y = (parentRect.top - slideRect.top + pseudoTop) * scaleY;
+        var rawContent = cs.content.replace(/^["']|["']$/g, '');
+        var isCircle = parseFloat(cs.borderRadius) >= pseudoW / 2;
+        return {
+            type: isCircle ? 'circle' : 'shape', rect: {x: x, y: y, w: pseudoW * scaleX, h: pseudoH * scaleY},
+            styles: {backgroundColor: cs.backgroundColor, color: cs.color,
+                fontSize: parseFloat(cs.fontSize), fontWeight: cs.fontWeight,
+                borderRadius: parseFloat(cs.borderRadius)},
+            text: rawContent, source: pseudo, depth: depth + 0.5
+        };
+    }
+
     var elements = [], svgs = [];
     slide.querySelectorAll('svg').forEach(function(svg) {
         if (!isVis(svg)) return;
@@ -105,7 +133,7 @@ JS_EXTRACT = r'''
     var richTags = {h1:1, h2:1, h3:1, h4:1, p:1, li:1};
     var leafTags = {span:1, a:1, strong:1, b:1, em:1, i:1, label:1, td:1, th:1, div:1};
 
-    function walkEl(el, depth) {
+    function walkEl(el, depth, currentSlotRect) {
         if (depth > 15) return;
         if (!isVis(el)) return;
         var tn = el.tagName;
@@ -117,6 +145,28 @@ JS_EXTRACT = r'''
         var cls = el.className ? String(el.className).split(/\s+/) : [];
         var hasBg = styles.backgroundColor !== 'rgba(0, 0, 0, 0)' && styles.backgroundColor !== 'transparent';
         var hasBorder = styles.borderWidth > 0.5 && styles.borderColor !== 'rgba(0, 0, 0, 0)';
+
+        if (tag === 'table' && rect.w > 50 && rect.h > 20) {
+            var tableData = {type: 'table', rect: rect, rows: [], styles: styles, depth: depth};
+            var trs = el.querySelectorAll(':scope > thead > tr, :scope > tbody > tr, :scope > tr');
+            trs.forEach(function(tr) {
+                var row = [];
+                tr.querySelectorAll(':scope > td, :scope > th').forEach(function(cell) {
+                    var cellRect = relRect(cell);
+                    var cellStyles = gs(cell);
+                    var runs = getRuns(cell);
+                    row.push({
+                        rect: cellRect, styles: cellStyles, runs: runs,
+                        text: cell.textContent.trim().substring(0, 300),
+                        colspan: cell.colSpan || 1, rowspan: cell.rowSpan || 1,
+                        tag: cell.tagName.toLowerCase()
+                    });
+                });
+                tableData.rows.push(row);
+            });
+            elements.push(tableData);
+            return;
+        }
 
         if (richTags[tag] && rect.w > 5 && rect.h > 3) {
             var fullText = el.textContent.trim();
@@ -133,7 +183,11 @@ JS_EXTRACT = r'''
                                 br: r.br || false
                             };
                         }),
-                        styles: {textAlign: styles.textAlign, letterSpacing: styles.letterSpacing},
+                        styles: {textAlign: styles.textAlign, letterSpacing: styles.letterSpacing,
+                                 whiteSpace: styles.whiteSpace,
+                                 paddingTop: styles.paddingTop, paddingRight: styles.paddingRight,
+                                 paddingBottom: styles.paddingBottom, paddingLeft: styles.paddingLeft},
+                        parentSlotRect: currentSlotRect || null,
                         depth: depth
                     });
                     richTextEls.add(el);
@@ -141,6 +195,22 @@ JS_EXTRACT = r'''
                 }
             }
         } else if (leafTags[tag] && rect.w > 3 && rect.h > 3 && !richTextEls.has(el)) {
+            var badgeBg = styles.backgroundColor !== 'rgba(0, 0, 0, 0)' && styles.backgroundColor !== 'transparent';
+            var badgeRound = styles.borderRadius >= Math.min(rect.w, rect.h) * 0.3;
+            if (badgeBg && badgeRound && rect.w > 10 && rect.h > 10) {
+                elements.push({
+                    type: 'badge', tag: tag, rect: rect,
+                    text: el.textContent.trim(),
+                    styles: {
+                        backgroundColor: styles.backgroundColor,
+                        color: styles.color, fontSize: styles.fontSize,
+                        fontWeight: styles.fontWeight, borderRadius: styles.borderRadius
+                    },
+                    depth: depth
+                });
+                richTextEls.add(el);
+                return;
+            }
             var dtext = '';
             for (var i = 0; i < el.childNodes.length; i++) {
                 if (el.childNodes[i].nodeType === 3) dtext += el.childNodes[i].textContent;
@@ -153,8 +223,12 @@ JS_EXTRACT = r'''
                         color: styles.color, fontSize: styles.fontSize,
                         fontWeight: styles.fontWeight, fontStyle: styles.fontStyle,
                         textAlign: styles.textAlign, letterSpacing: styles.letterSpacing,
-                        textTransform: styles.textTransform
+                        textTransform: styles.textTransform,
+                        whiteSpace: styles.whiteSpace,
+                        paddingTop: styles.paddingTop, paddingRight: styles.paddingRight,
+                        paddingBottom: styles.paddingBottom, paddingLeft: styles.paddingLeft
                     },
+                    parentSlotRect: currentSlotRect || null,
                     depth: depth
                 });
             }
@@ -167,16 +241,30 @@ JS_EXTRACT = r'''
                     backgroundColor: styles.backgroundColor, borderColor: styles.borderColor,
                     borderWidth: styles.borderWidth, borderRadius: styles.borderRadius,
                     opacity: styles.opacity, borderLeftColor: styles.borderLeftColor,
-                    borderLeftWidth: styles.borderLeftWidth
+                    borderLeftWidth: styles.borderLeftWidth,
+                    background: styles.background
                 },
                 depth: depth
             });
         }
 
-        for (var i = 0; i < el.children.length; i++) walkEl(el.children[i], depth + 1);
+        ['::before', '::after'].forEach(function(pseudo) {
+            var pn = capturePseudo(el, pseudo, depth);
+            if (pn) elements.push(pn);
+        });
+
+        if (styles.display === 'flex' || styles.display === 'grid' ||
+            styles.display === 'inline-flex' || styles.display === 'inline-grid') {
+            for (var i = 0; i < el.children.length; i++) {
+                var childRect = relRect(el.children[i]);
+                walkEl(el.children[i], depth + 1, childRect);
+            }
+        } else {
+            for (var i = 0; i < el.children.length; i++) walkEl(el.children[i], depth + 1, currentSlotRect);
+        }
     }
 
-    walkEl(slide, 0);
+    walkEl(slide, 0, null);
     var ss = gs(slide);
     document.getElementById('__layout_output__').textContent = JSON.stringify({
         slideWidth: SLIDE_W, slideHeight: SLIDE_H,
