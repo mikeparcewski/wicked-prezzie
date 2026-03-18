@@ -148,17 +148,17 @@ Project-level config stays in `skills/slide-config/config.json` (per-project ove
 
 5. **SVG handling** — large SVG charts rendered as cropped screenshot images. Small decorative SVGs (<60px) skipped.
 
-6. **PowerPoint for rendering** — PPTX→PDF via PowerPoint (AppleScript on macOS, COM on Windows), then pdftoppm for PDF→PNG. Highest fidelity since PowerPoint is the definitive renderer.
+6. **LibreOffice for rendering** — PPTX→PDF via `soffice --headless`, then pdftoppm for PDF→PNG. No Microsoft PowerPoint required — runs headless without GUI, permission dialogs, or automation consent. Handles sandboxed environments automatically.
 
-7. **Iterative visual verification** — After conversion, render both HTML (Chrome) and PPTX (PowerPoint) to PNG, then visually compare each slide. Fix issues and re-convert until all slides pass or no further improvement is possible. This is a Claude-in-the-loop pattern (like literal-extractor): Claude uses its vision to judge quality, not pixel math. The scripts are single-pass tools; the iteration logic lives in the SKILL.md workflow.
+7. **Iterative visual verification** — After conversion, render both HTML (Chrome) and PPTX (LibreOffice) to PNG, then visually compare each slide. Fix issues and re-convert until all slides pass or no further improvement is possible. This is a Claude-in-the-loop pattern (like literal-extractor): Claude uses its vision to judge quality, not pixel math. The scripts are single-pass tools; the iteration logic lives in the SKILL.md workflow.
 
-8. **Overflow detection** — pad+render+check pattern: enlarge PPTX with grey padding, render via PowerPoint, check margins for non-grey pixels indicating content overflow.
+8. **Overflow detection** — pad+render+check pattern: enlarge PPTX with grey padding, render via LibreOffice, check margins for non-grey pixels indicating content overflow.
 
 ## Dependencies
 
 - python-pptx, beautifulsoup4 + lxml, Pillow
 - Google Chrome (for headless extraction)
-- Microsoft PowerPoint (macOS via AppleScript, Windows via COM automation)
+- LibreOffice (`brew install --cask libreoffice` on macOS, `apt install libreoffice` on Linux)
 - pdftoppm from poppler (`brew install poppler` on macOS)
 
 ## Known Limitations

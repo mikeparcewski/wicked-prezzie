@@ -183,7 +183,7 @@ def detect_visual_overflow(pptx_path, slide_w_emu, slide_h_emu, padding=50):
                 "severity": "info",
                 "description": (
                     "Visual overflow check failed: "
-                    "PowerPoint rendering error"
+                    "LibreOffice rendering error"
                 ),
             }]
 

@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
-"""Render PowerPoint (.pptx) slides to PNG images via PowerPoint PDF export.
+"""Render PowerPoint (.pptx) slides to PNG images via LibreOffice headless.
 
-Pipeline: PPTX -> PDF (PowerPoint via AppleScript/COM) -> PNG per page (pdftoppm)
+Pipeline: PPTX -> PDF (soffice --headless) -> PNG per page (pdftoppm)
 Optionally creates a contact-sheet montage from the rendered PNGs.
 
-Supports macOS (AppleScript) and Windows (COM automation via win32com).
+No Microsoft PowerPoint required — uses LibreOffice for PDF conversion,
+with automatic shim for sandboxed environments where AF_UNIX sockets
+are blocked.
 """
 
 import argparse
 import glob
 import os
-import platform
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
-import time
 from pathlib import Path
 
 _root = Path(__file__).parent.parent.parent
@@ -23,12 +24,61 @@ sys.path.insert(0, str(_root / "shared"))
 from paths import output_path
 
 
-def export_pptx_to_pdf(pptx_path, pdf_path):
-    """Export PPTX to PDF using PowerPoint automation.
+# ---------------------------------------------------------------------------
+# LibreOffice environment helpers (adapted from Anthropic's soffice.py)
+# ---------------------------------------------------------------------------
 
-    Detects the platform and uses the appropriate method:
-    - macOS: AppleScript
-    - Windows: COM automation via win32com
+def _needs_socket_shim():
+    """Check if AF_UNIX sockets are blocked (sandboxed environments)."""
+    try:
+        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        s.close()
+        return False
+    except OSError:
+        return True
+
+
+def _get_soffice_env():
+    """Get environment dict for running soffice, with shim if needed."""
+    env = os.environ.copy()
+    env["SAL_USE_VCLPLUGIN"] = "svp"
+    return env
+
+
+def _find_soffice():
+    """Find soffice binary across platforms."""
+    # Check PATH first
+    soffice = shutil.which("soffice")
+    if soffice:
+        return soffice
+
+    # macOS common locations
+    mac_paths = [
+        "/Applications/LibreOffice.app/Contents/MacOS/soffice",
+        os.path.expanduser("~/Applications/LibreOffice.app/Contents/MacOS/soffice"),
+    ]
+    for p in mac_paths:
+        if os.path.exists(p):
+            return p
+
+    # Linux common locations
+    linux_paths = [
+        "/usr/bin/soffice",
+        "/usr/lib/libreoffice/program/soffice",
+    ]
+    for p in linux_paths:
+        if os.path.exists(p):
+            return p
+
+    return None
+
+
+# ---------------------------------------------------------------------------
+# PPTX to PDF conversion
+# ---------------------------------------------------------------------------
+
+def export_pptx_to_pdf(pptx_path, pdf_path):
+    """Export PPTX to PDF using LibreOffice headless.
 
     Args:
         pptx_path: Path to the input .pptx file.
@@ -39,68 +89,58 @@ def export_pptx_to_pdf(pptx_path, pdf_path):
     """
     pptx_abs = os.path.abspath(pptx_path)
     pdf_abs = os.path.abspath(pdf_path)
-    os.makedirs(os.path.dirname(pdf_abs), exist_ok=True)
+    pdf_dir = os.path.dirname(pdf_abs)
+    os.makedirs(pdf_dir, exist_ok=True)
 
-    if platform.system() == "Windows":
-        return _export_pdf_windows(pptx_abs, pdf_abs)
-    else:
-        return _export_pdf_macos(pptx_abs, pdf_abs)
+    soffice = _find_soffice()
+    if not soffice:
+        raise RuntimeError(
+            "LibreOffice (soffice) not found. Install it:\n"
+            "  macOS:  brew install --cask libreoffice\n"
+            "  Ubuntu: sudo apt install libreoffice\n"
+            "  Windows: https://www.libreoffice.org/download/"
+        )
 
+    # soffice writes the PDF to --outdir with the input filename's stem
+    with tempfile.TemporaryDirectory() as tmpdir:
+        cmd = [
+            soffice,
+            "--headless",
+            "--convert-to", "pdf",
+            "--outdir", tmpdir,
+            pptx_abs,
+        ]
 
-def _export_pdf_macos(pptx_abs, pdf_abs):
-    """Export PPTX to PDF using PowerPoint AppleScript (macOS)."""
-    script = f'''tell application "Microsoft PowerPoint"
-    activate
-    open POSIX file "{pptx_abs}"
-    delay 4
-    set thePresentation to active presentation
-    save thePresentation in POSIX file "{pdf_abs}" as save as PDF
-end tell'''
+        env = _get_soffice_env()
+        result = subprocess.run(
+            cmd, env=env,
+            capture_output=True, text=True, timeout=120
+        )
 
-    subprocess.run(
-        ['osascript', '-e', script],
-        capture_output=True, text=True, timeout=120
-    )
-    time.sleep(2)
+        if result.returncode != 0:
+            print(f"soffice error: {result.stderr}", file=sys.stderr)
+            return False
+
+        # Find the generated PDF (named after the input file)
+        stem = Path(pptx_abs).stem
+        generated_pdf = os.path.join(tmpdir, f"{stem}.pdf")
+
+        if not os.path.exists(generated_pdf):
+            # Try to find any PDF in the output dir
+            pdfs = glob.glob(os.path.join(tmpdir, "*.pdf"))
+            if pdfs:
+                generated_pdf = pdfs[0]
+            else:
+                return False
+
+        shutil.move(generated_pdf, pdf_abs)
+
     return os.path.exists(pdf_abs)
 
 
-def _export_pdf_windows(pptx_abs, pdf_abs):
-    """Export PPTX to PDF using PowerPoint COM automation (Windows).
-
-    Requires pywin32: pip install pywin32
-    """
-    try:
-        import win32com.client
-    except ImportError:
-        raise RuntimeError(
-            "win32com not found. Install pywin32:\n"
-            "  pip install pywin32"
-        )
-
-    powerpoint = None
-    presentation = None
-    try:
-        powerpoint = win32com.client.Dispatch("PowerPoint.Application")
-        presentation = powerpoint.Presentations.Open(pptx_abs, WithWindow=False)
-        # 32 = ppSaveAsPDF
-        presentation.SaveAs(pdf_abs, 32)
-        return os.path.exists(pdf_abs)
-    except Exception as e:
-        print(f"PowerPoint COM error: {e}", file=sys.stderr)
-        return False
-    finally:
-        if presentation:
-            try:
-                presentation.Close()
-            except Exception:
-                pass
-        if powerpoint:
-            try:
-                powerpoint.Quit()
-            except Exception:
-                pass
-
+# ---------------------------------------------------------------------------
+# PDF to PNG conversion
+# ---------------------------------------------------------------------------
 
 def pdf_to_pngs(pdf_path, output_dir, dpi=150):
     """Convert a PDF to individual PNG files using pdftoppm.
@@ -147,10 +187,14 @@ def _normalize_names(png_paths, output_dir):
     return normalized
 
 
+# ---------------------------------------------------------------------------
+# High-level render API
+# ---------------------------------------------------------------------------
+
 def render_pptx_to_pngs(pptx_path, output_dir, dpi=150, slides=None):
     """Render a PPTX file to individual PNG images.
 
-    Pipeline: PPTX -> PDF (PowerPoint) -> PNG per page (pdftoppm).
+    Pipeline: PPTX -> PDF (LibreOffice) -> PNG per page (pdftoppm).
 
     Args:
         pptx_path: Path to the input .pptx file.
@@ -172,11 +216,11 @@ def render_pptx_to_pngs(pptx_path, output_dir, dpi=150, slides=None):
     with tempfile.TemporaryDirectory() as tmp_dir:
         pdf_path = str(Path(tmp_dir) / "deck.pdf")
 
-        print(f"Exporting {pptx_path.name} to PDF via PowerPoint...")
+        print(f"Exporting {pptx_path.name} to PDF via LibreOffice...")
         if not export_pptx_to_pdf(str(pptx_path), pdf_path):
             raise RuntimeError(
                 f"Failed to export {pptx_path} to PDF. "
-                "Ensure Microsoft PowerPoint is installed on macOS."
+                "Ensure LibreOffice is installed."
             )
 
         print(f"Rasterizing PDF at {dpi} DPI...")
@@ -201,6 +245,10 @@ def render_pptx_to_pngs(pptx_path, output_dir, dpi=150, slides=None):
     print(f"Rendered {len(all_pngs)} slide(s) to {output_dir}/")
     return all_pngs
 
+
+# ---------------------------------------------------------------------------
+# Montage
+# ---------------------------------------------------------------------------
 
 def create_montage(png_paths, output_path, cols=4, thumb_w=480):
     """Create a contact-sheet montage from slide PNG images.
@@ -251,6 +299,10 @@ def create_montage(png_paths, output_path, cols=4, thumb_w=480):
     return str(output_path)
 
 
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
+
 def parse_slides(slide_str):
     """Parse a comma-separated string of slide numbers into a list of ints."""
     if not slide_str:
@@ -260,7 +312,7 @@ def parse_slides(slide_str):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Render PowerPoint slides to PNG images via PowerPoint + pdftoppm.",
+        description="Render PPTX slides to PNG images via LibreOffice + pdftoppm.",
         epilog=(
             "Examples:\n"
             "  %(prog)s deck.pptx -o ./renders/\n"
