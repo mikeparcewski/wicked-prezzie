@@ -1,13 +1,10 @@
 ---
 name: Slide Render
 description: >
-  PPTX-to-PNG rasterization via PowerPoint PDF export + pdftoppm, plus contact
-  sheet montage generation. Use this skill whenever the user needs to render a
-  PPTX to images, convert PowerPoint to PNG, create thumbnails, make a contact
-  sheet or montage, or export slides as images for review. Also use when
-  slide-validate needs visual overflow detection (the --render flag), or when
-  the user wants to see what the PPTX actually looks like. If someone says
-  "show me the slides" or "what does it look like", render and present the PNGs.
+  Renders PPTX slides to PNG images via PowerPoint, with optional contact sheet
+  montage. Use when the user says "show me the slides", "what does it look like",
+  wants to preview the PPTX, create thumbnails, or export slides as images.
+  Also used by the validation and comparison workflows.
 ---
 
 # Slide Render

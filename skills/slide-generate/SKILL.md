@@ -1,19 +1,11 @@
 ---
 name: Slide Generate
 description: >
-  Generates themed HTML slide files from a structured outline, with image
-  sourcing from Unsplash or icon sets. Use this skill whenever the user wants
-  to turn an outline into slides, generate HTML slides from a plan, or produce
-  the slide files that feed into the conversion pipeline. This is the bridge
-  between slide-outline (content planning) and slide-html-standardize
-  (normalization). If the user says "generate the slides", "create the HTML",
-  "build slides from the outline", "render the outline", "add photos from
-  Unsplash", "use icons instead of photos", or "no images", use this skill.
-  Also use when the user provides content and wants individual slide HTML files
-  without having created a formal outline — this skill can work from inline
-  content. Supports three image modes: unsplash (photography with attribution),
-  icons (icon/UI illustration from registered iconsets), and none (text-only).
-  Consult slide-theme for colors/fonts and slide-design for quality principles.
+  Turns outlines into themed HTML slide files with optional image sourcing
+  (Unsplash photos, icons, or text-only). Use when the user says "generate the
+  slides", "create the HTML", "build from the outline", "add photos", "use
+  icons", or provides content and wants slide HTML files. Can work from a
+  formal outline JSON or inline content.
 ---
 
 # Slide Generate

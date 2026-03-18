@@ -1,15 +1,11 @@
 ---
 name: Slide Outline
 description: >
-  Structures a topic or brief into a presentation outline using the Pyramid
-  Principle — one key message per slide, supporting evidence, narrative arc.
-  Use this skill whenever the user wants to plan a presentation, create a deck
-  outline, structure talking points, or says "make me a presentation about X",
-  "outline a deck on Y", "plan the slides", or "what slides do I need". This is
-  the first step in the content creation pipeline — it produces a structured
-  outline JSON that slide-generate consumes to produce themed HTML slides.
-  Also use when the user has a wall of text or bullet points and wants them
-  organized into a coherent deck structure.
+  Plans presentation structure from a topic or brief — one key message per slide,
+  narrative arc, Pyramid Principle. Use when the user says "make a presentation
+  about X", "outline a deck", "plan the slides", "what slides do I need", or has
+  a wall of text or bullet points to organize into a coherent deck. First step
+  in content creation before slide-generate.
 ---
 
 # Slide Outline

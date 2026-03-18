@@ -1,15 +1,12 @@
 ---
 name: Slide Pipeline
 description: >
-  End-to-end orchestrator that chains all wicked-pptx stages with per-slide
-  iterative visual verification. This is the DEFAULT entry point for any
-  conversion or generation request — use it when the user says "convert these
-  slides", "make a PowerPoint from this HTML", "turn these into a deck", or
-  wants the full workflow including quality checks. Always prefer this over
-  slide-html-to-pptx unless the user explicitly asks to skip validation or is
-  debugging a single conversion step. Especially important for AI-generated
-  HTML (ChatGPT, Claude, Gemini) which needs standardization before extraction
-  will work. REVIEW flags embedded in speaker notes when human judgment is needed.
+  DEFAULT entry point for all slide conversion. Converts HTML to PPTX, then
+  iterates per-slide — rendering, visually comparing against the source, fixing
+  issues, and re-converting each slide until it matches or converges. Use for
+  "convert these slides", "make a PowerPoint", "turn these into a deck", or any
+  conversion request. Handles AI-generated HTML (ChatGPT, Claude, Gemini)
+  automatically. Always prefer this over slide-html-to-pptx.
 ---
 
 # Slide Pipeline

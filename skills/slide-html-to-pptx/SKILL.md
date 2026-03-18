@@ -1,16 +1,11 @@
 ---
 name: HTML to PowerPoint
 description: >
-  The conversion stage that batch-converts HTML slide files into editable
-  PowerPoint (.pptx) with native shapes, formatted text, and accurate
-  positioning. This is a single pipeline stage, not the full workflow — for
-  end-to-end conversion (standardize + convert + validate + render + compare),
-  use slide-pipeline instead. Use this skill only when the user explicitly wants
-  just the conversion step without QA, when debugging conversion-specific issues
-  (fallback slides, extraction failures, manifest ordering), or when called as
-  part of a manual multi-step workflow. If the user says "just convert, skip
-  validation" or "re-convert slide 5 only", use this. For general "make me a
-  PowerPoint" requests, prefer slide-pipeline.
+  Single-stage HTML-to-PPTX conversion with native shapes and formatted text.
+  Use only when the user wants just conversion without QA — "just convert",
+  "skip validation", "re-convert slide 5 only". For general "make me a
+  PowerPoint" requests, prefer slide-pipeline which includes validation and
+  per-slide refinement.
 ---
 
 # HTML to PowerPoint Conversion

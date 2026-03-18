@@ -1,17 +1,10 @@
 ---
 name: Slide Config
 description: >
-  Two-tier configuration for the wicked-pptx toolkit — user-level defaults in
-  ~/.something-wicked/wicked-prezzie/config.json (shared across projects:
-  default_font, default_fidelity, unsplash_api_key) and project-level overrides
-  in skills/slide-config/config.json (quality_threshold, viewport, hide_selectors,
-  active_theme, slide dimensions). Use this skill whenever the user wants to
-  change settings, set the quality threshold, configure viewport size, set the
-  default font or fidelity tier, add an Unsplash API key, change which CSS
-  selectors get hidden, or view current settings. Also use when the user says
-  "the threshold is too strict", "change the default viewport", "set my API key",
-  "what are the current settings", or "configure fidelity". Resolution order:
-  defaults → user config → project config (project wins).
+  Settings and configuration for the slide toolkit. Use when the user wants to
+  change quality threshold, viewport size, default font, fidelity tier, Unsplash
+  API key, hidden selectors, slide dimensions, or view current settings. Also
+  use when something feels "too strict" or "too loose" — thresholds live here.
 ---
 
 # Slide Config

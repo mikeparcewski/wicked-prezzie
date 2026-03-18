@@ -1,17 +1,11 @@
 ---
 name: PPTX Slide Builder
 description: >
-  Converts extracted layout JSON into native PPTX shapes, richtext boxes, and
-  images at pixel-accurate positions. Use this skill when the PPTX output has
-  visual problems — text overlapping, wrong positions, shapes invisible, text
-  overflowing cards, headings wrapping differently than HTML, SVG charts missing,
-  wrong background colors, or colors that look wrong (too dark, too bright,
-  alpha blending issues). This skill owns the full rendering pipeline including
-  bundled color_utils.py for CSS-to-PPTX color translation. Also use when adjusting fonts,
-  text width, margins, or the coordinate mapping between Chrome pixels and PPTX
-  EMU units. If the extraction looks correct (check chrome-extract) but the PPTX
-  still looks wrong, the issue is here. Consult slide-design for design
-  principles and quality rubric.
+  Builds native PPTX shapes from extracted layout data. Use when the PPTX looks
+  wrong — text overlapping, wrong positions, colors too dark or bright, text
+  overflowing cards, shapes invisible, SVG charts missing. If Chrome extraction
+  looks correct but the PPTX is still off, the problem is here. Owns color
+  translation, font sizing, and coordinate mapping.
 ---
 
 # PPTX Slide Builder

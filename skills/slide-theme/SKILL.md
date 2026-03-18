@@ -1,20 +1,11 @@
 ---
 name: Slide Theme
 description: >
-  Brand and style definitions for slide decks — color palettes, font stacks,
-  layout patterns, reusable design tokens, portable style profiles, and a
-  git-backed shared design registry. Use this skill whenever the user wants to
-  define a brand, set colors, choose fonts, create a theme, customize the look
-  and feel, learn styles from existing assets, manage profiles, or interact with
-  the design registry. Also use when the user says "use my brand colors", "learn
-  my brand", "extract styles from this PDF/PPTX", "make it match our brand",
-  "change the palette", "use these colors", "describe a vibe", "list profiles",
-  "export profile", "import profile", "sync registry", "push palette", or
-  "assemble a profile". Themes are stored in ~/.something-wicked/wicked-prezzie/
-  themes/ (shared across projects). Supports style extraction from PPTX/PDF/
-  images with confidence scoring, .pptprofile export/import for team sharing,
-  vibe matching ("clean and modern" → corporate-light), and delta-E color
-  matching against existing themes and registry palettes.
+  Brand and style definitions — color palettes, fonts, layout tokens, and
+  portable style profiles. Use when the user wants to set colors, choose fonts,
+  create or apply a theme, match a brand, extract styles from existing assets,
+  describe a vibe ("clean and modern"), or manage profiles. Supports learning
+  styles from PPTX/PDF/images and team sharing via profiles.
 ---
 
 # Slide Theme

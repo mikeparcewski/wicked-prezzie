@@ -1,20 +1,12 @@
 ---
 name: Slide Validate
 description: >
-  Post-conversion quality assurance and comprehensive deck auditing — layout
-  validation (bounds, overflow, empty slides), 5-category weighted deck audit
-  (structure 25%, content 30%, layout 20%, consistency 15%, lint 10%), content
-  lint (bullet overload, title hygiene, stat formatting, quote attribution,
-  passive voice, CTA completeness), and cross-deck consistency checks (heading
-  sizes, palette adherence, template distribution, section divider cadence,
-  speaker notes presence). Use this skill whenever the user wants to validate
-  slides, audit a deck, lint content, check consistency, compare two decks,
-  detect overflow, find layout issues, QA a deck, or verify conversion output.
-  Also use proactively after any conversion run — always suggest validation
-  even if the user doesn't ask. If the user says "is it good?", "audit my
-  deck", "lint my deck", "check content", "check consistency", "compare deck A
-  and deck B", "any problems?", or "re-audit", use this skill. Scoring bands:
-  PASS ≥ 80, REVIEW 60-79, FAIL < 60.
+  Quality assurance for slide decks — layout validation, content lint, deck
+  audit, and consistency checks. Use when the user says "is it good?", "audit
+  my deck", "check for problems", "lint content", "check consistency", or
+  "any issues?". Also use proactively after any conversion run. Catches
+  overflow, empty slides, bullet overload, title issues, and cross-slide
+  inconsistencies.
 ---
 
 # Slide Validate

@@ -1,14 +1,11 @@
 ---
 name: Slide Compare
 description: >
-  Generates side-by-side comparison images of original HTML slides versus the
-  converted PPTX output for visual fidelity review. Use this skill whenever the
-  user wants to check conversion quality, compare HTML to PowerPoint, do a visual
-  diff, review slide fidelity, or verify that the PPTX matches the original. Also
-  use after any conversion run to catch visual regressions — even if the user
-  doesn't explicitly ask for comparison, suggesting a visual check is good practice.
-  If the user says "does it look right?", "how close is it?", "check fidelity",
-  or "visual diff", this is the tool.
+  Side-by-side visual comparison of HTML source slides vs converted PPTX output.
+  Use when checking conversion quality, doing a visual diff, reviewing fidelity,
+  or verifying the PPTX matches the original. Also use proactively after any
+  conversion — "does it look right?", "how close is it?", "check fidelity",
+  "visual diff".
 ---
 
 # Slide Visual Comparison

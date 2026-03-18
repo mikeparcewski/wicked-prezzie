@@ -1,17 +1,11 @@
 ---
 name: Slide Design
 description: >
-  Reference-only skill providing design principles, a 100-point quality rubric,
-  CSS contract (zone class naming conventions, type rules, conservative fallback
-  layout), and contextual hint/REVIEW flag systems for presentation slides. This
-  skill has no scripts and cannot take action — it is a knowledge base consulted
-  by other skills when they need design guidance. Use this skill when the user
-  asks about design theory, the quality rubric, CSS zone naming, best practice
-  rules, REVIEW flags, contextual hints, "what are the design rules", "what CSS
-  classes should I use", or "how do REVIEW flags work". Do NOT use for action
-  requests like "make it look better" — those should route to the skill that
-  can act (slide-generate for regenerating, slide-validate for diagnosing,
-  slide-pptx-builder for fixing layout).
+  Reference-only design knowledge base — design principles, quality rubric, CSS
+  contract, and REVIEW flag system. Cannot take action. Use when asking about
+  design rules, the quality rubric, CSS zone naming, or REVIEW flags. Do NOT use
+  for "make it look better" — route those to slide-generate, slide-validate, or
+  slide-pptx-builder instead.
 ---
 
 # Slide Design Skill

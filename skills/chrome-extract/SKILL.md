@@ -1,15 +1,12 @@
 ---
 name: Chrome Layout Extraction
 description: >
-  Chrome headless DOM extraction engine — extracts computed bounding boxes,
-  colors, fonts, and inline formatting from rendered HTML slides as structured
-  JSON. Use this skill whenever the user mentions extracting layout from HTML,
-  debugging why elements are missing or mispositioned, fixing DOM walking,
-  taking screenshots of HTML slides, cropping regions, adjusting viewport size,
-  or investigating why Chrome headless produces unexpected output. Also consult
-  this skill when conversion results look wrong and the issue might be in the
-  extraction phase rather than the PPTX building phase — if elements are missing
-  or at wrong positions, start here before checking slide-pptx-builder.
+  Extracts layout data from rendered HTML slides via Chrome headless — bounding
+  boxes, colors, fonts, inline formatting. Use when elements are missing or
+  mispositioned in the PPTX, when screenshots of HTML slides are needed, when
+  debugging extraction issues, or when the conversion looks wrong and you need
+  to check whether the problem is in extraction vs PPTX building. Start here
+  before checking slide-pptx-builder.
 ---
 
 # Chrome Layout Extraction
