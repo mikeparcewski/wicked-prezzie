@@ -15,6 +15,8 @@ from pathlib import Path
 
 # Import from sibling skills
 _root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(_root / "shared"))
+from paths import output_path
 sys.path.insert(0, str(_root / "chrome-extract" / "scripts"))
 sys.path.insert(0, str(_root / "slide-render" / "scripts"))
 from chrome_extract import screenshot_html
@@ -107,7 +109,7 @@ def main():
     parser = argparse.ArgumentParser(description='Compare HTML slides vs PPTX output')
     parser.add_argument('--html-dir', '-d', required=True, help='HTML slides directory')
     parser.add_argument('--pptx', '-p', required=True, help='PPTX file to compare')
-    parser.add_argument('--output-dir', '-o', default='./compare', help='Output directory')
+    parser.add_argument('--output-dir', '-o', default=output_path('compare'), help='Output directory')
     parser.add_argument('--slides', '-s', help='Comma-separated slide indices (1-based)')
     parser.add_argument('--hide', help='CSS selectors to hide (comma-separated)')
     args = parser.parse_args()

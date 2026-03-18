@@ -18,6 +18,10 @@ import tempfile
 import time
 from pathlib import Path
 
+_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(_root / "shared"))
+from paths import output_path
+
 
 def export_pptx_to_pdf(pptx_path, pdf_path):
     """Export PPTX to PDF using PowerPoint automation.
@@ -266,8 +270,8 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("pptx", help="Path to the input .pptx file")
-    parser.add_argument("-o", "--output-dir", default="./slide-renders",
-                        help="Directory for per-slide PNG output (default: ./slide-renders/)")
+    parser.add_argument("-o", "--output-dir", default=output_path("renders"),
+                        help="Directory for per-slide PNG output")
     parser.add_argument("--dpi", type=int, default=150,
                         help="Rasterization resolution in DPI (default: 150)")
     parser.add_argument("--slides", type=str, default=None,

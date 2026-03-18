@@ -13,6 +13,8 @@ from pathlib import Path
 
 _root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(_root / "slide-theme" / "scripts"))
+sys.path.insert(0, str(_root / "shared"))
+from paths import output_path
 
 VALID_TYPES = {"title", "section", "content", "stats", "comparison", "quote", "cta", "blank"}
 VALID_LAYOUTS = {
@@ -286,7 +288,7 @@ def main():
             key_message=args.key_message,
             theme=args.theme,
         )
-        output = args.output or "outline.json"
+        output = args.output or output_path("outline.json")
         save_outline(outline, output)
         print("Scaffold created with TODO placeholders — fill in slide content.")
         summarize_outline(outline)
@@ -298,7 +300,7 @@ def main():
         # Extract a title from the first line
         first_line = brief_text.strip().split("\n")[0].strip("# ").strip()
         outline = scaffold_outline(first_line, audience=args.audience, key_message=args.key_message, theme=args.theme)
-        output = args.output or "outline.json"
+        output = args.output or output_path("outline.json")
         save_outline(outline, output)
         print("Scaffold created from brief — review and refine the structure.")
         return

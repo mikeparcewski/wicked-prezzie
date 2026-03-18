@@ -18,6 +18,8 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 
 # Import from sibling skills
 _root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(_root / "shared"))
+from paths import output_path
 sys.path.insert(0, str(_root / "chrome-extract" / "scripts"))
 sys.path.insert(0, str(_root / "slide-pptx-builder" / "scripts"))
 sys.path.insert(0, str(_root / "slide-html-standardize" / "scripts"))

@@ -23,6 +23,9 @@ All skills live under `skills/`. Each has SKILL.md + optional scripts/ and refer
 
 ```
 skills/
+  shared/                  — Shared utilities (paths, constants)
+    __init__.py
+    paths.py                     (output_path, ensure_output_dir → ~/.something-wicked/wicked-prezzie/output/)
   slide-theme/             — Brand/style definitions: colors, fonts, layout tokens
     SKILL.md
     scripts/slide_theme.py
@@ -121,6 +124,11 @@ Project-level config stays in `skills/slide-config/config.json` (per-project ove
     iconsets/
   versions/                — Deck version metadata (per slug)
     sales-kickoff.json
+  output/                  — Default output directory for intermediate artifacts
+    outline.json           — Default outline output
+    slides/                — Generated HTML slides
+    renders/               — PPTX→PNG renders
+    compare/               — HTML vs PPTX comparison images
 ```
 
 **Resolution order**: defaults → user config → project config (project wins).
@@ -142,7 +150,7 @@ Project-level config stays in `skills/slide-config/config.json` (per-project ove
 
 6. **PowerPoint for rendering** — PPTX→PDF via PowerPoint (AppleScript on macOS, COM on Windows), then pdftoppm for PDF→PNG. Highest fidelity since PowerPoint is the definitive renderer.
 
-7. **Advisory validation** — slide-validate produces reports but does not block the pipeline. The iteration loop (render → inspect → fix → verify) is the quality gate.
+7. **Iterative visual verification** — After conversion, render both HTML (Chrome) and PPTX (PowerPoint) to PNG, then visually compare each slide. Fix issues and re-convert until all slides pass or no further improvement is possible. This is a Claude-in-the-loop pattern (like literal-extractor): Claude uses its vision to judge quality, not pixel math. The scripts are single-pass tools; the iteration logic lives in the SKILL.md workflow.
 
 8. **Overflow detection** — pad+render+check pattern: enlarge PPTX with grey padding, render via PowerPoint, check margins for non-grey pixels indicating content overflow.
 

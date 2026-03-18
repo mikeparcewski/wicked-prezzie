@@ -4,6 +4,9 @@ slide-pipeline — End-to-end orchestrator for HTML-to-PPTX conversion.
 
 Chains: standardize → convert → validate → render → compare
 
+Single-pass tool. Iterative refinement is orchestrated by the SKILL.md
+workflow — Claude renders, visually inspects, and re-runs as needed.
+
 Usage:
     python slide-pipeline/scripts/slide_pipeline.py --input-dir ./slides --output deck.pptx
     python slide-pipeline/scripts/slide_pipeline.py -d ./slides -o deck.pptx --visual-overflow
@@ -15,6 +18,8 @@ from pathlib import Path
 
 # Import from sibling skills
 _root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(_root / "shared"))
+from paths import output_path as default_output_path
 sys.path.insert(0, str(_root / "slide-html-to-pptx" / "scripts"))
 sys.path.insert(0, str(_root / "slide-validate" / "scripts"))
 sys.path.insert(0, str(_root / "slide-render" / "scripts"))
@@ -42,14 +47,18 @@ def discover_slides(input_dir, slides_arg=None, manifest_arg=None):
 def run_pipeline(input_dir, output_path, slides, viewport_w=1280, viewport_h=720,
                  hide_selectors=None, standardize=True, validate=True,
                  render=True, compare=True, visual_overflow=False,
-                 montage_path=None, render_dir='./renders', compare_dir='./compare',
+                 montage_path=None, render_dir=None, compare_dir=None,
                  workers=None):
-    """
-    Run the full slide conversion pipeline.
+    """Run the full slide conversion pipeline (single pass).
 
     Returns:
         dict with pipeline results and validation report
     """
+    if render_dir is None:
+        render_dir = default_output_path('renders')
+    if compare_dir is None:
+        compare_dir = default_output_path('compare')
+
     hide = hide_selectors or ['.slide-nav']
     results = {'stages': {}, 'success': True}
 
@@ -149,9 +158,9 @@ def main():
     parser.add_argument('--visual-overflow', action='store_true',
                         help='Enable visual overflow detection (requires PowerPoint)')
     parser.add_argument('--montage', help='Create contact sheet at given path')
-    parser.add_argument('--render-dir', default='./renders',
+    parser.add_argument('--render-dir', default=default_output_path('renders'),
                         help='Output directory for rendered PNGs')
-    parser.add_argument('--compare-dir', default='./compare',
+    parser.add_argument('--compare-dir', default=default_output_path('compare'),
                         help='Output directory for comparison images')
     args = parser.parse_args()
 

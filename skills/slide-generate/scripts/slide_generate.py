@@ -13,6 +13,8 @@ from pathlib import Path
 
 _root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(_root / "slide-theme" / "scripts"))
+sys.path.insert(0, str(_root / "shared"))
+from paths import output_path
 from slide_theme import load_theme, get_active_theme_name, theme_to_css
 
 VIEWPORT_W = 1280
@@ -409,7 +411,9 @@ def render_slide(slide, css_vars):
     return renderer(slide, css_vars)
 
 
-def generate_from_outline(outline, theme_name=None, output_dir="."):
+def generate_from_outline(outline, theme_name=None, output_dir=None):
+    if output_dir is None:
+        output_dir = output_path("slides")
     """Generate HTML slides from an outline JSON structure."""
     # Resolve theme
     t_name = theme_name or outline.get("theme") or get_active_theme_name()
@@ -476,7 +480,7 @@ def main():
     parser = argparse.ArgumentParser(description="Generate themed HTML slides from outlines")
 
     parser.add_argument("--outline", "-i", help="Path to outline JSON file")
-    parser.add_argument("--output-dir", "-d", default="./slides", help="Output directory for slide HTML files")
+    parser.add_argument("--output-dir", "-d", default=output_path("slides"), help="Output directory for slide HTML files")
     parser.add_argument("--theme", "-t", help="Theme name (overrides outline)")
     parser.add_argument("--viewport", help="Viewport dimensions (WxH)")
     parser.add_argument("--type", help="Single slide type to generate")
