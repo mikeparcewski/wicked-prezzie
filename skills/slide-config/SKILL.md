@@ -1,14 +1,17 @@
 ---
 name: Slide Config
 description: >
-  Project-level configuration for the wicked-pptx toolkit — quality threshold,
-  viewport defaults, hide selectors, font settings. Use this skill whenever the
-  user wants to change the quality threshold (default 85), set a custom viewport
-  size, change which CSS selectors get hidden, configure the default font, or
-  view current settings. Also use when the user says "the threshold is too strict"
-  or "too lenient", "change the default viewport", or "what are the current
-  settings". Settings persist in config.json and are automatically read by
-  slide-validate and slide-pipeline.
+  Two-tier configuration for the wicked-pptx toolkit — user-level defaults in
+  ~/.something-wicked/wicked-prezzie/config.json (shared across projects:
+  default_font, default_fidelity, unsplash_api_key) and project-level overrides
+  in skills/slide-config/config.json (quality_threshold, viewport, hide_selectors,
+  active_theme, slide dimensions). Use this skill whenever the user wants to
+  change settings, set the quality threshold, configure viewport size, set the
+  default font or fidelity tier, add an Unsplash API key, change which CSS
+  selectors get hidden, or view current settings. Also use when the user says
+  "the threshold is too strict", "change the default viewport", "set my API key",
+  "what are the current settings", or "configure fidelity". Resolution order:
+  defaults → user config → project config (project wins).
 ---
 
 # Slide Config
@@ -23,10 +26,16 @@ preferences that persist across sessions and are read by other skills.
 - Setting default CSS selectors to hide
 - Viewing current configuration
 
-## Configuration File
+## Configuration Files
 
-Settings are stored in `skills/slide-config/config.json` at the project root.
-Other skills read this file automatically when it exists.
+Settings are stored at two levels:
+
+- **User-level**: `~/.something-wicked/wicked-prezzie/config.json` — shared across projects
+  (default_font, default_fidelity, unsplash_api_key)
+- **Project-level**: `skills/slide-config/config.json` — per-project overrides
+  (quality_threshold, viewport, hide_selectors, active_theme, slide dimensions)
+
+Resolution order: defaults → user config → project config (project wins).
 
 ## Usage
 
@@ -54,20 +63,31 @@ python ${CLAUDE_SKILL_DIR}/scripts/slide_config.py reset
 | `quality_threshold` | 85 | slide-validate, slide-pipeline | Minimum score for a slide to pass |
 | `viewport` | `1280x720` | slide-html-standardize, slide-html-to-pptx, slide-pipeline | Default viewport dimensions |
 | `hide_selectors` | `[".slide-nav"]` | slide-html-to-pptx, slide-pipeline | CSS selectors to hide during extraction |
-| `default_font` | `Calibri` | slide-pptx-builder | Font for generated PPTX text |
-| `slide_width_inches` | `13.333` | slide-pptx-builder | Slide width |
-| `slide_height_inches` | `7.5` | slide-pptx-builder | Slide height |
+| `default_font` | `Calibri` | slide-pptx-builder | Font for generated PPTX text (user-level) |
+| `default_fidelity` | `draft` | slide-pipeline | Default fidelity tier (user-level) |
+| `unsplash_api_key` | (none) | slide-generate | Unsplash API key for image sourcing (user-level) |
+| `slide_width_inches` | `13.333` | slide-pptx-builder | Slide width (project-level) |
+| `slide_height_inches` | `7.5` | slide-pptx-builder | Slide height (project-level) |
 
 ## How Other Skills Read Config
 
-Skills use `_load_threshold()` or similar helpers that check for
-`skills/slide-config/config.json` at the project root:
+Skills use `load_config()` which merges defaults → user → project:
 
 ```python
-config_path = Path(__file__).parent.parent.parent / "slide-config" / "config.json"
-if config_path.exists():
-    cfg = json.load(open(config_path))
-    threshold = cfg.get("quality_threshold", 85)
+from pathlib import Path
+import json
+
+USER_DATA_DIR = Path.home() / ".something-wicked" / "wicked-prezzie"
+USER_CONFIG = USER_DATA_DIR / "config.json"
+PROJECT_CONFIG = Path(__file__).parent.parent.parent / "slide-config" / "config.json"
+
+def load_config():
+    config = {"quality_threshold": 85, "viewport": "1280x720", ...}
+    if USER_CONFIG.exists():
+        config.update(json.load(open(USER_CONFIG)))
+    if PROJECT_CONFIG.exists():
+        config.update(json.load(open(PROJECT_CONFIG)))
+    return config
 ```
 
-If the config file doesn't exist, skills use their built-in defaults.
+If neither config file exists, skills use their built-in defaults.

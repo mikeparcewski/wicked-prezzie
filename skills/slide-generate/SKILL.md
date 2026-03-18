@@ -1,16 +1,19 @@
 ---
 name: Slide Generate
 description: >
-  Generates themed HTML slide files from a structured outline. Use this skill
-  whenever the user wants to turn an outline into slides, generate HTML slides
-  from a plan, or produce the slide files that feed into slide-html-to-pptx. This is
-  the bridge between slide-outline (content planning) and slide-html-standardize
+  Generates themed HTML slide files from a structured outline, with image
+  sourcing from Unsplash or icon sets. Use this skill whenever the user wants
+  to turn an outline into slides, generate HTML slides from a plan, or produce
+  the slide files that feed into the conversion pipeline. This is the bridge
+  between slide-outline (content planning) and slide-html-standardize
   (normalization). If the user says "generate the slides", "create the HTML",
-  "build slides from the outline", or "render the outline", use this skill.
+  "build slides from the outline", "render the outline", "add photos from
+  Unsplash", "use icons instead of photos", or "no images", use this skill.
   Also use when the user provides content and wants individual slide HTML files
   without having created a formal outline — this skill can work from inline
-  content. Consult slide-theme for colors/fonts and slide-design for quality
-  principles.
+  content. Supports three image modes: unsplash (photography with attribution),
+  icons (icon/UI illustration from registered iconsets), and none (text-only).
+  Consult slide-theme for colors/fonts and slide-design for quality principles.
 ---
 
 # Slide Generate
@@ -228,3 +231,12 @@ This manifest is consumed by slide-html-to-pptx for slide ordering and metadata.
 | Too many elements on slide | Outline has too much content per slide | Split in the outline phase; max 6-7 elements |
 | Cards overlap | Grid layout too tight | Increase gap between cards; check card padding |
 | Missing speaker notes | No `notes` field in outline | Add notes to outline JSON before generating |
+
+## Reference Files
+
+Read these on demand — do not load all at once.
+
+| File | Read when... |
+|---|---|
+| [templates.md](references/templates.md) | Slide template definitions, zone schemas, and selection logic |
+| [image-sourcing.md](references/image-sourcing.md) | Image modes (Unsplash/icons/none), attribution rules, placement strategies |

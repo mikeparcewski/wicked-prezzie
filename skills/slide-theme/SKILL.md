@@ -2,14 +2,19 @@
 name: Slide Theme
 description: >
   Brand and style definitions for slide decks — color palettes, font stacks,
-  layout patterns, and reusable design tokens. Use this skill whenever the user
-  wants to define a brand, set colors, choose fonts, create a theme, customize
-  the look and feel, or says "use my brand colors" or "learn my brand". Also use
-  when generating slides and no theme exists yet — a default dark theme is
-  provided. If the user says "make it match our brand", "change the palette",
-  "use these colors", or "create a theme from this PDF/website", start here.
-  This skill produces theme JSON files consumed by slide-generate and
-  slide-outline for consistent visual identity across decks.
+  layout patterns, reusable design tokens, portable style profiles, and a
+  git-backed shared design registry. Use this skill whenever the user wants to
+  define a brand, set colors, choose fonts, create a theme, customize the look
+  and feel, learn styles from existing assets, manage profiles, or interact with
+  the design registry. Also use when the user says "use my brand colors", "learn
+  my brand", "extract styles from this PDF/PPTX", "make it match our brand",
+  "change the palette", "use these colors", "describe a vibe", "list profiles",
+  "export profile", "import profile", "sync registry", "push palette", or
+  "assemble a profile". Themes are stored in ~/.something-wicked/wicked-prezzie/
+  themes/ (shared across projects). Supports style extraction from PPTX/PDF/
+  images with confidence scoring, .pptprofile export/import for team sharing,
+  vibe matching ("clean and modern" → corporate-light), and delta-E color
+  matching against existing themes and registry palettes.
 ---
 
 # Slide Theme
@@ -34,7 +39,9 @@ consistent styling, and by slide-outline to inform color-coded section planning.
 
 ## Theme File Format
 
-Themes are stored as JSON files in `slide-theme/themes/`. Each theme file follows
+Themes are stored as JSON files in `~/.something-wicked/wicked-prezzie/themes/`
+(user-level, shared across projects). Built-in themes are seeded on first use.
+Each theme file follows
 this structure:
 
 ```json
@@ -182,7 +189,8 @@ References the theme's color palette when assigning section colors in the
 outline structure. Ensures the outline's visual plan matches the final output.
 
 ### slide-config
-The active theme name is stored as `active_theme` in `skills/slide-config/config.json`.
+The active theme name is stored as `active_theme` in `skills/slide-config/config.json`
+(project-level — different projects can use different themes).
 If no theme is activated, `midnight-purple` is used as the default.
 
 ## Creating Themes from Existing Assets
@@ -199,3 +207,13 @@ the visual identity:
    text colors from representative slides.
 
 Always validate the extracted theme against contrast requirements before saving.
+
+## Reference Files
+
+Read these on demand — do not load all at once.
+
+| File | Read when... |
+|---|---|
+| [style-learning.md](references/style-learning.md) | User provides existing assets for style extraction (PPTX, PDF, images) |
+| [profiles.md](references/profiles.md) | Managing, assembling, or selecting style profiles; importing/exporting `.pptprofile` files |
+| [design-registry.md](references/design-registry.md) | Shared team design assets — registry sync, push/pull palettes, strategies, iconsets |

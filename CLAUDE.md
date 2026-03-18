@@ -27,6 +27,9 @@ skills/
     SKILL.md
     scripts/slide_theme.py
     themes/                      (auto-created: midnight-purple, corporate-light, warm-dark)
+    references/style-learning.md   (extract styles from PPTX/PDF/images)
+    references/profiles.md         (portable style profiles, vibe matching)
+    references/design-registry.md  (git-backed shared design assets)
   slide-outline/           — Topic → structured outline (Pyramid Principle)
     SKILL.md
     scripts/slide_outline.py
@@ -35,6 +38,7 @@ skills/
     SKILL.md
     scripts/slide_generate.py    (imports: slide-theme)
     references/templates.md
+    references/image-sourcing.md   (Unsplash/icons/none modes, attribution)
   chrome-extract/          — Chrome headless layout extraction + screenshots
     SKILL.md
     scripts/chrome_extract.py
@@ -51,10 +55,13 @@ skills/
   slide-html-to-pptx/      — Batch convert HTML slides to PPTX (conversion stage)
     SKILL.md
     scripts/html_to_pptx.py      (imports: chrome-extract, slide-pptx-builder)
-  slide-validate/          — Post-conversion QA: bounds, overflow, scoring
+  slide-validate/          — Post-conversion QA: bounds, overflow, scoring, audit
     SKILL.md
     scripts/slide_validate.py    (imports: slide-render)
     references/overflow-detection.md
+    references/deck-audit.md       (5-category weighted quality audit)
+    references/content-lint.md     (bullets, titles, stats, quotes, passive voice, CTAs)
+    references/consistency-checks.md (within-deck + cross-deck consistency)
   slide-render/            — PPTX → PNG via PowerPoint headless
     SKILL.md
     scripts/slide_render.py
@@ -62,12 +69,18 @@ skills/
     SKILL.md
     references/design-principles.md
     references/quality-rubric.md
+    references/css-contract.md     (zone CSS naming, type rules, fallback layout)
+    references/hints.md            (contextual hints + REVIEW flags in speaker notes)
   slide-compare/           — Visual comparison: HTML screenshots vs PPTX renders
     SKILL.md
     scripts/slide_compare.py     (imports: chrome-extract)
   slide-pipeline/          — End-to-end orchestrator (chains all stages)
     SKILL.md
     scripts/slide_pipeline.py    (imports: all skills)
+    references/fidelity-tiers.md   (best/draft/rough quality tiers, multi-pass loops)
+    references/versioning.md       (deck versioning, naming, metadata, diff)
+    references/output-formats.md   (PPTX + Reveal.js HTML dual-format output)
+    references/edit-coordination.md (session locks for concurrent operations)
   slide-config/            — User-configurable settings (quality threshold, viewport, etc.)
     SKILL.md
     scripts/slide_config.py
@@ -90,6 +103,30 @@ _root = Path(__file__).parent.parent.parent  # skills/ directory
 sys.path.insert(0, str(_root / "chrome-extract" / "scripts"))
 from chrome_extract import extract_layout
 ```
+
+## Storage Architecture
+
+User-level data lives in `~/.something-wicked/wicked-prezzie/` (shared across projects).
+Project-level config stays in `skills/slide-config/config.json` (per-project overrides).
+
+```
+~/.something-wicked/wicked-prezzie/
+  config.json              — User defaults (default_font, default_fidelity, unsplash_api_key)
+  themes/                  — Theme JSON files (learned, imported, built-in seeds)
+  profiles/                — Exported .pptprofile files
+  registry/                — Shared design registry cache + config
+    config.json            — Registry remote URL, sync status
+    palettes/
+    strategies/
+    iconsets/
+  versions/                — Deck version metadata (per slug)
+    sales-kickoff.json
+```
+
+**Resolution order**: defaults → user config → project config (project wins).
+
+**User-level keys**: `default_font`, `default_fidelity`, `unsplash_api_key`
+**Project-level keys**: `quality_threshold`, `viewport`, `hide_selectors`, `active_theme`, `slide_width_inches`, `slide_height_inches`
 
 ## Key Design Decisions
 

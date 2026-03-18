@@ -1,15 +1,16 @@
 ---
 name: Slide Design
 description: >
-  Reference-only skill providing design principles and a 100-point quality rubric
-  for presentation slides — color strategy, typography hierarchy, layout rules,
-  whitespace targets. This skill has no scripts and cannot take action — it is a
-  knowledge base consulted by other skills (slide-generate, slide-validate,
-  slide-pptx-builder) when they need design guidance. Use this skill when the user asks
-  explicitly about design theory, the quality rubric scoring system, best practice
-  rules, or "what are the design rules". Do NOT use for action requests like
-  "make it look better" or "fix the design" — those should route to the skill
-  that can act (slide-generate for regenerating, slide-validate for diagnosing,
+  Reference-only skill providing design principles, a 100-point quality rubric,
+  CSS contract (zone class naming conventions, type rules, conservative fallback
+  layout), and contextual hint/REVIEW flag systems for presentation slides. This
+  skill has no scripts and cannot take action — it is a knowledge base consulted
+  by other skills when they need design guidance. Use this skill when the user
+  asks about design theory, the quality rubric, CSS zone naming, best practice
+  rules, REVIEW flags, contextual hints, "what are the design rules", "what CSS
+  classes should I use", or "how do REVIEW flags work". Do NOT use for action
+  requests like "make it look better" — those should route to the skill that
+  can act (slide-generate for regenerating, slide-validate for diagnosing,
   slide-pptx-builder for fixing layout).
 ---
 
@@ -84,3 +85,14 @@ Do not treat design validation as a post-hoc step only. Apply the design princip
 The design principles and rubric are calibrated for the wicked-pptx pipeline. The standard canvas is 1280x720 pixels (widescreen 16:9). Margin and size values in the principles reference assume this canvas size. When working with different dimensions, scale proportionally.
 
 The alpha-blending guidance in the color strategy section directly complements the `color_utils.py` module bundled in slide-pptx-builder. The card text clamping rules in the layout section align with the card width constraints enforced by `pptx_builder.py`. Refer to both the design principles and the codebase when resolving visual quality issues.
+
+## Reference Files
+
+Read these on demand — do not load all at once.
+
+| File | Read when... |
+|---|---|
+| [design-principles.md](references/design-principles.md) | Color, typography, layout, hierarchy, and shape design guidance |
+| [quality-rubric.md](references/quality-rubric.md) | 100-point scoring system with 7 categories for slide quality |
+| [css-contract.md](references/css-contract.md) | CSS class naming conventions, zone types, and conservative fallback layout |
+| [hints.md](references/hints.md) | Contextual hints during creation flows and REVIEW flag system for speaker notes |

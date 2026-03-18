@@ -1,14 +1,20 @@
 ---
 name: Slide Validate
 description: >
-  Post-conversion quality assurance — checks bounds, detects overflow, scores
-  slides against the design rubric (default threshold: 85). Use this skill
-  whenever the user wants to validate slides, check PPTX quality, detect
-  overflow, find layout issues, QA a deck, or verify conversion output. Also
-  use proactively after any slide-html-to-pptx or slide-pipeline run — always suggest
-  validation even if the user doesn't ask. Supports static checks (fast, no
-  deps) and visual overflow detection via --render (requires LibreOffice). If
-  the user says "is it good?" or "any problems?", run validation and report.
+  Post-conversion quality assurance and comprehensive deck auditing — layout
+  validation (bounds, overflow, empty slides), 5-category weighted deck audit
+  (structure 25%, content 30%, layout 20%, consistency 15%, lint 10%), content
+  lint (bullet overload, title hygiene, stat formatting, quote attribution,
+  passive voice, CTA completeness), and cross-deck consistency checks (heading
+  sizes, palette adherence, template distribution, section divider cadence,
+  speaker notes presence). Use this skill whenever the user wants to validate
+  slides, audit a deck, lint content, check consistency, compare two decks,
+  detect overflow, find layout issues, QA a deck, or verify conversion output.
+  Also use proactively after any conversion run — always suggest validation
+  even if the user doesn't ask. If the user says "is it good?", "audit my
+  deck", "lint my deck", "check content", "check consistency", "compare deck A
+  and deck B", "any problems?", or "re-audit", use this skill. Scoring bands:
+  PASS ≥ 80, REVIEW 60-79, FAIL < 60.
 ---
 
 # Slide Validate
@@ -156,3 +162,19 @@ Each issue deducts points independently. A slide with 10 shapes that each overfl
 ### Text overflow false positives
 
 The character-count heuristic is deliberately conservative. It will flag text boxes that are actually fine because it cannot account for font size or auto-shrink settings. Use `--render` for definitive overflow detection, or ignore text_overflow warnings when the visual output looks correct.
+
+## Extended Validation: Deck Audit
+
+Beyond layout validation, slide-validate supports comprehensive deck quality auditing through
+its reference files. These provide content-level and structural quality analysis.
+
+## Reference Files
+
+Read these on demand — do not load all at once.
+
+| File | Read when... |
+|---|---|
+| [overflow-detection.md](references/overflow-detection.md) | Understanding the pad+render+check visual overflow algorithm |
+| [deck-audit.md](references/deck-audit.md) | Running a full 5-category quality audit (structure, content, layout, consistency, lint) |
+| [content-lint.md](references/content-lint.md) | Checking content quality: bullets, titles, stats, quotes, passive voice, CTAs |
+| [consistency-checks.md](references/consistency-checks.md) | Within-deck and cross-deck consistency: heading sizes, palette adherence, section cadence |

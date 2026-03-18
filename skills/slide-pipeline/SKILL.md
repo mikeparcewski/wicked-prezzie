@@ -1,17 +1,20 @@
 ---
 name: Slide Pipeline
 description: >
-  End-to-end orchestrator that chains all wicked-pptx stages: standardize HTML,
-  convert to PPTX, validate quality, render to PNG, and compare visually. This
-  is the DEFAULT entry point for any ambiguous conversion request — use it when
-  the user says "convert these slides", "make a PowerPoint from this HTML",
-  "turn these into a deck", or wants the full workflow including quality checks.
-  Always prefer this over slide-html-to-pptx unless the user explicitly asks to
-  skip validation/rendering or is debugging a single conversion step. Especially
+  End-to-end orchestrator that chains all wicked-pptx stages with three fidelity
+  tiers (best/draft/rough), dual-format output (PPTX + self-contained Reveal.js
+  HTML), non-destructive versioning ({slug}_v{N}.pptx), and session-scoped edit
+  coordination. This is the DEFAULT entry point for any ambiguous conversion or
+  generation request — use it when the user says "convert these slides", "make a
+  PowerPoint from this HTML", "turn these into a deck", "best fidelity", "draft
+  quality", "render as HTML", "both formats", "show version history", "diff v1
+  and v2", "re-render as html", or wants the full workflow including quality
+  checks. Always prefer this over slide-html-to-pptx unless the user explicitly
+  asks to skip validation or is debugging a single conversion step. Especially
   important for AI-generated HTML (ChatGPT, Claude, Gemini) which needs
-  standardization before extraction will work. If unsure whether to use this or
-  slide-html-to-pptx, use this — it includes everything slide-html-to-pptx does
-  plus QA, rendering, and comparison.
+  standardization before extraction will work. Fidelity tiers: best (multi-pass
+  verification), draft (single clean pass, default), rough (structure only).
+  REVIEW flags embedded in speaker notes when human judgment is needed.
 ---
 
 # Slide Pipeline
@@ -103,3 +106,14 @@ python ${CLAUDE_SKILL_DIR}/scripts/slide_pipeline.py --input-dir ./slides --outp
 When slides fail validation, fix the HTML source and re-run. The pipeline
 supports incremental runs — only re-process changed files by specifying
 `--slides` with the filenames that need fixing.
+
+## Reference Files
+
+Read these on demand — do not load all at once.
+
+| File | Read when... |
+|---|---|
+| [fidelity-tiers.md](references/fidelity-tiers.md) | Quality tiers (best/draft/rough), multi-pass render loops, visual QA checks |
+| [versioning.md](references/versioning.md) | Deck versioning, naming conventions, version metadata, diff operations |
+| [output-formats.md](references/output-formats.md) | Dual-format rendering: PPTX (python-pptx) + HTML (Reveal.js), format comparison |
+| [edit-coordination.md](references/edit-coordination.md) | Session locks and render guards for concurrent edit coordination |

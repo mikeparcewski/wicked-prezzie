@@ -15,7 +15,9 @@ Usage:
 import argparse, json, math, os, sys
 from pathlib import Path
 
-THEMES_DIR = Path(__file__).parent.parent / "themes"
+USER_DATA_DIR = Path.home() / ".something-wicked" / "wicked-prezzie"
+THEMES_DIR = USER_DATA_DIR / "themes"
+BUILTIN_THEMES_DIR = Path(__file__).parent.parent / "themes"
 CONFIG_PATH = Path(__file__).parent.parent.parent / "slide-config" / "config.json"
 
 # --- Built-in themes ---
@@ -208,31 +210,46 @@ def _parse_px(value):
 
 
 def ensure_themes_dir():
-    """Create themes directory and seed built-in themes if missing."""
+    """Create user themes directory and seed built-in themes if missing."""
     THEMES_DIR.mkdir(parents=True, exist_ok=True)
     for name, theme in BUILTIN_THEMES.items():
         path = THEMES_DIR / f"{name}.json"
         if not path.exists():
             with open(path, "w") as f:
                 json.dump(theme, f, indent=2)
+    # Also copy any built-in themes shipped with the skill that aren't in user dir
+    if BUILTIN_THEMES_DIR.exists():
+        for src in BUILTIN_THEMES_DIR.glob("*.json"):
+            dest = THEMES_DIR / src.name
+            if not dest.exists():
+                import shutil
+                shutil.copy2(src, dest)
 
 
 def load_theme(name):
-    """Load a theme by name."""
+    """Load a theme by name. Checks user dir first, then built-in dir."""
     ensure_themes_dir()
     path = THEMES_DIR / f"{name}.json"
     if not path.exists():
-        print(f"Error: theme '{name}' not found")
-        print(f"Available: {', '.join(list_themes())}")
-        sys.exit(1)
+        # Fall back to built-in themes shipped with the skill
+        builtin_path = BUILTIN_THEMES_DIR / f"{name}.json"
+        if builtin_path.exists():
+            path = builtin_path
+        else:
+            print(f"Error: theme '{name}' not found")
+            print(f"Available: {', '.join(list_themes())}")
+            sys.exit(1)
     with open(path) as f:
         return json.load(f)
 
 
 def list_themes():
-    """List available theme names."""
+    """List available theme names from user dir + built-in dir."""
     ensure_themes_dir()
-    return sorted(p.stem for p in THEMES_DIR.glob("*.json"))
+    names = set(p.stem for p in THEMES_DIR.glob("*.json"))
+    if BUILTIN_THEMES_DIR.exists():
+        names |= set(p.stem for p in BUILTIN_THEMES_DIR.glob("*.json"))
+    return sorted(names)
 
 
 def get_active_theme_name():
