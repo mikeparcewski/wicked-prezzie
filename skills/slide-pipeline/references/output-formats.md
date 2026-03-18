@@ -28,7 +28,7 @@ The HTML slides are the canonical source. Both renderers consume them.
 
 ### `pptx` — PowerPoint (default)
 Generated via Chrome headless extraction + python-pptx builder. Native OOXML. Opens in
-PowerPoint, Keynote, LibreOffice. Fully editable after delivery. Best for decks that need
+PowerPoint, Keynote, Google Slides. Fully editable after delivery. Best for decks that need
 post-generation polish or client handoff.
 
 ### `html` — Reveal.js Presentation

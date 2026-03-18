@@ -18,7 +18,7 @@ The core idea is simple: add a known-color margin around the slide, render the r
 
 Open the original PPTX with python-pptx. Increase the slide width and height by twice the padding amount (once for each side). The default padding is 50 pixels, converted to EMU at 96 DPI (approximately 476,250 EMU per side). Shift every shape on every slide by the padding offset in both X and Y, so that the original content occupies the center of the enlarged slide. Save the modified PPTX to a temporary file.
 
-The padding value is a tradeoff. Larger padding makes detection more robust (a few stray anti-aliased pixels at the edge are less likely to trigger a false positive), but it changes the aspect ratio more and may cause LibreOffice to render at a different effective resolution. Fifty pixels provides enough margin to detect meaningful overflow without distorting the layout.
+The padding value is a tradeoff. Larger padding makes detection more robust (a few stray anti-aliased pixels at the edge are less likely to trigger a false positive), but it changes the aspect ratio more and may cause PowerPoint to render at a different effective resolution. Fifty pixels provides enough margin to detect meaningful overflow without distorting the layout.
 
 ### Step 2: Paint the Background Grey
 
@@ -28,13 +28,13 @@ The grey background is applied to the slide background element in the PPTX XML. 
 
 ### Step 3: Render to PNG
 
-Pass the padded PPTX to LibreOffice (via the slide-render skill's `render_pptx_to_pngs` function) to produce one PNG per slide. LibreOffice performs the same text reflow and layout calculations that PowerPoint would, so the rendered output reflects the actual appearance of the deck. The PNGs are written to a temporary directory.
+Pass the padded PPTX to PowerPoint (via the slide-render skill's `render_pptx_to_pngs` function) to produce one PNG per slide. PowerPoint performs the definitive text reflow and layout calculations, so the rendered output reflects the actual appearance of the deck. The PNGs are written to a temporary directory.
 
-LibreOffice's font metrics are not identical to PowerPoint's, but they are much closer than Chrome's CSS metrics. This makes the visual check a meaningful approximation of what the recipient will see.
+Since PowerPoint is the target renderer, the visual check is an exact representation of what the recipient will see — unlike Chrome's CSS metrics which differ significantly.
 
 ### Step 4: Scan the Margins
 
-For each rendered PNG, calculate the expected margin width in pixels. The margin size depends on the ratio of the padding to the total padded slide dimensions, scaled to the rendered image resolution. The calculation accounts for the possibility that LibreOffice renders at a different resolution than the nominal 96 DPI.
+For each rendered PNG, calculate the expected margin width in pixels. The margin size depends on the ratio of the padding to the total padded slide dimensions, scaled to the rendered image resolution. The calculation accounts for the possibility that PowerPoint renders at a different resolution than the nominal 96 DPI.
 
 Crop four regions from the image: top margin, bottom margin, left margin, and right margin. Each region spans the full length of its respective edge but excludes the corners (to avoid double-counting). For each region, iterate over every pixel and compare it to the expected grey (128, 128, 128) with a tolerance of 15 per channel. This tolerance accommodates JPEG compression artifacts, anti-aliasing, and minor color-space differences in the rendering pipeline.
 
@@ -50,10 +50,10 @@ Each overflowing edge produces a separate error in the issue list for the affect
 
 Enable visual overflow detection with the `--render` flag. It requires:
 
-- **LibreOffice** installed and accessible from the command line. On macOS: `brew install --cask libreoffice`. On Linux: install via the system package manager.
-- **The slide-render skill** present at `slide-render/scripts/slide_render.py` relative to the project root. This provides the `render_pptx_to_pngs` function that wraps LibreOffice.
+- **Microsoft PowerPoint** installed. On macOS it is automated via AppleScript; on Windows via COM automation (`pip install pywin32`).
+- **The slide-render skill** present at `slide-render/scripts/slide_render.py` relative to the project root. This provides the `render_pptx_to_pngs` function that wraps PowerPoint.
 - **Pillow** (`pip install Pillow`) for image loading and pixel inspection.
 
-Visual detection adds several seconds per slide (LibreOffice startup, rendering, pixel scanning), so it is not suitable for tight iteration loops during development. Use static validation for rapid feedback. Reserve visual validation for final QA passes, CI pipelines, or when static validation passes but the rendered output looks wrong.
+Visual detection adds several seconds per slide (PowerPoint startup, rendering, pixel scanning), so it is not suitable for tight iteration loops during development. Use static validation for rapid feedback. Reserve visual validation for final QA passes, CI pipelines, or when static validation passes but the rendered output looks wrong.
 
-If LibreOffice or the slide-render skill is not available, the detector emits an info-level message and skips the visual check rather than failing. The static checks still run and produce a report. This allows the same script to be used in environments with and without LibreOffice installed.
+If PowerPoint or the slide-render skill is not available, the detector emits an info-level message and skips the visual check rather than failing. The static checks still run and produce a report. This allows the same script to be used in environments with and without PowerPoint installed.

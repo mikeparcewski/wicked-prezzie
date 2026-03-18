@@ -23,7 +23,7 @@ description: >
 
 Slide Validate is a quality assurance tool for PowerPoint files produced by the wicked-pptx conversion pipeline. It inspects `.pptx` files for layout defects, content overflow, empty slides, and structural problems that arise when HTML slide decks are converted to native PowerPoint shapes. Run it after every conversion to catch issues before the deck reaches a human reviewer.
 
-The tool operates in two modes: static validation (fast, no external dependencies beyond python-pptx) and visual validation (slower, requires LibreOffice for rendering). Static validation catches most structural problems. Visual validation catches problems that only manifest after PowerPoint reflows text using its own font metrics.
+The tool operates in two modes: static validation (fast, no external dependencies beyond python-pptx) and visual validation (slower, requires PowerPoint for rendering). Static validation catches most structural problems. Visual validation catches problems that only manifest after PowerPoint reflows text using its own font metrics.
 
 ## Validation Modes
 
@@ -31,11 +31,11 @@ The tool operates in two modes: static validation (fast, no external dependencie
 
 Static mode opens the `.pptx` file with python-pptx and inspects every shape on every slide. It checks bounding boxes against the slide dimensions, flags negative coordinates, detects empty slides, and estimates text overflow using character-count heuristics. No rendering step is involved, so it completes in under a second for most decks.
 
-Use static mode for rapid feedback during development or when LibreOffice is not available.
+Use static mode for rapid feedback during development or when PowerPoint is not available.
 
 ### Visual Mode (--render)
 
-Visual mode extends static mode with a pixel-level overflow detection pass. It creates a padded copy of the PPTX (grey margins added around each slide), renders the padded slides to PNG using LibreOffice via the slide-render skill, then scans the margin regions for non-grey pixels. Any content that bleeds into the padding area is reported as a visual overflow error.
+Visual mode extends static mode with a pixel-level overflow detection pass. It creates a padded copy of the PPTX (grey margins added around each slide), renders the padded slides to PNG using PowerPoint via the slide-render skill, then scans the margin regions for non-grey pixels. Any content that bleeds into the padding area is reported as a visual overflow error.
 
 Use visual mode for final QA before delivering a deck. It catches text reflow overflow, image bleed, and shape clipping that static heuristics miss. See `references/overflow-detection.md` for a detailed explanation of the pad+render+check algorithm.
 
@@ -62,7 +62,7 @@ python ${CLAUDE_SKILL_DIR}/scripts/slide_validate.py output.pptx --rubric my_rub
 | Argument | Description |
 |---|---|
 | `pptx_path` | Path to the `.pptx` file to validate. Required. |
-| `--render` | Enable visual overflow detection. Requires LibreOffice and the slide-render skill. |
+| `--render` | Enable visual overflow detection. Requires PowerPoint and the slide-render skill. |
 | `--json` | Output results as JSON instead of the human-readable summary. |
 | `--rubric` | Path to a custom rubric JSON file. Reserved for future scoring customization. |
 
@@ -147,9 +147,9 @@ The visual overflow detector solves this by rendering the actual PPTX output and
 
 The `--render` flag requires the slide-render skill to be present at `../slide-render/scripts/slide_render.py` relative to this skill, and Pillow must be installed. Install Pillow with `pip install Pillow` and verify the slide-render skill exists.
 
-### "Visual overflow check failed: LibreOffice rendering error"
+### "Visual overflow check failed: PowerPoint rendering error"
 
-LibreOffice must be installed and accessible from the command line. On macOS, install it via `brew install --cask libreoffice`. On Linux, use your package manager. Verify with `libreoffice --version`.
+Microsoft PowerPoint must be installed. On macOS, it is automated via AppleScript. On Windows, it is automated via COM (`pip install pywin32`). Verify PowerPoint opens and can export to PDF.
 
 ### False positives on bounds checks
 

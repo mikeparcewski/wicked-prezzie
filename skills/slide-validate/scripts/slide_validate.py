@@ -3,7 +3,7 @@
 
 Checks for layout defects, content overflow, empty slides, and structural
 problems. Supports static validation (python-pptx only) and visual overflow
-detection (requires LibreOffice via slide-render).
+detection (requires PowerPoint via slide-render).
 """
 
 import os
@@ -183,7 +183,7 @@ def detect_visual_overflow(pptx_path, slide_w_emu, slide_h_emu, padding=50):
                 "severity": "info",
                 "description": (
                     "Visual overflow check failed: "
-                    "LibreOffice rendering error"
+                    "PowerPoint rendering error"
                 ),
             }]
 
@@ -380,7 +380,7 @@ def main():
     parser.add_argument(
         "--render",
         action="store_true",
-        help="Enable visual overflow detection (requires slide-render + LibreOffice).",
+        help="Enable visual overflow detection (requires slide-render + PowerPoint).",
     )
     parser.add_argument(
         "--json",

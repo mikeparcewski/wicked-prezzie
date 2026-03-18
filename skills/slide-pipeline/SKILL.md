@@ -34,7 +34,7 @@ pipeline: standardize HTML, convert to PPTX, validate, render, and compare.
 1. standardize  →  Normalize HTML (viewport, .slide wrapper, strip animations)
 2. convert      →  HTML → PPTX via Chrome extraction + slide-pptx-builder
 3. validate     →  Bounds checking, overflow detection, quality scoring
-4. render       →  PPTX → PNG via LibreOffice for visual review
+4. render       →  PPTX → PNG via PowerPoint for visual review
 5. compare      →  Side-by-side HTML vs PPTX comparison images
 ```
 
@@ -69,11 +69,12 @@ python ${CLAUDE_SKILL_DIR}/scripts/slide_pipeline.py --input-dir ./slides --outp
 | `--manifest`, `-m` | (none) | JSON manifest for slide ordering |
 | `--viewport` | `1280x720` | Browser viewport dimensions |
 | `--hide` | `.slide-nav` | CSS selectors to hide |
+| `--workers`, `-w` | auto | Max parallel Chrome workers (default: min(slides, cpu/2, 6)) |
 | `--no-standardize` | | Skip HTML standardization |
 | `--no-validate` | | Skip PPTX validation |
 | `--no-render` | | Skip PPTX→PNG rendering |
 | `--no-compare` | | Skip HTML vs PPTX comparison |
-| `--visual-overflow` | | Enable visual overflow detection (requires LibreOffice) |
+| `--visual-overflow` | | Enable visual overflow detection (requires PowerPoint) |
 | `--montage` | | Create contact sheet montage at given path |
 | `--render-dir` | `./renders` | Output directory for rendered PNGs |
 | `--compare-dir` | `./compare` | Output directory for comparison images |
@@ -99,7 +100,7 @@ python ${CLAUDE_SKILL_DIR}/scripts/slide_pipeline.py --input-dir ./slides --outp
 |---|---|
 | 0 | Pipeline complete, all slides pass validation (score >= 75) |
 | 1 | Pipeline complete but some slides failed validation |
-| 2 | Pipeline error (missing files, Chrome/LibreOffice not found) |
+| 2 | Pipeline error (missing files, Chrome/PowerPoint not found) |
 
 ## Iteration Loop
 

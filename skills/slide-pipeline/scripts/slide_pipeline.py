@@ -42,7 +42,8 @@ def discover_slides(input_dir, slides_arg=None, manifest_arg=None):
 def run_pipeline(input_dir, output_path, slides, viewport_w=1280, viewport_h=720,
                  hide_selectors=None, standardize=True, validate=True,
                  render=True, compare=True, visual_overflow=False,
-                 montage_path=None, render_dir='./renders', compare_dir='./compare'):
+                 montage_path=None, render_dir='./renders', compare_dir='./compare',
+                 workers=None):
     """
     Run the full slide conversion pipeline.
 
@@ -56,7 +57,7 @@ def run_pipeline(input_dir, output_path, slides, viewport_w=1280, viewport_h=720
     stage_label = "Standardize + Convert" if standardize else "Convert"
     print(f"\n=== {stage_label} (parallel) ===")
     pptx_path = build_deck(slides, input_dir, output_path, hide, viewport_w, viewport_h,
-                           standardize=standardize)
+                           standardize=standardize, workers=workers)
     results['stages']['convert'] = {'output': pptx_path}
 
     # Stage 3: Validate
@@ -135,6 +136,8 @@ def main():
     parser.add_argument('--viewport', default='1280x720', help='Viewport WxH')
     parser.add_argument('--hide', help='CSS selectors to hide (comma-separated)')
 
+    parser.add_argument('--workers', '-w', type=int, default=None,
+                        help='Max parallel Chrome workers (default: min(slides, cpu_count/2, 6))')
     parser.add_argument('--no-standardize', action='store_true',
                         help='Skip HTML standardization')
     parser.add_argument('--no-validate', action='store_true',
@@ -144,7 +147,7 @@ def main():
     parser.add_argument('--no-compare', action='store_true',
                         help='Skip HTML vs PPTX comparison')
     parser.add_argument('--visual-overflow', action='store_true',
-                        help='Enable visual overflow detection (requires LibreOffice)')
+                        help='Enable visual overflow detection (requires PowerPoint)')
     parser.add_argument('--montage', help='Create contact sheet at given path')
     parser.add_argument('--render-dir', default='./renders',
                         help='Output directory for rendered PNGs')
@@ -172,6 +175,7 @@ def main():
         montage_path=args.montage,
         render_dir=args.render_dir,
         compare_dir=args.compare_dir,
+        workers=args.workers,
     )
 
     sys.exit(0 if results['success'] else 1)

@@ -105,6 +105,29 @@ def _extract_single_slide(args):
     return result
 
 
+def _parallel_extract(work_items, max_workers, total):
+    """Run parallel Chrome extraction and return results keyed by index."""
+    extracted = {}
+    with ProcessPoolExecutor(max_workers=max_workers) as pool:
+        futures = {pool.submit(_extract_single_slide, item): item[0]
+                   for item in work_items}
+        for future in as_completed(futures):
+            result = future.result()
+            idx = result['index']
+            extracted[idx] = result
+            filename = result['filename']
+            if result['error'] == 'NOT FOUND':
+                print(f"    [{idx+1}/{total}] {filename}: NOT FOUND")
+            elif result['error']:
+                print(f"    [{idx+1}/{total}] {filename}: error: {result['error']}")
+            elif result['layout'] and result['layout'].get('elements'):
+                ne = len(result['layout']['elements'])
+                print(f"    [{idx+1}/{total}] {filename}: {ne} elements")
+            else:
+                print(f"    [{idx+1}/{total}] {filename}: fallback")
+    return extracted
+
+
 # ---------------------------------------------------------------------------
 # Phase 2: PPTX assembly (runs sequentially in main process)
 # ---------------------------------------------------------------------------
@@ -126,7 +149,9 @@ def build_deck(slides, input_dir, output_path, hide_selectors=None,
 
     total = len(slides)
     hide = hide_selectors or ['.slide-nav']
-    max_workers = workers or min(total, os.cpu_count() or 4)
+    # Cap default workers to avoid Chrome resource contention
+    cpu = os.cpu_count() or 4
+    max_workers = workers or min(total, cpu // 2 or 1, 6)
 
     with tempfile.TemporaryDirectory() as cache_dir:
         # --- Phase 1: Parallel extraction ---
@@ -138,25 +163,25 @@ def build_deck(slides, input_dir, output_path, hide_selectors=None,
             for i, si in enumerate(slides)
         ]
 
-        # Collect results keyed by index to preserve slide order
-        extracted = {}
-        with ProcessPoolExecutor(max_workers=max_workers) as pool:
-            futures = {pool.submit(_extract_single_slide, item): item[0]
-                       for item in work_items}
-            for future in as_completed(futures):
-                result = future.result()
-                idx = result['index']
-                extracted[idx] = result
-                filename = result['filename']
-                if result['error'] == 'NOT FOUND':
-                    print(f"    [{idx+1}/{total}] {filename}: NOT FOUND")
-                elif result['error']:
-                    print(f"    [{idx+1}/{total}] {filename}: error: {result['error']}")
-                elif result['layout'] and result['layout'].get('elements'):
-                    ne = len(result['layout']['elements'])
-                    print(f"    [{idx+1}/{total}] {filename}: {ne} elements")
+        extracted = _parallel_extract(work_items, max_workers, total)
+
+        # --- Phase 1b: Retry failed extractions sequentially ---
+        failed_indices = [
+            idx for idx, r in extracted.items()
+            if r['error'] and r['error'] != 'NOT FOUND'
+        ]
+        if failed_indices:
+            print(f"\n  Retrying {len(failed_indices)} failed slide(s) sequentially...")
+            for idx in failed_indices:
+                item = work_items[idx]
+                retry = _extract_single_slide(item)
+                filename = retry['filename']
+                if retry['error']:
+                    print(f"    [{idx+1}/{total}] {filename}: retry failed: {retry['error']}")
                 else:
-                    print(f"    [{idx+1}/{total}] {filename}: fallback")
+                    ne = len(retry['layout'].get('elements', [])) if retry['layout'] else 0
+                    print(f"    [{idx+1}/{total}] {filename}: retry OK ({ne} elements)")
+                    extracted[idx] = retry
 
         extract_time = time.time() - t0
         print(f"  Extraction: {extract_time:.1f}s ({extract_time/total:.1f}s/slide effective)")
