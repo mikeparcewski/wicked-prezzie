@@ -13,7 +13,6 @@ import argparse
 import glob
 import os
 import shutil
-import socket
 import subprocess
 import sys
 import tempfile
@@ -22,55 +21,14 @@ from pathlib import Path
 _root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(_root / "shared"))
 from paths import output_path
-
-
-# ---------------------------------------------------------------------------
-# LibreOffice environment helpers (adapted from Anthropic's soffice.py)
-# ---------------------------------------------------------------------------
-
-def _needs_socket_shim():
-    """Check if AF_UNIX sockets are blocked (sandboxed environments)."""
-    try:
-        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        s.close()
-        return False
-    except OSError:
-        return True
+from deps import ensure_libreoffice, ensure_pdftoppm
 
 
 def _get_soffice_env():
-    """Get environment dict for running soffice, with shim if needed."""
+    """Get environment dict for running soffice headless."""
     env = os.environ.copy()
     env["SAL_USE_VCLPLUGIN"] = "svp"
     return env
-
-
-def _find_soffice():
-    """Find soffice binary across platforms."""
-    # Check PATH first
-    soffice = shutil.which("soffice")
-    if soffice:
-        return soffice
-
-    # macOS common locations
-    mac_paths = [
-        "/Applications/LibreOffice.app/Contents/MacOS/soffice",
-        os.path.expanduser("~/Applications/LibreOffice.app/Contents/MacOS/soffice"),
-    ]
-    for p in mac_paths:
-        if os.path.exists(p):
-            return p
-
-    # Linux common locations
-    linux_paths = [
-        "/usr/bin/soffice",
-        "/usr/lib/libreoffice/program/soffice",
-    ]
-    for p in linux_paths:
-        if os.path.exists(p):
-            return p
-
-    return None
 
 
 # ---------------------------------------------------------------------------
@@ -92,14 +50,7 @@ def export_pptx_to_pdf(pptx_path, pdf_path):
     pdf_dir = os.path.dirname(pdf_abs)
     os.makedirs(pdf_dir, exist_ok=True)
 
-    soffice = _find_soffice()
-    if not soffice:
-        raise RuntimeError(
-            "LibreOffice (soffice) not found. Install it:\n"
-            "  macOS:  brew install --cask libreoffice\n"
-            "  Ubuntu: sudo apt install libreoffice\n"
-            "  Windows: https://www.libreoffice.org/download/"
-        )
+    soffice = ensure_libreoffice()
 
     # soffice writes the PDF to --outdir with the input filename's stem
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -159,13 +110,7 @@ def pdf_to_pngs(pdf_path, output_dir, dpi=150):
     os.makedirs(output_dir, exist_ok=True)
     prefix = str(Path(output_dir) / "slide")
 
-    pdftoppm = shutil.which("pdftoppm")
-    if not pdftoppm:
-        raise RuntimeError(
-            "pdftoppm not found. Install poppler:\n"
-            "  macOS:  brew install poppler\n"
-            "  Ubuntu: sudo apt install poppler-utils"
-        )
+    pdftoppm = ensure_pdftoppm()
 
     cmd = [pdftoppm, "-png", "-r", str(dpi), str(pdf_path), prefix]
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
