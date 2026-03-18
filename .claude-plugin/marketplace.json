@@ -1,0 +1,20 @@
+{
+  "name": "wicked-prezzie",
+  "description": "HTML slide decks to editable PowerPoint — topic planning, themed generation, Chrome extraction, native PPTX building, and quality validation",
+  "owner": {
+    "name": "Mike Parcewski",
+    "url": "https://github.com/mikeparcewski"
+  },
+  "plugins": [
+    {
+      "name": "wicked-prezzie",
+      "description": "HTML slide decks to editable PowerPoint — topic planning, themed generation, Chrome extraction, native PPTX building, and quality validation",
+      "version": "1.0.0",
+      "source": "./",
+      "author": {
+        "name": "Mike Parcewski",
+        "url": "https://github.com/mikeparcewski"
+      }
+    }
+  ]
+}
