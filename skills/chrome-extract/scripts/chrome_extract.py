@@ -150,6 +150,30 @@ JS_EXTRACT = r'''
     var richTags = {h1:1, h2:1, h3:1, h4:1, p:1, li:1};
     var leafTags = {span:1, a:1, strong:1, b:1, em:1, i:1, label:1, td:1, th:1, div:1};
 
+    // Infer semantic layout role from CSS classes (#28 — enriched IR)
+    var rolePatterns = [
+        [/zone-header|slide-header|header/i, 'header'],
+        [/zone-content|slide-content|main-content/i, 'content'],
+        [/zone-footer|slide-footer|footer/i, 'footer'],
+        [/card|tile|panel/i, 'card'],
+        [/stat|metric|kpi|number/i, 'stat'],
+        [/badge|pill|tag|chip/i, 'badge'],
+        [/icon|emoji|symbol/i, 'icon'],
+        [/chart|graph|diagram|gauge/i, 'chart'],
+        [/progress|bar|meter/i, 'progress'],
+        [/timeline|roadmap/i, 'timeline'],
+        [/grid|row|column|flex/i, 'grid'],
+        [/quote|blockquote|testimonial/i, 'quote'],
+        [/cta|button|action/i, 'cta']
+    ];
+    function getLayoutRole(el) {
+        var cls = el.className ? String(el.className) : '';
+        for (var i = 0; i < rolePatterns.length; i++) {
+            if (rolePatterns[i][0].test(cls)) return rolePatterns[i][1];
+        }
+        return null;
+    }
+
     function walkEl(el, depth, currentSlotRect) {
         if (depth > 15) return;
         if (!isVis(el)) return;
@@ -160,12 +184,13 @@ JS_EXTRACT = r'''
         var styles = gs(el);
         var tag = tn.toLowerCase();
         var cls = el.className ? String(el.className).split(/\s+/) : [];
+        var role = getLayoutRole(el);
         var hasBg = (styles.backgroundColor !== 'rgba(0, 0, 0, 0)' && styles.backgroundColor !== 'transparent')
             || ((styles.backgroundImage || '').indexOf('gradient') !== -1);
         var hasBorder = styles.borderWidth > 0.5 && styles.borderColor !== 'rgba(0, 0, 0, 0)';
 
         if (tag === 'table' && rect.w > 50 && rect.h > 20) {
-            var tableData = {type: 'table', rect: rect, rows: [], styles: styles, depth: depth};
+            var tableData = {type: 'table', rect: rect, rows: [], styles: styles, classes: cls, layoutRole: role, depth: depth};
             var trs = el.querySelectorAll(':scope > thead > tr, :scope > tbody > tr, :scope > tr');
             trs.forEach(function(tr) {
                 var row = [];
@@ -192,7 +217,7 @@ JS_EXTRACT = r'''
                 var runs = getRuns(el);
                 if (runs.length > 0) {
                     elements.push({
-                        type: 'richtext', tag: tag, classes: cls, rect: rect,
+                        type: 'richtext', tag: tag, classes: cls, layoutRole: role, rect: rect,
                         runs: runs.map(function(r) {
                             return {
                                 text: r.text.substring(0, 500), color: r.color,
@@ -228,7 +253,7 @@ JS_EXTRACT = r'''
                     if (gradMatch) bgColor = gradMatch[0];
                 }
                 elements.push({
-                    type: 'badge', tag: tag, rect: rect,
+                    type: 'badge', tag: tag, classes: cls, layoutRole: role || 'badge', rect: rect,
                     text: el.textContent.trim(),
                     styles: {
                         backgroundColor: bgColor,
@@ -262,7 +287,7 @@ JS_EXTRACT = r'''
                 var runs = getRuns(el);
                 if (runs.length > 0) {
                     elements.push({
-                        type: 'richtext', tag: tag, classes: cls, rect: rect,
+                        type: 'richtext', tag: tag, classes: cls, layoutRole: role, rect: rect,
                         runs: runs.map(function(r) {
                             return {
                                 text: r.text.substring(0, 500), color: r.color,
@@ -291,7 +316,7 @@ JS_EXTRACT = r'''
             dtext = dtext.trim();
             if (dtext.length > 0) {
                 elements.push({
-                    type: 'text', tag: tag, classes: cls, text: dtext.substring(0, 300), rect: rect,
+                    type: 'text', tag: tag, classes: cls, layoutRole: role, text: dtext.substring(0, 300), rect: rect,
                     styles: {
                         color: styles.color, fontSize: styles.fontSize,
                         fontWeight: styles.fontWeight, fontStyle: styles.fontStyle,
@@ -310,7 +335,7 @@ JS_EXTRACT = r'''
 
         if ((hasBg || hasBorder) && tag !== 'body' && tag !== 'html' && rect.w > 8 && rect.h > 4) {
             elements.push({
-                type: 'shape', tag: tag, classes: cls, rect: rect,
+                type: 'shape', tag: tag, classes: cls, layoutRole: role, rect: rect,
                 styles: {
                     backgroundColor: styles.backgroundColor, borderColor: styles.borderColor,
                     borderWidth: styles.borderWidth, borderRadius: styles.borderRadius,

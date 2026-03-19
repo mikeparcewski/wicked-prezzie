@@ -50,11 +50,13 @@ skills/
     SKILL.md
     scripts/pptx_builder.py
     scripts/color_utils.py       (CSS color parsing, alpha blending)
+    scripts/edl_apply.py         (EDL applicator for declarative PPTX edits)
     references/coordinate-system.md
     references/text-clamping.md
+    references/pptx-recipes.md   (python-pptx fix recipes for direct edits)
   slide-html-standardize/  — Normalize AI-generated HTML before conversion
     SKILL.md
-    scripts/html_standardize.py
+    scripts/html_standardize.py  (+ complexity annotation for pipeline routing)
   slide-html-to-pptx/      — Batch convert HTML slides to PPTX (conversion stage)
     SKILL.md
     scripts/html_to_pptx.py      (imports: chrome-extract, slide-pptx-builder)
@@ -153,6 +155,12 @@ Project-level config stays in `skills/slide-config/config.json` (per-project ove
 7. **Iterative visual verification** — After conversion, render both HTML (Chrome) and PPTX (LibreOffice) to PNG, then visually compare each slide. Fix issues and re-convert until all slides pass or no further improvement is possible. This is a Claude-in-the-loop pattern (like literal-extractor): Claude uses its vision to judge quality, not pixel math. The scripts are single-pass tools; the iteration logic lives in the SKILL.md workflow.
 
 8. **Overflow detection** — pad+render+check pattern: enlarge PPTX with grey padding, render via LibreOffice, check margins for non-grey pixels indicating content overflow.
+
+9. **Hybrid fix architecture** — Scripts handle the deterministic 90% (geometry translation, color parsing, zone dispatch). SKILL.md guides the model for the 10% slide-specific edge cases using EDL specs (declarative JSON edits) or python-pptx recipes. Decision framework enforced in `slide-pipeline/SKILL.md`: script fix for systemic patterns (2+ decks), direct fix for slide-specific layout issues.
+
+10. **Enriched IR** — Extraction includes `layoutRole` (inferred from CSS class patterns like `card`, `stat`, `badge`, `progress`, `chart`) and full `classes` on every element. The builder can dispatch by semantic role instead of guessing from pixel geometry.
+
+11. **Complexity routing** — `html_standardize.py` annotates each slide with `<!-- COMPLEXITY: high|low -->` by scanning for SVGs, gradients, pseudo-elements, rotated text. The pipeline uses this to set expectations: low-complexity slides should pass in 1-2 attempts, high-complexity slides may need direct fixes.
 
 ## Dependencies
 

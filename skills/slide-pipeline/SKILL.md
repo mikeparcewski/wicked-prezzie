@@ -134,23 +134,34 @@ Before attempting a fix, check these. If any is true, stop working on this slide
 
 ## Step 3: Fix the Current Slide
 
-Diagnose the root cause and apply the minimum fix:
+### Decision Framework — Script Fix vs Direct Fix
 
-### Common Issues and Fixes
+**Before writing any fix, decide which path:**
+
+| Condition | Fix path | Why |
+|---|---|---|
+| Issue appears in 2+ distinct decks | **Script fix** in `pptx_builder.py` or `chrome_extract.py` | Systemic pattern — fix once for everyone |
+| Issue affects >15% of slides in this deck | **Script fix** | General enough to warrant a heuristic |
+| Issue is specific to this slide's CSS layout | **Direct fix** via EDL or recipe | No general heuristic will cover it |
+| Element needs repositioning, resizing, recoloring | **EDL spec** → `edl_apply.py` | Safe, declarative, no code |
+| Element needs structural replacement (wrong shape type, new shapes) | **Recipe** from `pptx-recipes.md` | Requires python-pptx code |
+
+**Promotion rule:** If a recipe or EDL pattern gets used 3+ times across sessions,
+it should graduate to a script heuristic.
+
+### Step 3a: Script Fix (systemic issues)
+
+For patterns that affect many slides:
 
 | Issue | Root Cause | Fix |
 |---|---|---|
 | Text clipped/overflow | Text box too narrow or short | Edit `pptx_builder.py` width clamping or font size scaling |
 | Elements overlapping | Overlapping bounding boxes from Chrome | Check `chrome_extract.py` DOM walker — z-ordering or dedup |
 | Wrong background color | Alpha blending against wrong base | Check `color_utils.py` blend target, verify `slideBg` in layout JSON |
-| Missing elements | Filtered by size threshold or selector | Check `hide_selectors` and the 60px SVG threshold |
-| Cards too dark/light | Card alpha not blended correctly | Fix alpha blending in `color_utils.py` |
-| Text wrapping different | Calibri vs CSS font metrics | Adjust width multiplier in `pptx_builder.py` |
+| Missing elements | Filtered by size threshold or selector | Check `hide_selectors` and size thresholds |
 | Fallback slide (screenshot) | Chrome extraction failed | Fix HTML — likely missing `.slide` wrapper or bad viewport |
 
-### After Fixing
-
-Re-convert ONLY the current slide:
+After fixing the script, re-convert ONLY the affected slide:
 
 ```bash
 python ${CLAUDE_SKILL_DIR}/scripts/slide_pipeline.py \
@@ -158,7 +169,66 @@ python ${CLAUDE_SKILL_DIR}/scripts/slide_pipeline.py \
   --slides slide-03.html --no-render --no-compare
 ```
 
-Then go back to Step 2a: re-render, re-compare, re-grade this one slide.
+### Step 3b: Direct Fix — EDL (parametric edits)
+
+For slide-specific positioning, sizing, or color issues. Write a JSON edit spec
+and apply it — no python-pptx API knowledge needed:
+
+```bash
+python skills/slide-pptx-builder/scripts/edl_apply.py deck.pptx edits.json -o deck.pptx
+```
+
+Example EDL spec:
+```json
+{
+  "edits": [
+    {
+      "slide": 7,
+      "target": "image:0",
+      "ops": [{"action": "crop_bottom", "pixels": 30}]
+    },
+    {
+      "slide": 7,
+      "target": "shape:0",
+      "ops": [
+        {"action": "add_shape", "shape": "rounded_rectangle",
+         "x": 100, "y": 350, "width": 390, "height": 8, "fill": "#22c55e"}
+      ]
+    }
+  ]
+}
+```
+
+**EDL actions:** `move`, `resize`, `crop_bottom`, `crop_top`, `set_text`,
+`set_fill`, `set_font_size`, `set_rotation`, `delete`, `add_shape`, `add_textbox`
+
+**Targets:** `shape:N` (by index), `text:substring` (by content), `image:N` (Nth picture)
+
+### Step 3c: Direct Fix — Recipes (structural edits)
+
+For complex fixes that need python-pptx code (replacing shapes, adding
+composite elements). See `slide-pptx-builder/references/pptx-recipes.md`:
+
+- **Re-crop SVG screenshot** — trim bleed from chart images
+- **Replace vertical badges with horizontal row** — fix collapsed badge containers
+- **Add missing progress bar** — draw track + fill shapes
+- **Add left-border accent** — separate thin shape at card edge
+- **Screenshot crop replacement** — replace broken element with HTML crop
+- **Fix text overflow** — widen box or reduce font size
+
+### After Any Fix
+
+Go back to Step 2a: re-render, re-compare, re-grade this one slide.
+
+### Complexity Routing
+
+The standardize step annotates each slide with `<!-- COMPLEXITY: high|low -->`.
+Use this to prioritize:
+
+- **Low complexity slides** — expect the pipeline to get these right in 1-2 passes.
+  If not, it's likely a script bug.
+- **High complexity slides** — expect to use EDL or recipes for the last mile.
+  SVGs, gradients, pseudo-elements, rotated text are inherently harder to convert.
 
 ## Step 4: Finalize
 
@@ -209,3 +279,4 @@ Read these on demand — do not load all at once.
 | [versioning.md](references/versioning.md) | Deck versioning, naming, metadata, diff |
 | [output-formats.md](references/output-formats.md) | PPTX + Reveal.js dual-format output |
 | [edit-coordination.md](references/edit-coordination.md) | Session locks for concurrent edits |
+| [pptx-recipes.md](../slide-pptx-builder/references/pptx-recipes.md) | python-pptx fix recipes for direct PPTX edits |

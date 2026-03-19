@@ -210,6 +210,64 @@ def _is_external_url(url):
     return False
 
 
+COMPLEXITY_SIGNALS = re.compile(
+    r'(linear-gradient|radial-gradient|writing-mode\s*:\s*vertical|'
+    r'transform\s*:\s*rotate|::before|::after|clip-path|mask-image)',
+    re.IGNORECASE,
+)
+
+
+def annotate_complexity(soup):
+    """Scan slide content and add a complexity annotation for pipeline routing (#28).
+
+    Inserts <!-- COMPLEXITY: high|low --> as the first child of .slide.
+    High complexity: SVGs, gradients, pseudo-elements, rotated text, clip-paths.
+    """
+    slide = soup.find(class_='slide')
+    if not slide:
+        return
+
+    signals = 0
+    reasons = []
+
+    # SVG elements
+    svgs = slide.find_all('svg')
+    if svgs:
+        signals += len(svgs)
+        reasons.append(f'{len(svgs)} SVG')
+
+    # Check all style attributes and <style> tags for complex CSS
+    all_styles = ' '.join(
+        tag.get('style', '') for tag in slide.find_all(attrs={'style': True})
+    )
+    for style_tag in soup.find_all('style'):
+        if style_tag.string:
+            all_styles += ' ' + style_tag.string
+
+    gradient_count = len(re.findall(r'linear-gradient|radial-gradient', all_styles, re.I))
+    if gradient_count:
+        signals += gradient_count
+        reasons.append(f'{gradient_count} gradient')
+
+    if re.search(r'writing-mode\s*:\s*vertical', all_styles, re.I):
+        signals += 1
+        reasons.append('vertical-text')
+
+    if re.search(r'transform\s*:\s*rotate', all_styles, re.I):
+        signals += 1
+        reasons.append('rotation')
+
+    pseudo_count = len(re.findall(r'::before|::after', all_styles))
+    if pseudo_count:
+        signals += pseudo_count
+        reasons.append(f'{pseudo_count} pseudo')
+
+    level = 'high' if signals >= 2 else 'low'
+    reason_str = ', '.join(reasons) if reasons else 'simple layout'
+    from bs4 import Comment
+    slide.insert(0, Comment(f' COMPLEXITY: {level} — {reason_str} '))
+
+
 def standardize_html(html_path, output_path=None, viewport_w=1280, viewport_h=720):
     """Orchestrate all normalizations. Returns path to normalized file."""
     html_path = Path(html_path)
@@ -225,6 +283,7 @@ def standardize_html(html_path, output_path=None, viewport_w=1280, viewport_h=72
     normalize_viewport(soup, w=viewport_w, h=viewport_h)
     strip_animations(soup)
     strip_external_resources(soup)
+    annotate_complexity(soup)
 
     # Determine output path
     if output_path is None:

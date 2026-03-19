@@ -83,6 +83,18 @@ EMU_x = px / source_w * slide_w_inches * 914400
 | Shapes invisible | Fill color is transparent/None | Check `parse_css_color` return and alpha threshold |
 | Wrong background color | Slide class not detected | Verify `slideClasses` in layout JSON |
 
+## EDL Applicator
+
+For slide-specific fixes that don't warrant script changes, use the EDL
+(Edit Description Language) applicator:
+
+```bash
+python scripts/edl_apply.py deck.pptx edits.json -o deck-fixed.pptx
+```
+
+Write a JSON spec describing what to change — the script applies it safely.
+See the docstring in `scripts/edl_apply.py` for the full schema.
+
 ## Additional Resources
 
 ### Reference Files
@@ -90,8 +102,10 @@ EMU_x = px / source_w * slide_w_inches * 914400
 For detailed implementation specifics, consult:
 - **`references/coordinate-system.md`** — EMU conversion math, width multiplier rationale
 - **`references/text-clamping.md`** — Card text clamping algorithm, tolerance values
+- **`references/pptx-recipes.md`** — Tested python-pptx code patterns for direct PPTX fixes
 
 ### Related Skills
 
 - **slide-design** — Design principles and quality rubric for evaluating output
 - **`scripts/color_utils.py`** — Bundled CSS color parsing and alpha blending logic
+- **`scripts/edl_apply.py`** — Declarative edit applicator for slide-specific fixes
