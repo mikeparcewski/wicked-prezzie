@@ -24,7 +24,7 @@ sys.path.insert(0, str(_root / "chrome-extract" / "scripts"))
 sys.path.insert(0, str(_root / "slide-pptx-builder" / "scripts"))
 sys.path.insert(0, str(_root / "slide-html-standardize" / "scripts"))
 
-from chrome_extract import extract_layout, screenshot_html, crop_region
+from chrome_extract import extract_layout, screenshot_html, crop_region, screenshot_svg_isolated
 from pptx_builder import SlideBuilder
 from html_standardize import standardize_html
 from pptx import Presentation
@@ -209,15 +209,37 @@ def build_deck(slides, input_dir, output_path, hide_selectors=None,
                           and len(layout.get('elements', [])) > 0)
 
             if has_layout:
-                # SVG screenshot callback uses the cached full-page screenshot
-                def screenshot_svg(svg_rect, _ss=screenshot_path, _idx=i,
-                                   _cache=cache_dir, _vw=viewport_w, _vh=viewport_h):
-                    if not _ss or not os.path.exists(_ss):
-                        return None
+                # SVG screenshot callback — isolated rendering eliminates bleed (#19)
+                html_path = os.path.join(input_dir, result['filename'])
+                svg_counter = [0]  # mutable counter for closure
+
+                def screenshot_svg(svg_rect, _html=html_path, _idx=i,
+                                   _cache=cache_dir, _vw=viewport_w, _vh=viewport_h,
+                                   _counter=svg_counter, _ss=screenshot_path):
+                    svg_num = _counter[0]
+                    _counter[0] += 1
                     out = os.path.join(_cache,
-                        f"svg_{_idx}_{int(svg_rect['x'])}_{int(svg_rect['y'])}.png")
-                    if crop_region(_ss, out, svg_rect, _vw, _vh):
-                        return out
+                        f"svg_{_idx}_{svg_num}.png")
+                    # Try isolated SVG rendering first (no bleed)
+                    iso_tmpdir = os.path.join(_cache, f"svgiso_{_idx}_{svg_num}")
+                    os.makedirs(iso_tmpdir, exist_ok=True)
+                    try:
+                        if screenshot_svg_isolated(_html, svg_num, out, iso_tmpdir,
+                                                   _vw, _vh):
+                            # Crop to just the SVG region from the isolated screenshot
+                            cropped = os.path.join(_cache,
+                                f"svg_{_idx}_{svg_num}_crop.png")
+                            if crop_region(out, cropped, svg_rect, _vw, _vh):
+                                return cropped
+                            return out
+                    except Exception:
+                        pass
+                    # Fallback: crop from full-page screenshot
+                    if _ss and os.path.exists(_ss):
+                        fallback = os.path.join(_cache,
+                            f"svg_{_idx}_{svg_num}_fb.png")
+                        if crop_region(_ss, fallback, svg_rect, _vw, _vh):
+                            return fallback
                     return None
 
                 notes = f"[{act}] {title}\n\n{result['notes']}" if act else result['notes']

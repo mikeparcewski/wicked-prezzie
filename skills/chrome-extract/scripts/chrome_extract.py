@@ -489,6 +489,86 @@ def screenshot_html(html_path, png_path, tmpdir, viewport_w=1280, viewport_h=720
     return False
 
 
+def screenshot_svg_isolated(html_path, svg_index, png_path, tmpdir,
+                            viewport_w=1280, viewport_h=720, scale_factor=2):
+    """Screenshot a single SVG element in isolation — hides all other content.
+
+    This eliminates SVG crop bleed (#19) by rendering only the target SVG
+    against the slide background, with no other elements visible.
+
+    Args:
+        html_path: Path to HTML file
+        svg_index: 0-based index of the SVG element (matches svgElements order)
+        png_path: Output PNG path
+        tmpdir: Temporary directory
+        viewport_w/h: Browser viewport size
+        scale_factor: Device scale factor
+
+    Returns:
+        True if screenshot created successfully
+    """
+    from PIL import Image
+
+    with open(html_path) as f:
+        html = f.read()
+
+    # Inject CSS that hides everything except the slide background and the target SVG.
+    # Also inject JS that marks the target SVG so CSS can select it.
+    isolation_js = f'''
+    <script>
+    window.addEventListener("load", function() {{
+        var svgs = document.querySelectorAll('.slide svg');
+        if (svgs[{svg_index}]) {{
+            svgs[{svg_index}].setAttribute('data-isolated', 'true');
+        }}
+    }});
+    </script>
+    '''
+    isolation_css = '''
+    <style>
+    .slide > *:not(svg) { visibility: hidden !important; }
+    .slide * { visibility: hidden !important; }
+    .slide svg { visibility: hidden !important; }
+    .slide svg[data-isolated="true"],
+    .slide svg[data-isolated="true"] * { visibility: visible !important; }
+    .slide { visibility: visible !important; }
+    body.standalone .slide{box-shadow:none!important;border:none!important;border-radius:0!important;}
+    .slide{margin:0!important;}
+    </style>
+    '''
+
+    html = html.replace('</head>', isolation_css + isolation_js + '</head>')
+
+    tmp = os.path.join(tmpdir, f"svgiso_{svg_index}_{os.path.basename(str(html_path))}")
+    with open(tmp, 'w') as f:
+        f.write(html)
+
+    subprocess.run([
+        CHROME, "--headless", "--disable-gpu", "--no-sandbox",
+        "--disable-software-rasterizer", "--hide-scrollbars",
+        f"--screenshot={png_path}", f"--window-size={viewport_w},{viewport_h}",
+        f"--force-device-scale-factor={scale_factor}",
+        "--virtual-time-budget=3000",
+        f"file://{tmp}"
+    ], capture_output=True, timeout=30)
+
+    if os.path.exists(png_path):
+        img = Image.open(png_path)
+        w, h = img.size
+        tr = viewport_w / viewport_h
+        cr = w / h
+        if abs(cr - tr) > 0.01:
+            if cr > tr:
+                nw = int(h * tr); left = (w - nw) // 2
+                img = img.crop((left, 0, left + nw, h))
+            else:
+                nh = int(w / tr); top = (h - nh) // 2
+                img = img.crop((0, top, w, top + nh))
+            img.save(png_path)
+        return True
+    return False
+
+
 def crop_region(full_png_path, out_path, region_rect, source_w=1280, source_h=720):
     """
     Crop a region from a full-page screenshot.
