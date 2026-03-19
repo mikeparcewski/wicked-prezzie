@@ -331,9 +331,13 @@ def validate_pptx(pptx_path, render=False, rubric_path=None, threshold=None):
         "total_slides": total,
         "passed": passed,
         "failed": total - passed,
-        "score": round(avg_score),
+        "structural_score": round(avg_score),
+        "fidelity": "NOT CHECKED — run per-slide visual comparison to verify",
+        "score_type": "structural",
         "threshold": threshold,
         "slides": results,
+        # Keep "score" for backward compat but it means structural only
+        "score": round(avg_score),
     }
 
 
@@ -343,22 +347,28 @@ def validate_pptx(pptx_path, render=False, rubric_path=None, threshold=None):
 
 def print_report(report):
     """Print a concise human-readable validation report."""
-    print("=== Slide Validation Report ===")
+    print("=== Structural Validation Report ===")
     print(f"File:   {report['file']}")
     print(
         f"Slides: {report['total_slides']} total, "
         f"{report['passed']} passed, {report['failed']} failed"
     )
-    print(f"Score:  {report['score']}/100 (threshold: {report['threshold']})")
+    print(f"Structural score: {report['structural_score']}/100 "
+          f"(threshold: {report['threshold']})")
+    print()
+    print("NOTE: This checks PPTX structure only (bounds, overflow, empty slides).")
+    print("      It does NOT verify visual fidelity against the HTML source.")
+    print("      Run the per-slide visual comparison loop to check actual quality.")
     print()
 
     failing = [s for s in report["slides"] if not s["pass"]]
     if not failing:
-        print("All slides passed.")
+        print("All slides passed structural checks.")
+        print(">>> Next step: per-slide visual comparison (pipeline Step 2)")
         return
 
     for slide in failing:
-        print(f"Slide {slide['index']} [FAIL] score={slide['score']}")
+        print(f"Slide {slide['index']} [FAIL] structural_score={slide['score']}")
         for issue in slide["issues"]:
             sev = issue["severity"].upper()
             print(f"  [{sev}] {issue['type']}: {issue['description']}")

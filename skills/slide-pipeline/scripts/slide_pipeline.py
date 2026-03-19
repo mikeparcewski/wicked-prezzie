@@ -69,9 +69,11 @@ def run_pipeline(input_dir, output_path, slides, viewport_w=1280, viewport_h=720
                            standardize=standardize, workers=workers)
     results['stages']['convert'] = {'output': pptx_path}
 
-    # Stage 3: Validate
+    # Stage 3: Structural Validation (not visual fidelity)
     if validate:
-        print("\n=== Stage 3: Validate ===")
+        print("\n=== Stage 3: Structural Validation ===")
+        print("  (checks PPTX structure: bounds, overflow, empty slides)")
+        print("  (does NOT check visual fidelity — that's the per-slide comparison loop)")
         report = validate_pptx(pptx_path, render=visual_overflow)
         results['stages']['validate'] = report
 
@@ -79,7 +81,8 @@ def run_pipeline(input_dir, output_path, slides, viewport_w=1280, viewport_h=720
         report_path = os.path.splitext(output_path)[0] + '-validation.json'
         with open(report_path, 'w') as f:
             json.dump(report, f, indent=2)
-        print(f"  Score: {report['score']}/100 (threshold: {report['threshold']})")
+        print(f"  Structural score: {report['structural_score']}/100 "
+              f"(threshold: {report['threshold']})")
         print(f"  Passed: {report['passed']}/{report['total_slides']}")
         if report['failed'] > 0:
             print(f"  Failed slides:")
@@ -129,8 +132,14 @@ def run_pipeline(input_dir, output_path, slides, viewport_w=1280, viewport_h=720
     print(f"  Output: {output_path}")
     if 'validate' in results['stages'] and isinstance(results['stages']['validate'], dict):
         r = results['stages']['validate']
-        status = "PASS" if results['success'] else "NEEDS WORK"
-        print(f"  Validation: {status} ({r['score']}/100)")
+        structural_ok = results['success']
+        print(f"  Structural: {'PASS' if structural_ok else 'ISSUES'} "
+              f"({r['structural_score']}/100)")
+    print(f"  Visual fidelity: NOT YET CHECKED")
+    print()
+    print("  >>> Next: run per-slide visual comparison (pipeline Step 2)")
+    print("      Compare HTML screenshots vs PPTX renders for each slide.")
+    print("      The structural score only checks shape bounds, not visual accuracy.")
 
     return results
 
@@ -156,7 +165,7 @@ def main():
     parser.add_argument('--no-compare', action='store_true',
                         help='Skip HTML vs PPTX comparison')
     parser.add_argument('--visual-overflow', action='store_true',
-                        help='Enable visual overflow detection (requires PowerPoint)')
+                        help='Enable visual overflow detection (requires LibreOffice)')
     parser.add_argument('--montage', help='Create contact sheet at given path')
     parser.add_argument('--render-dir', default=default_output_path('renders'),
                         help='Output directory for rendered PNGs')

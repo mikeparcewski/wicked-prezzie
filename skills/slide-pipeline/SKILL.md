@@ -15,20 +15,38 @@ End-to-end orchestrator for HTML → PPTX conversion with **per-slide** iterativ
 visual verification. Each slide is individually refined until it matches the
 source, converges, or regresses — then move on to the next slide.
 
+## Two-Phase Quality Model
+
+**Phase 1 — Conversion + Structural Validation** (automated, fast)
+: Converts all slides and checks PPTX structure: shapes in bounds, no empty
+slides, no text overflow. Produces a **structural score**. A high structural
+score means the PPTX file is well-formed. **It does NOT mean the slides look
+correct.** A slide with every element in the wrong position scores 100/100 if
+the shapes fit on the slide.
+
+**Phase 2 — Per-Slide Visual Comparison** (model-driven, thorough)
+: For each slide, render both HTML source and PPTX output to PNG, then visually
+compare. This is where actual quality is measured. **Never skip this phase
+based on the structural score alone.**
+
 ## Workflow Overview
 
 ```
-For each slide in the deck:
-  1. Convert the slide (standardize → extract → build PPTX)
-  2. Render: screenshot the HTML source + render the PPTX slide to PNG
-  3. Visually compare: grade the PPTX against the HTML source
-  4. If PASS → move to next slide
-  5. If FIX → diagnose, fix, re-convert THIS slide only, go to step 2
-  6. Stop this slide when:
-     a. It passes (output matches source)
-     b. Output matches the previous attempt (converged — no point continuing)
-     c. Score drops vs previous attempt (pick the previous version, that was peak)
-     d. 4 attempts reached (mark REVIEW, move on)
+Step 1: Convert all slides (produces deck.pptx + structural score)
+        ⚠ Structural score ≠ visual quality. Do NOT stop here.
+
+Step 2: For each slide:
+  a. Render: screenshot HTML source + render PPTX to PNG
+  b. Visually compare: grade PPTX against HTML source
+  c. If PASS → move to next slide
+  d. If FIX → diagnose, fix (script/EDL/recipe), re-convert, go to (a)
+  e. Stop this slide when:
+     - It passes (output matches source)
+     - Output matches previous attempt (converged)
+     - Score drops vs previous attempt (use previous version)
+     - 4 attempts reached (mark REVIEW, move on)
+
+Step 3: Finalize (render montage, report results)
 ```
 
 **Key principle:** Process slide-by-slide, not whole-deck passes. Don't waste
