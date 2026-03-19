@@ -112,34 +112,46 @@ Use the Read tool to view BOTH images for the current slide:
 
 1. Read the HTML screenshot (source of truth)
 2. Read the PPTX render (conversion output)
-3. Grade using the checklist below
+3. Grade using the two questions below
 
-### Per-Slide Grading Checklist
+### Per-Slide Grading
 
-**Critical (must pass):**
-- [ ] **Text readable** — All text visible, not clipped, not overlapping
-- [ ] **Layout match** — Elements in approximately the same positions as HTML
-- [ ] **Colors correct** — Background, text, and accent colors match
-- [ ] **No missing elements** — All headings, bullets, cards, stats, images present
-- [ ] **No phantom elements** — No extra shapes or artifacts not in the source
+Look at both images. Apply two questions in order:
 
-**Important (should pass):**
-- [ ] **Font sizes proportional** — Heading/body hierarchy preserved
-- [ ] **Spacing reasonable** — Margins and gaps proportional to source
-- [ ] **Cards/shapes correct** — Background fills, borders approximate the source
-- [ ] **Text wrapping** — Long text wraps similarly (no single-line overflow)
+**Q1: Are any elements clearly broken?**
 
-**Known limitations (do not fail for these):**
-- Exact font match (CSS → Calibri mapping is inherently different)
-- Sub-pixel alignment
-- Gradient backgrounds (approximated with solid blended color)
-- CSS animations/transitions (stripped during standardization)
+A clearly broken element is one that:
+- Is missing entirely (card, background, icon, shape present in HTML but absent in PPTX)
+- Has concatenated text ("foobar" instead of "foo bar") or raw leading whitespace
+- Has a background that's missing or completely wrong color
+- Has a completely wrong layout (collapsed, overlapping, off-position by >20%)
+- Contains navigation elements, page numbers, or artifacts that shouldn't be there
+
+If yes: verdict is **FIX**. Tag each issue with a category:
+- `missing_element` — shape, card background, icon, or image not present
+- `text_error` — wrong spacing, concatenation, leading whitespace, words run together
+- `layout_shift` — element present but in wrong position, size, or z-order
+- `wrong_color` — background or text color clearly different from source
+- `artifact` — navigation, page numbers, or other elements that shouldn't be there
+
+**Q2: Does the PPTX convey the same structure and content as the HTML?**
+
+"Same structure" = same sections, same hierarchy, same reading order.
+"Same content" = all text present and readable.
+
+Ignore only: CSS→Calibri font differences, sub-pixel alignment, gradients
+rendered as solid colors, stripped animations. These are inherent format
+limitations, not bugs.
+
+If no: verdict is **FIX** even if no single element is clearly broken.
 
 ### 2c. Verdict
 
-- **PASS** — Move to next slide.
-- **FIX** — List the specific issues. Proceed to Step 3.
-- **REVIEW** — Issue can't be fixed (fundamental limitation). Add REVIEW flag to speaker notes, move to next slide.
+- **PASS** — Both questions passed. Move to next slide.
+- **FIX** — Q1 or Q2 found issues. List the category tags. Proceed to Step 3.
+- **REVIEW** — The issue is an inherent format limitation that no script change
+  can resolve. **Must include explicit justification** stating which limitation
+  applies and why no fix is possible. If in doubt, use FIX.
 
 ### 2d. Stop Conditions (Per Slide)
 

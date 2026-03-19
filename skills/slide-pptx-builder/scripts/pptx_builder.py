@@ -20,6 +20,26 @@ from lxml import etree
 from color_utils import parse_css_color, is_bold, decode_entities
 
 FONT = "Calibri"
+EMOJI_FONT = "Segoe UI Emoji"  # Windows/cross-platform; macOS falls back to Apple Color Emoji
+
+import platform as _platform
+if _platform.system() == 'Darwin':
+    EMOJI_FONT = "Apple Color Emoji"
+
+
+def _has_emoji(text):
+    """Check if text contains emoji characters that Calibri can't render."""
+    for ch in text:
+        cp = ord(ch)
+        if cp >= 0x1F300:  # Emoji range (miscellaneous symbols and pictographs+)
+            return True
+        if 0x2600 <= cp <= 0x27BF:  # Misc symbols, dingbats
+            return True
+        if 0xFE00 <= cp <= 0xFE0F:  # Variation selectors
+            return True
+        if 0x200D == cp:  # Zero-width joiner (emoji sequences)
+            return True
+    return False
 
 
 def pp_align(css_align):
@@ -345,15 +365,19 @@ class SlideBuilder:
                 pw = parent['w'] - 8
                 x = self.px2emu_x(max(0, px))
                 y = self.px2emu_y(max(0, r['y']))
-                w = self.px2emu_x(max(20, pw))
+                # Card width is a hard ceiling (#29 bug 7)
+                w = self.px2emu_x(max(20, min(pw, parent['w'])))
             elif align == 'center' and tag in ('h1', 'h2', 'h3', 'p'):
-                x = self.px2emu_x(48)
+                # Center within actual width, not forced to full-slide (#29 bug 7)
+                actual_w = min(r['w'] * 1.05, self.src_w - 96)
+                cx = (self.src_w - actual_w) / 2
+                x = self.px2emu_x(max(0, cx))
                 y = self.px2emu_y(max(0, r['y']))
-                w = self.px2emu_x(self.src_w - 96)
+                w = self.px2emu_x(actual_w)
             else:
                 x = self.px2emu_x(max(0, r['x']))
                 y = self.px2emu_y(max(0, r['y']))
-                extra = 1.15 if tag in ('h1', 'h2', 'h3') else 1.08
+                extra = 1.05 if tag in ('h1', 'h2', 'h3') else 1.03
                 w = self.px2emu_x(min(r['w'] * extra, self.src_w - max(0, r['x'])))
 
             h = self.px2emu_y(min(max(r['h'], 14), self.src_h - max(0, r['y'])))
@@ -418,7 +442,7 @@ class SlideBuilder:
                 px = parent['x'] + 4
                 pw = parent['w'] - 8
                 x = self.px2emu_x(max(0, px))
-                w = self.px2emu_x(max(20, pw))
+                w = self.px2emu_x(max(20, min(pw, parent['w'])))
             else:
                 x = self.px2emu_x(max(0, r['x']))
                 w = self.px2emu_x(min(r['w'] * 1.02, self.src_w - max(0, r['x'])))
@@ -444,8 +468,9 @@ class SlideBuilder:
             p.space_after = Pt(0)
 
             run = p.add_run()
-            run.text = decode_entities(text)
-            run.font.name = self.font
+            decoded_text = decode_entities(text)
+            run.text = decoded_text
+            run.font.name = EMOJI_FONT if _has_emoji(decoded_text) else self.font
             fs = st.get('fontSize', 14)
             run.font.size = Pt(round(max(6, min(52, fs * 0.75)), 1))
             run.font.bold = is_bold(st.get('fontWeight'))
@@ -469,7 +494,7 @@ class SlideBuilder:
             text = text.upper()
         run = paragraph.add_run()
         run.text = decode_entities(text)
-        run.font.name = self.font
+        run.font.name = EMOJI_FONT if _has_emoji(text) else self.font
         fs = run_data.get('fontSize', 14)
         run.font.size = Pt(round(max(6, min(52, fs * 0.75)), 1))
         run.font.bold = is_bold(run_data.get('fontWeight'))

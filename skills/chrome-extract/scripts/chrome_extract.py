@@ -78,10 +78,28 @@ JS_EXTRACT = r'''
         var runs = [];
         function walk(node) {
             if (node.nodeType === 3) {
-                var t = node.textContent;
-                if (t.length === 0) return;
+                var raw = node.textContent;
+                if (raw.length === 0) return;
                 var parent = node.parentElement;
                 var pcs = window.getComputedStyle(parent);
+                // Normalize whitespace unless pre-formatted (#29 bug 2)
+                var ws = pcs.whiteSpace || '';
+                var t;
+                if (ws === 'pre' || ws === 'pre-wrap' || ws === 'pre-line') {
+                    t = raw;
+                } else {
+                    t = raw.replace(/[\s\n\t]+/g, ' ');
+                    // Trim leading/trailing if this is a whitespace-only node
+                    if (!/\S/.test(t)) return;
+                }
+                if (t.length === 0) return;
+                // Inject space at word boundaries between adjacent inline runs (#29 bug 1)
+                if (runs.length > 0 && !runs[runs.length - 1].br) {
+                    var prev = runs[runs.length - 1].text;
+                    if (/\w$/.test(prev) && /^\w/.test(t)) {
+                        runs[runs.length - 1].text += ' ';
+                    }
+                }
                 runs.push({
                     text: t,
                     color: pcs.color,
@@ -95,6 +113,11 @@ JS_EXTRACT = r'''
                 if (tn === 'SCRIPT' || tn === 'STYLE' || tn === 'SVG' || tn === 'NAV') return;
                 if (tn === 'BR') { runs.push({text: '\n', br: true}); return; }
                 if (!isVis(node)) return;
+                // Insert line break before block-level children (#29 bug 1)
+                var disp = window.getComputedStyle(node).display;
+                if (disp !== 'inline' && disp !== 'inline-block' && runs.length > 0 && !runs[runs.length - 1].br) {
+                    runs.push({text: '\n', br: true});
+                }
                 for (var i = 0; i < node.childNodes.length; i++) walk(node.childNodes[i]);
             }
         }
@@ -118,16 +141,24 @@ JS_EXTRACT = r'''
 
     function capturePseudo(el, pseudo, depth) {
         var cs = window.getComputedStyle(el, pseudo);
-        if (!cs.content || cs.content === 'none' || cs.content === 'normal' || cs.content === '""') return null;
+        if (!cs.content || cs.content === 'none' || cs.content === 'normal') return null;
+        // Allow content:"" when pseudo has a visible background or border (#29 bug 3)
+        var rawContent = cs.content.replace(/^["']|["']$/g, '');
+        var pBg = cs.backgroundColor;
+        var hasPseudoBg = pBg && pBg !== 'rgba(0, 0, 0, 0)' && pBg !== 'transparent';
+        var hasPseudoBorder = (parseFloat(cs.borderWidth) || 0) > 0.5;
+        if (!rawContent && !hasPseudoBg && !hasPseudoBorder) return null;
         var pseudoW = parseFloat(cs.width) || 0;
         var pseudoH = parseFloat(cs.height) || 0;
+        // Include border dimensions for CSS border-based shapes (#29 bug 4)
+        pseudoW += (parseFloat(cs.borderLeftWidth) || 0) + (parseFloat(cs.borderRightWidth) || 0);
+        pseudoH += (parseFloat(cs.borderTopWidth) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
         if (pseudoW < 2 || pseudoH < 2) return null;
         var parentRect = el.getBoundingClientRect();
         var pseudoLeft = parseFloat(cs.left) || 0;
         var pseudoTop = parseFloat(cs.top) || 0;
         var x = (parentRect.left - slideRect.left + pseudoLeft) * scaleX;
         var y = (parentRect.top - slideRect.top + pseudoTop) * scaleY;
-        var rawContent = cs.content.replace(/^["']|["']$/g, '');
         var isCircle = parseFloat(cs.borderRadius) >= pseudoW / 2;
         return {
             type: isCircle ? 'circle' : 'shape', rect: {x: x, y: y, w: pseudoW * scaleX, h: pseudoH * scaleY},
@@ -393,12 +424,19 @@ def extract_layout(html_path, tmpdir, viewport_w=1280, viewport_h=720, hide_sele
     with open(html_path) as f:
         html = f.read()
 
-    # Inject CSS to hide elements and remove standalone artifacts
-    hide_css = ''
+    # Physically remove hidden elements from DOM before Chrome sees them (#29 bug 5)
+    # This is more reliable than CSS injection which can fail due to specificity conflicts
     if hide_selectors:
-        hide_css = ''.join(f'{sel}{{display:none!important}}' for sel in hide_selectors)
+        from bs4 import BeautifulSoup as _BS
+        _soup = _BS(html, 'html.parser')
+        for sel in hide_selectors:
+            for el in _soup.select(sel):
+                el.decompose()
+        html = str(_soup)
+
+    # Inject CSS for standalone cleanup
     html = html.replace('</head>',
-        f'<style>{hide_css}'
+        '<style>'
         'body.standalone .slide{box-shadow:none!important;border:none!important;border-radius:0!important;}'
         '.slide{margin:0!important;}</style></head>')
 

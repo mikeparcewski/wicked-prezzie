@@ -1,6 +1,6 @@
 {
   "name": "wicked-prezzie",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "HTML slides to native editable PowerPoint — plan, generate, convert, validate, and refine. Extracts real shapes and formatted text via Chrome headless, builds PPTX with python-pptx, validates structure, then iterates per-slide with visual comparison. Supports model-driven fixes via EDL specs and python-pptx recipes for slide-specific issues.",
   "author": {
     "name": "Mike Parcewski",
