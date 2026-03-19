@@ -80,8 +80,8 @@ A JSON array where each entry has at least a `file` key:
   `rgba(161,0,255,0.06)` on a dark background becomes `#13091D`.
 - **Card text clamping** — Text inside card shapes uses the card's full width,
   not Chrome's tight bounding box, preventing text overflow in PPTX.
-- **SVG charts** — Large SVGs (>60px) are rendered as cropped screenshot images.
-  Small decorative SVGs are skipped to avoid capturing surrounding text.
+- **SVG charts** — SVGs (>30px) are rendered via isolated screenshot (non-SVG
+  content hidden) to eliminate crop bleed. Small decorative SVGs are skipped.
 - **Speaker notes** — Extracted body text from each HTML file is added as
   speaker notes. If the manifest includes an `act` field, it prefixes the notes.
 
@@ -99,4 +99,4 @@ Verify before running:
 | All slides show `[fallback]` | Chrome not found | Set `CHROME_PATH` env var |
 | Text overlaps in PPTX | Inline spans extracted as separate boxes | Verify richtext extraction is active (h1-h3, p tags) |
 | Colors look wrong | Alpha blending against wrong background | Check `slideBg` in layout JSON |
-| SVG charts missing | SVG too small or too few lines | Lower the 60px / 10-line thresholds in `slide-pptx-builder/scripts/pptx_builder.py` |
+| SVG charts missing | SVG too small or too few lines | Lower the 30px / 3-line thresholds in `slide-pptx-builder/scripts/pptx_builder.py` |

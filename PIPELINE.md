@@ -78,7 +78,7 @@ graph TD
 | Skill | Purpose |
 |---|---|
 | **slide-validate** | 5-category deck audit (structure 25%, content 30%, layout 20%, consistency 15%, lint 10%). Content lint catches bullet overload, title hygiene, stat formatting, quote attribution, passive voice, CTA completeness. Consistency checks heading sizes, palette adherence, template distribution, section cadence, speaker notes. Layout checks bounds, overflow, and element overlap. Scoring: PASS ≥ 80, REVIEW 60–79, FAIL < 60. Supports re-audit with delta tracking. |
-| **slide-render** | Renders PPTX to PNG via PowerPoint PDF export + pdftoppm. Generates contact-sheet montages for quick visual review. |
+| **slide-render** | Renders PPTX to PNG via LibreOffice headless PDF export + pdftoppm. Generates contact-sheet montages for quick visual review. |
 | **slide-compare** | Produces paired HTML/PPTX screenshots for side-by-side fidelity comparison. Catches visual regressions after conversion. |
 
 ### Supporting

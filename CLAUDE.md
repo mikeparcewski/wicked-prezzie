@@ -67,7 +67,7 @@ skills/
     references/deck-audit.md       (5-category weighted quality audit)
     references/content-lint.md     (bullets, titles, stats, quotes, passive voice, CTAs)
     references/consistency-checks.md (within-deck + cross-deck consistency)
-  slide-render/            — PPTX → PNG via PowerPoint headless
+  slide-render/            — PPTX → PNG via LibreOffice headless
     SKILL.md
     scripts/slide_render.py
   slide-design/            — Design principles + quality rubric (reference only)
@@ -148,7 +148,7 @@ Project-level config stays in `skills/slide-config/config.json` (per-project ove
 
 4. **Card text clamping** — text inside card shapes is constrained to the card's width (not Chrome's tight bounding box).
 
-5. **SVG handling** — large SVG charts rendered as cropped screenshot images. Small decorative SVGs (<60px) skipped.
+5. **SVG handling** — SVG charts rendered via isolated screenshot (hide all non-SVG content, screenshot, crop). Small decorative SVGs (<30px) skipped. Eliminates crop bleed from overlapping content.
 
 6. **LibreOffice for rendering** — PPTX→PDF via `soffice --headless`, then pdftoppm for PDF→PNG. No Microsoft PowerPoint required — runs headless without GUI, permission dialogs, or automation consent. Handles sandboxed environments automatically.
 

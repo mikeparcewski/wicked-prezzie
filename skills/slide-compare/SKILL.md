@@ -23,7 +23,7 @@ identifying layout differences.
 ## Architecture
 
 1. **HTML screenshots** — Chrome headless captures each HTML slide as PNG
-2. **PPTX rendering** — PowerPoint exports the .pptx to PDF via AppleScript,
+2. **PPTX rendering** — LibreOffice exports the .pptx to PDF via headless mode,
    then `pdftoppm` converts PDF pages to PNG
 3. **Output** — Paired PNG files in `html/` and `pptx/` subdirectories for
    manual or automated visual comparison
@@ -66,7 +66,7 @@ compare/
 Verify before running:
 
 - Google Chrome (for HTML screenshots)
-- **Microsoft PowerPoint** for macOS (exports PPTX to PDF via AppleScript)
+- **LibreOffice** (exports PPTX to PDF via headless mode)
 - `pdftoppm` from poppler (`brew install poppler`)
 
 ## Reviewing Results

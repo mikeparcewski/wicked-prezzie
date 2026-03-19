@@ -40,8 +40,8 @@ Builds a single slide from layout JSON. Rendering order:
    for `section-divider` and `title-slide`
 2. **Shapes** — Background/border elements sorted by DOM depth (deepest last).
    Filters out full-slide shapes and tiny elements. Supports rounded rectangles.
-3. **SVG images** — Large SVGs (>60px, >10 lines) rendered via `screenshot_fn`
-   callback as cropped PNGs
+3. **SVG images** — SVGs (>30px, >3 lines) rendered via isolated screenshot
+   (hides non-SVG content) and cropped to the SVG region
 4. **Richtext** — `h1`-`h4`/`p`/`li` elements with inline run formatting.
    Each run preserves its own color, size, weight, style
 5. **Simple text** — Leaf text nodes not covered by richtext

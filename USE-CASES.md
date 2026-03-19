@@ -194,7 +194,7 @@ Compare the original HTML against the converted PPTX, side by side.
 "Create a montage of all slides"
 ```
 
-**slide-render** uses PowerPoint itself as the renderer (AppleScript on macOS, COM on Windows) — the only way to see exactly what the audience will see.
+**slide-render** uses LibreOffice headless for rendering — no GUI or automation consent needed. Runs on macOS, Linux, and Windows.
 
 ### Cross-deck consistency
 

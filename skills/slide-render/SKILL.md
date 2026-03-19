@@ -1,17 +1,17 @@
 ---
 name: Slide Render
 description: >
-  Renders PPTX slides to PNG images via PowerPoint, with optional contact sheet
-  montage. Use when the user says "show me the slides", "what does it look like",
-  wants to preview the PPTX, create thumbnails, or export slides as images.
-  Also used by the validation and comparison workflows.
+  Renders PPTX slides to PNG images via LibreOffice headless, with optional
+  contact sheet montage. Use when the user says "show me the slides", "what
+  does it look like", wants to preview the PPTX, create thumbnails, or export
+  slides as images. Also used by the validation and comparison workflows.
 ---
 
 # Slide Render
 
 Render PowerPoint (.pptx) files into PNG images for visual review, comparison,
 and quality assurance. Converts slide decks into individual per-slide PNGs and
-optional contact-sheet montages using PowerPoint's native PDF export.
+optional contact-sheet montages using LibreOffice headless PDF export.
 
 ## When to Use
 
@@ -53,12 +53,14 @@ python ${CLAUDE_SKILL_DIR}/scripts/slide_render.py deck.pptx --montage overview.
 
 ### Stage 1: PPTX to PDF
 
-PowerPoint exports the .pptx to PDF using platform-native automation:
-- **macOS**: AppleScript (`osascript`)
-- **Windows**: COM automation via `win32com` (`pip install pywin32`)
+LibreOffice headless exports the .pptx to PDF:
 
-This gives the highest fidelity rendering since PowerPoint is the definitive
-renderer — no font substitution, no layout differences.
+```bash
+soffice --headless --convert-to pdf --outdir <tmpdir> <pptx_path>
+```
+
+Runs without GUI, permission dialogs, or automation consent. Handles sandboxed
+macOS environments automatically by detecting and using the correct binary path.
 
 ### Stage 2: PDF to PNG
 
@@ -78,17 +80,15 @@ tiles into a grid using Pillow. White background, configurable columns.
 
 ## Dependencies
 
-- **Microsoft PowerPoint** (macOS via AppleScript, Windows via COM/pywin32)
-- **pdftoppm** from poppler (macOS: `brew install poppler`, Windows: install poppler binaries)
+- **LibreOffice** (macOS: `brew install --cask libreoffice`, Linux: `apt install libreoffice`)
+- **pdftoppm** from poppler (macOS: `brew install poppler`, Linux: `apt install poppler-utils`)
 - **Pillow** (for montage creation)
-- **pywin32** (Windows only: `pip install pywin32`)
 
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| PDF export fails (macOS) | PowerPoint not responding | Close other presentations, try again |
-| PDF export fails (Windows) | win32com not installed | `pip install pywin32` |
+| PDF export fails | LibreOffice not installed or not in PATH | Install LibreOffice; check `soffice --version` |
 | pdftoppm not found | Poppler not installed | macOS: `brew install poppler` |
 | Missing fonts in render | Fonts not on system | Install .ttf/.otf to system fonts dir |
 | Montage too large | Too many slides / high thumb width | Reduce `--thumb-width` or increase `--cols` |
