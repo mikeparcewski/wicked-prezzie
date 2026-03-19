@@ -43,6 +43,7 @@ JS_EXTRACT = r'''
             color: cs.color,
             backgroundColor: cs.backgroundColor,
             background: cs.background,
+            backgroundImage: cs.backgroundImage,
             fontSize: parseFloat(cs.fontSize),
             fontWeight: cs.fontWeight,
             fontStyle: cs.fontStyle,
@@ -60,7 +61,9 @@ JS_EXTRACT = r'''
             paddingRight: parseFloat(cs.paddingRight),
             paddingBottom: parseFloat(cs.paddingBottom),
             paddingLeft: parseFloat(cs.paddingLeft),
-            whiteSpace: cs.whiteSpace
+            whiteSpace: cs.whiteSpace,
+            transform: cs.transform,
+            writingMode: cs.writingMode
         };
     }
 
@@ -97,6 +100,20 @@ JS_EXTRACT = r'''
         }
         walk(el);
         return runs;
+    }
+
+    function getRotation(styles) {
+        // Detect rotation from CSS transform matrix or writing-mode (#27)
+        if (styles.writingMode === 'vertical-rl' || styles.writingMode === 'vertical-lr') return -90;
+        var t = styles.transform;
+        if (!t || t === 'none') return 0;
+        var m = t.match(/matrix\(([^)]+)\)/);
+        if (m) {
+            var vals = m[1].split(',').map(Number);
+            var angle = Math.round(Math.atan2(vals[1], vals[0]) * 180 / Math.PI);
+            if (Math.abs(angle) >= 5) return angle;
+        }
+        return 0;
     }
 
     function capturePseudo(el, pseudo, depth) {
@@ -143,7 +160,8 @@ JS_EXTRACT = r'''
         var styles = gs(el);
         var tag = tn.toLowerCase();
         var cls = el.className ? String(el.className).split(/\s+/) : [];
-        var hasBg = styles.backgroundColor !== 'rgba(0, 0, 0, 0)' && styles.backgroundColor !== 'transparent';
+        var hasBg = (styles.backgroundColor !== 'rgba(0, 0, 0, 0)' && styles.backgroundColor !== 'transparent')
+            || ((styles.backgroundImage || '').indexOf('gradient') !== -1);
         var hasBorder = styles.borderWidth > 0.5 && styles.borderColor !== 'rgba(0, 0, 0, 0)';
 
         if (tag === 'table' && rect.w > 50 && rect.h > 20) {
@@ -188,6 +206,7 @@ JS_EXTRACT = r'''
                                  paddingTop: styles.paddingTop, paddingRight: styles.paddingRight,
                                  paddingBottom: styles.paddingBottom, paddingLeft: styles.paddingLeft},
                         parentSlotRect: currentSlotRect || null,
+                        rotation: getRotation(styles),
                         depth: depth
                     });
                     richTextEls.add(el);
@@ -196,13 +215,23 @@ JS_EXTRACT = r'''
             }
         } else if (leafTags[tag] && rect.w > 3 && rect.h > 3 && !richTextEls.has(el)) {
             var badgeBg = styles.backgroundColor !== 'rgba(0, 0, 0, 0)' && styles.backgroundColor !== 'transparent';
-            var badgeRound = styles.borderRadius >= Math.min(rect.w, rect.h) * 0.3;
-            if (badgeBg && badgeRound && rect.w > 10 && rect.h > 10) {
+            // Also detect gradient backgrounds on small icon containers (#24)
+            var gradSrc = (styles.backgroundImage || '') + ' ' + (styles.background || '');
+            var hasGradient = gradSrc.indexOf('gradient') !== -1;
+            var badgeRound = styles.borderRadius >= Math.min(rect.w, rect.h) * 0.15;
+            var isSmallRounded = styles.borderRadius >= 4 && rect.w < 200 && rect.h < 80;
+            if ((badgeBg || hasGradient) && (badgeRound || isSmallRounded) && rect.w > 8 && rect.h > 8) {
+                // For gradient backgrounds, extract first color as solid fallback
+                var bgColor = styles.backgroundColor;
+                if (!badgeBg && hasGradient) {
+                    var gradMatch = gradSrc.match(/rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+[^)]*\)/);
+                    if (gradMatch) bgColor = gradMatch[0];
+                }
                 elements.push({
                     type: 'badge', tag: tag, rect: rect,
                     text: el.textContent.trim(),
                     styles: {
-                        backgroundColor: styles.backgroundColor,
+                        backgroundColor: bgColor,
                         color: styles.color, fontSize: styles.fontSize,
                         fontWeight: styles.fontWeight, borderRadius: styles.borderRadius
                     },
@@ -210,6 +239,50 @@ JS_EXTRACT = r'''
                 });
                 richTextEls.add(el);
                 return;
+            }
+            // Check if this leafTag has inline leaf children with text (mixed content).
+            // e.g. <span><strong>bold</strong> normal</span> — extract as richtext
+            // to avoid parent/child overlap (#20). Only for inline-level elements,
+            // not large block containers.
+            var inlineLeafs = {strong:1, b:1, em:1, i:1, a:1, span:1, label:1};
+            var hasInlineLeafChild = false;
+            var hasDirectText = false;
+            for (var i = 0; i < el.childNodes.length; i++) {
+                if (el.childNodes[i].nodeType === 3 && el.childNodes[i].textContent.trim().length > 0) {
+                    hasDirectText = true;
+                }
+                if (el.childNodes[i].nodeType === 1) {
+                    var childTag = el.childNodes[i].tagName.toLowerCase();
+                    if (inlineLeafs[childTag] && el.childNodes[i].textContent.trim().length > 0 && isVis(el.childNodes[i])) {
+                        hasInlineLeafChild = true;
+                    }
+                }
+            }
+            if (hasInlineLeafChild && hasDirectText && el.textContent.trim().length > 0) {
+                var runs = getRuns(el);
+                if (runs.length > 0) {
+                    elements.push({
+                        type: 'richtext', tag: tag, classes: cls, rect: rect,
+                        runs: runs.map(function(r) {
+                            return {
+                                text: r.text.substring(0, 500), color: r.color,
+                                fontSize: r.fontSize, fontWeight: r.fontWeight,
+                                fontStyle: r.fontStyle, textTransform: r.textTransform || '',
+                                br: r.br || false
+                            };
+                        }),
+                        styles: {textAlign: styles.textAlign, letterSpacing: styles.letterSpacing,
+                                 whiteSpace: styles.whiteSpace,
+                                 paddingTop: styles.paddingTop, paddingRight: styles.paddingRight,
+                                 paddingBottom: styles.paddingBottom, paddingLeft: styles.paddingLeft},
+                        parentSlotRect: currentSlotRect || null,
+                        rotation: getRotation(styles),
+                        depth: depth
+                    });
+                    richTextEls.add(el);
+                    el.querySelectorAll('*').forEach(function(c) { richTextEls.add(c); });
+                    return;
+                }
             }
             var dtext = '';
             for (var i = 0; i < el.childNodes.length; i++) {
@@ -229,6 +302,7 @@ JS_EXTRACT = r'''
                         paddingBottom: styles.paddingBottom, paddingLeft: styles.paddingLeft
                     },
                     parentSlotRect: currentSlotRect || null,
+                    rotation: getRotation(styles),
                     depth: depth
                 });
             }

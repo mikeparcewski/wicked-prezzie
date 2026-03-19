@@ -223,8 +223,14 @@ class SlideBuilder:
             blw = st.get('borderLeftWidth', 0)
             blc = parse_css_color(st.get('borderLeftColor'), slide_bg_rgb)
             if blc and blw > 2:
-                shape.line.color.rgb = blc
-                shape.line.width = Pt(max(1, min(blw, 4)))
+                # Create separate accent bar instead of full outline (#25)
+                accent_w = self.px2emu_x(max(3, min(blw, 6)))
+                accent = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, x, y, accent_w, h)
+                accent.fill.solid()
+                accent.fill.fore_color.rgb = blc
+                accent.line.fill.background()
+                accent.text_frame.clear()
+                shape.line.fill.background()
             elif border_c and bw > 0.3:
                 shape.line.color.rgb = border_c
                 shape.line.width = Pt(max(0.25, bw * 0.75))  # CSS px → PPTX pt at 96 DPI
@@ -234,22 +240,43 @@ class SlideBuilder:
 
         # Render SVGs as images
         if screenshot_fn:
+            # Collect non-SVG element top edges for overlap detection (#19)
+            non_svg_tops = []
+            for e in elements:
+                if e['type'] in ('richtext', 'text', 'shape', 'badge'):
+                    non_svg_tops.append(e['rect']['y'])
+
             for svg in svg_elements:
                 r = svg['rect']
-                if r['w'] < 60 or r['h'] < 60: continue
-                if svg.get('lines', 0) < 10: continue
-                png_path = screenshot_fn(r)
+                if r['w'] < 30 or r['h'] < 30: continue
+                if svg.get('lines', 0) < 3: continue
+                # Clamp SVG bottom to avoid bleeding into content below (#19)
+                # Elements within 30px below SVG can bleed through transparent areas
+                svg_bottom = r['y'] + r['h']
+                crop_r = dict(r)
+                nearest_below = None
+                for ey in sorted(non_svg_tops):
+                    if ey > r['y'] + r['h'] * 0.5 and ey <= svg_bottom + 30:
+                        nearest_below = ey
+                        break
+                if nearest_below is not None:
+                    new_h = nearest_below - r['y'] - 8
+                    if new_h > r['h'] * 0.5 and new_h < r['h']:
+                        crop_r['h'] = new_h
+                png_path = screenshot_fn(crop_r)
                 if png_path and os.path.exists(png_path):
-                    x = self.px2emu_x(max(0, r['x']))
-                    y = self.px2emu_y(max(0, r['y']))
-                    w = self.px2emu_x(r['w'])
-                    h = self.px2emu_y(r['h'])
+                    x = self.px2emu_x(max(0, crop_r['x']))
+                    y = self.px2emu_y(max(0, crop_r['y']))
+                    w = self.px2emu_x(crop_r['w'])
+                    h = self.px2emu_y(crop_r['h'])
                     try:
                         slide.shapes.add_picture(png_path, x, y, w, h)
                     except: pass
 
         # Render native tables
-        table_data = [e for e in elements if e['type'] == 'table']
+        table_data = [e for e in elements if e['type'] == 'table'
+                      and e['rect']['x'] < self.src_w and e['rect']['y'] < self.src_h
+                      and e['rect']['x'] + e['rect']['w'] > 0 and e['rect']['y'] + e['rect']['h'] > 0]
         for td in table_data:
             try:
                 self.build_table(slide, td, slide_bg_rgb)
@@ -308,6 +335,7 @@ class SlideBuilder:
             full_text = ''.join(run.get('text', '') for run in runs).strip()
             if not full_text: continue
 
+            rotation = rt.get('rotation', 0)
             align = rt.get('styles', {}).get('textAlign', 'left')
             tag = rt.get('tag', '')
             parent = find_containment_rect(rt)
@@ -331,7 +359,12 @@ class SlideBuilder:
             h = self.px2emu_y(min(max(r['h'], 14), self.src_h - max(0, r['y'])))
             if w < 5000 or h < 5000: continue
 
+            # For rotated text, swap dimensions and apply PPTX rotation (#27)
+            if rotation and abs(rotation) >= 5:
+                w, h = h, w
             tb = slide.shapes.add_textbox(x, y, w, h)
+            if rotation and abs(rotation) >= 5:
+                tb.rotation = rotation
             tb.fill.background()
             tb.line.fill.background()
             tf = tb.text_frame
@@ -375,6 +408,7 @@ class SlideBuilder:
             text = t.get('text', '').strip()
             if not text: continue
 
+            rotation = t.get('rotation', 0)
             tt = st.get('textTransform', '')
             if tt == 'uppercase':
                 text = text.upper()
@@ -392,7 +426,12 @@ class SlideBuilder:
             h = self.px2emu_y(min(max(r['h'], 14), self.src_h - max(0, r['y'])))
             if w < 5000 or h < 5000: continue
 
+            # For rotated text, swap dimensions (#27)
+            if rotation and abs(rotation) >= 5:
+                w, h = h, w
             tb = slide.shapes.add_textbox(x, y, w, h)
+            if rotation and abs(rotation) >= 5:
+                tb.rotation = rotation
             tb.fill.background()
             tb.line.fill.background()
             tf = tb.text_frame
@@ -467,13 +506,29 @@ class SlideBuilder:
         table_shape = slide.shapes.add_table(num_rows, num_cols, x, y, w, h)
         table = table_shape.table
 
-        # Set column widths from first row cell widths
+        # Disable default table styling that causes white banded rows (#16)
         tbl = table._tbl
+        tblPr = tbl.find(qn('a:tblPr'))
+        if tblPr is not None:
+            tblPr.attrib.clear()
+            tblPr.set('bandRow', '0')
+            tblPr.set('bandCol', '0')
+            tblPr.set('firstRow', '0')
+            tblPr.set('lastRow', '0')
+            tblPr.set('firstCol', '0')
+            tblPr.set('lastCol', '0')
+            for child in list(tblPr):
+                if child.tag.endswith('}tblStyle'):
+                    tblPr.remove(child)
+
+        # Set column widths from first row cell widths
         if rows[0]:
             for ci, cell_data in enumerate(rows[0]):
                 if ci < num_cols:
                     col_w = self.px2emu_x(cell_data['rect']['w'])
                     tbl.tblGrid[ci].set('w', str(col_w))
+
+        fallback_bg = RGBColor(slide_bg_rgb[0], slide_bg_rgb[1], slide_bg_rgb[2])
 
         for ri, row in enumerate(rows):
             for ci, cell_data in enumerate(row):
@@ -481,9 +536,8 @@ class SlideBuilder:
                     continue
                 cell = table.cell(ri, ci)
                 bg = parse_css_color(cell_data['styles'].get('backgroundColor'), slide_bg_rgb)
-                if bg:
-                    cell.fill.solid()
-                    cell.fill.fore_color.rgb = bg
+                cell.fill.solid()
+                cell.fill.fore_color.rgb = bg or fallback_bg
                 tf = cell.text_frame
                 tf.word_wrap = True
                 runs = cell_data.get('runs', [])
@@ -514,10 +568,15 @@ class SlideBuilder:
     def build_badge(self, slide, node, slide_bg_rgb):
         """Build a pill/circle badge shape."""
         r = node['rect']
+        # Bounds check: skip badges outside the slide viewport (#17)
+        if r['x'] > self.src_w or r['y'] > self.src_h:
+            return None
+        if r['x'] + r['w'] < 0 or r['y'] + r['h'] < 0:
+            return None
         x = self.px2emu_x(max(0, r['x']))
         y = self.px2emu_y(max(0, r['y']))
-        w = self.px2emu_x(r['w'])
-        h = self.px2emu_y(r['h'])
+        w = self.px2emu_x(min(r['w'], self.src_w - max(0, r['x'])))
+        h = self.px2emu_y(min(r['h'], self.src_h - max(0, r['y'])))
         st = node.get('styles', {})
         br = st.get('borderRadius', 0)
         if br >= min(r['w'], r['h']) / 2:

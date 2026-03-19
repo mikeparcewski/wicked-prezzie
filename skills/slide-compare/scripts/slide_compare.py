@@ -81,7 +81,7 @@ def compare_slides(html_dir, pptx_path, output_dir, slide_indices=None,
         print(f"No slide HTML files found in {html_dir}")
         return
 
-    hide = hide_selectors or ['.slide-nav']
+    hide = hide_selectors or ['.slide-nav', '.slide-number']
 
     with tempfile.TemporaryDirectory() as tmpdir:
         for i, html_file in enumerate(html_files):

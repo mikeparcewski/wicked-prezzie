@@ -150,7 +150,7 @@ def build_deck(slides, input_dir, output_path, hide_selectors=None,
     prs.slide_height = Inches(sh)
 
     total = len(slides)
-    hide = hide_selectors or ['.slide-nav']
+    hide = hide_selectors or ['.slide-nav', '.slide-number']
     # Cap default workers to avoid Chrome resource contention
     cpu = os.cpu_count() or 4
     max_workers = workers or min(total, cpu // 2 or 1, 6)

@@ -59,7 +59,7 @@ def run_pipeline(input_dir, output_path, slides, viewport_w=1280, viewport_h=720
     if compare_dir is None:
         compare_dir = default_output_path('compare')
 
-    hide = hide_selectors or ['.slide-nav']
+    hide = hide_selectors or ['.slide-nav', '.slide-number']
     results = {'stages': {}, 'success': True}
 
     # Stage 1+2: Standardize + Convert (parallel per-slide extraction)
