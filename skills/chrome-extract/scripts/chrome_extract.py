@@ -270,61 +270,72 @@ JS_EXTRACT = r'''
                 }
             }
         } else if (leafTags[tag] && rect.w > 3 && rect.h > 3 && !richTextEls.has(el)) {
-            var badgeBg = styles.backgroundColor !== 'rgba(0, 0, 0, 0)' && styles.backgroundColor !== 'transparent';
-            // Also detect gradient backgrounds on small icon containers (#24)
-            var gradSrc = (styles.backgroundImage || '') + ' ' + (styles.background || '');
-            var hasGradient = gradSrc.indexOf('gradient') !== -1;
-            var badgeRound = styles.borderRadius >= Math.min(rect.w, rect.h) * 0.15;
-            var isSmallRounded = styles.borderRadius >= 4 && rect.w < 200 && rect.h < 80;
-            if ((badgeBg || hasGradient) && (badgeRound || isSmallRounded) && rect.w > 8 && rect.h > 8) {
-                // For gradient backgrounds, extract first color as solid fallback
-                var bgColor = styles.backgroundColor;
-                if (!badgeBg && hasGradient) {
-                    var gradMatch = gradSrc.match(/rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+[^)]*\)/);
-                    if (gradMatch) bgColor = gradMatch[0];
+            // Ask the DOM: does this element have visible child elements?
+            // If yes, it's a layout container — its children will be walked and
+            // emit their own text. Don't extract the parent's aggregate text.
+            var hasVisibleChildElements = false;
+            for (var i = 0; i < el.children.length; i++) {
+                if (isVis(el.children[i]) && el.children[i].textContent.trim().length > 0) {
+                    hasVisibleChildElements = true;
+                    break;
                 }
-                elements.push({
-                    type: 'badge', tag: tag, classes: cls, layoutRole: role || 'badge', rect: rect,
-                    text: el.textContent.trim(),
-                    styles: {
-                        backgroundColor: bgColor,
-                        color: styles.color, fontSize: styles.fontSize,
-                        fontWeight: styles.fontWeight, borderRadius: styles.borderRadius
-                    },
-                    depth: depth
-                });
-                richTextEls.add(el);
-                return;
             }
-            // Unified text extraction: all leaf tags go through getRuns() (#30, #31).
-            // This handles <br>, block-level children, and inline formatting uniformly
-            // instead of the old simple-text path that dropped non-text nodes.
-            var fullText = el.textContent.trim();
-            if (fullText.length > 0) {
-                var runs = getRuns(el);
-                if (runs.length > 0) {
+
+            if (!hasVisibleChildElements) {
+                // True leaf — no child elements with content. Extract text/badge.
+                var badgeBg = styles.backgroundColor !== 'rgba(0, 0, 0, 0)' && styles.backgroundColor !== 'transparent';
+                var gradSrc = (styles.backgroundImage || '') + ' ' + (styles.background || '');
+                var hasGradient = gradSrc.indexOf('gradient') !== -1;
+                var badgeRound = styles.borderRadius >= Math.min(rect.w, rect.h) * 0.15;
+                var isSmallRounded = styles.borderRadius >= 4 && rect.w < 200 && rect.h < 80;
+                if ((badgeBg || hasGradient) && (badgeRound || isSmallRounded) && rect.w > 8 && rect.h > 8) {
+                    var bgColor = styles.backgroundColor;
+                    if (!badgeBg && hasGradient) {
+                        var gradMatch = gradSrc.match(/rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+[^)]*\)/);
+                        if (gradMatch) bgColor = gradMatch[0];
+                    }
                     elements.push({
-                        type: 'richtext', tag: tag, classes: cls, layoutRole: role, rect: rect,
-                        runs: runs.map(function(r) {
-                            return {
-                                text: r.text.substring(0, 500), color: r.color,
-                                fontSize: r.fontSize, fontWeight: r.fontWeight,
-                                fontStyle: r.fontStyle, textTransform: r.textTransform || '',
-                                br: r.br || false
-                            };
-                        }),
-                        styles: {textAlign: styles.textAlign, letterSpacing: styles.letterSpacing,
-                                 whiteSpace: styles.whiteSpace,
-                                 paddingTop: styles.paddingTop, paddingRight: styles.paddingRight,
-                                 paddingBottom: styles.paddingBottom, paddingLeft: styles.paddingLeft},
-                        parentSlotRect: currentSlotRect || null,
-                        rotation: getRotation(styles),
+                        type: 'badge', tag: tag, classes: cls, layoutRole: role || 'badge', rect: rect,
+                        text: el.textContent.trim(),
+                        styles: {
+                            backgroundColor: bgColor,
+                            color: styles.color, fontSize: styles.fontSize,
+                            fontWeight: styles.fontWeight, borderRadius: styles.borderRadius
+                        },
                         depth: depth
                     });
                     richTextEls.add(el);
-                    el.querySelectorAll('*').forEach(function(c) { richTextEls.add(c); });
+                    return;
+                }
+                // Unified text extraction via getRuns() (#30, #31).
+                var fullText = el.textContent.trim();
+                if (fullText.length > 0) {
+                    var runs = getRuns(el);
+                    if (runs.length > 0) {
+                        elements.push({
+                            type: 'richtext', tag: tag, classes: cls, layoutRole: role, rect: rect,
+                            runs: runs.map(function(r) {
+                                return {
+                                    text: r.text.substring(0, 500), color: r.color,
+                                    fontSize: r.fontSize, fontWeight: r.fontWeight,
+                                    fontStyle: r.fontStyle, textTransform: r.textTransform || '',
+                                    br: r.br || false
+                                };
+                            }),
+                            styles: {textAlign: styles.textAlign, letterSpacing: styles.letterSpacing,
+                                     whiteSpace: styles.whiteSpace,
+                                     paddingTop: styles.paddingTop, paddingRight: styles.paddingRight,
+                                     paddingBottom: styles.paddingBottom, paddingLeft: styles.paddingLeft},
+                            parentSlotRect: currentSlotRect || null,
+                            rotation: getRotation(styles),
+                            depth: depth
+                        });
+                        richTextEls.add(el);
+                        el.querySelectorAll('*').forEach(function(c) { richTextEls.add(c); });
+                    }
                 }
             }
+            // else: container div with child elements — skip text, let children handle it
         }
 
         if ((hasBg || hasBorder) && tag !== 'body' && tag !== 'html' && rect.w > 8 && rect.h > 4) {
