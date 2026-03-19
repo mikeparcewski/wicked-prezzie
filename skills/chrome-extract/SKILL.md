@@ -12,100 +12,99 @@ description: >
 # Chrome Layout Extraction
 
 Drives Chrome headless to render HTML slides, injects JavaScript to walk the
-DOM, and extracts computed bounding boxes, colors, fonts, and inline formatting
-as structured JSON.
+DOM, and extracts **raw facts** — bounding boxes, computed styles, text runs,
+and structural metadata. No classification decisions are made by the script.
 
-## When to Use
+## Two-Step Architecture
 
-- Debugging why elements are missing or mispositioned in extraction
-- Adjusting the JavaScript DOM walker for new HTML patterns
-- Fixing screenshot or cropping behavior
-- Adding support for new element types
+### Step 1: `extract_layout()` — Raw Facts from Chrome
+
+Walks every visible DOM element and emits:
+- `tag`, `classes`, `rect` (bounding box), `depth`
+- `styles` (all computed CSS properties)
+- `directText` (text nodes owned by this element, not children)
+- `runs` (inline-formatted text with per-run color/font — only on true leaves)
+- `hasBg`, `hasBorder`, `childElementCount`, `rotation`
+
+No `type` field. No classification. Just browser-computed facts.
+
+### Step 2: `classify_elements()` — Default Classification
+
+Converts raw nodes into typed elements the builder expects:
+- Nodes with `runs` → `type: 'richtext'`
+- Nodes with `hasBg`/`hasBorder` and no text → `type: 'shape'`
+- Tables → `type: 'table'`
+
+This is the **deterministic default** for the 90% case. The model can override
+any classification by looking at the HTML screenshot and the raw element list.
+
+### When the Model Should Override
+
+After the initial conversion, if a slide looks wrong, read the raw extraction
+JSON. Common overrides:
+- Element classified as richtext but it's a container → skip it
+- Element classified as shape but it should have text → promote to richtext
+- Element missing because it's a pseudo-element → adjust pseudo capture
 
 ## Core Functions
 
 ### `extract_layout(html_path, tmpdir, viewport_w, viewport_h, hide_selectors)`
 
-Renders an HTML file in Chrome headless and returns structured layout JSON:
-
+Returns raw element tree:
 ```json
 {
   "slideWidth": 1280, "slideHeight": 720,
-  "slideClasses": ["slide", "section-divider"],
   "slideBg": "rgb(10, 10, 15)",
   "elements": [
-    {"type": "shape", "tag": "div", "rect": {"x":0,"y":0,"w":400,"h":200}, "styles": {...}},
-    {"type": "richtext", "tag": "h1", "rect": {...}, "runs": [...], "styles": {...}},
-    {"type": "richtext", "tag": "span", "rect": {...}, "runs": [...], "styles": {...}}
+    {"tag": "div", "rect": {...}, "styles": {...}, "hasBg": true, "childElementCount": 3, "depth": 0},
+    {"tag": "h1", "rect": {...}, "styles": {...}, "directText": "Title", "runs": [...], "depth": 1}
   ],
-  "svgElements": [
-    {"type": "svg", "rect": {"x":100,"y":200,"w":600,"h":300}, "lines": 45}
-  ]
+  "svgElements": [{"type": "svg", "rect": {...}, "lines": 45}]
 }
 ```
 
-**Element types**:
-- `shape` — Elements with background color or border (cards, containers)
-- `richtext` — All text elements with inline run formatting (headings, paragraphs, and leaf tags like `span`, `a`, `div`)
-- `badge` — Small rounded elements with background fill (pills, chips, tags)
-- `table` — Native HTML tables with per-cell run formatting
-- `svg` — SVG elements with bounding rects
+### `classify_elements(raw_data)`
 
-**How it works**: Injects CSS to hide specified selectors, injects the
-`JS_EXTRACT` script that runs on page load, uses `--dump-dom` to capture the
-output, then parses the JSON from a hidden `<pre>` element.
+Applies default classification. Returns data in the format `pptx_builder` expects.
 
-### `screenshot_html(html_path, png_path, tmpdir, viewport_w, viewport_h, scale_factor, hide_selectors)`
+### `screenshot_html(html_path, png_path, ...)`
 
-Captures a full-page PNG screenshot using Chrome's `--screenshot` flag.
-Crops to the target aspect ratio after capture. Uses 2x scale factor for
-retina quality by default.
+Full-page PNG screenshot via Chrome's `--screenshot` flag.
 
-### `crop_region(full_png_path, out_path, region_rect, source_w, source_h)`
+### `crop_region(full_png_path, out_path, region_rect, ...)`
 
-Crops a region from a full screenshot. Used to extract SVG chart areas
-as individual images for embedding in PPTX.
+Crop a region from a screenshot. Used for SVG chart extraction.
 
 ## Script Location
 
-`scripts/chrome_extract.py` — imported by `slide-html-to-pptx` and `slide-compare` skills.
+`scripts/chrome_extract.py` — imported by `slide-html-to-pptx`.
 
 ## Environment
 
-Chrome path defaults to macOS location. Override with `CHROME_PATH` env var:
-
-```bash
-export CHROME_PATH="/usr/bin/google-chrome"
-```
+Chrome path defaults to macOS location. Override with `CHROME_PATH` env var.
 
 ## JavaScript DOM Walker
 
-The `JS_EXTRACT` constant in the script contains the injected JavaScript.
+The `JS_EXTRACT` constant walks every visible element and collects facts.
 Key behaviors:
 
 - Walks from `.slide` element (or `body` fallback)
-- Coordinates are relative to the slide container, scaled to source dimensions
-- All text elements use unified richtext extraction with per-run formatting
-  (color, fontSize, fontWeight, fontStyle) — handles `<br>`, block children,
-  and inline spans uniformly
-- Elements inside richtext parents are excluded from deeper extraction to
-  prevent duplicates
-- SVGs are collected separately with line counts (used for size filtering)
-- Max depth of 15 to avoid infinite recursion
-- Skips `script`, `style`, `nav`, and invisible elements
+- Coordinates relative to slide container, scaled to source dimensions
+- `getRuns()` extracts inline-formatted text with per-run styles
+- Only called on true leaf elements (no child elements)
+- Tables extracted with full row/cell structure
+- SVGs collected separately with line counts
+- Pseudo-elements captured with geometry
+- Max depth 15, skips script/style/nav/invisible
 
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| Empty layout / null return | Chrome not found or crash | Check `CHROME_PATH`, verify Chrome installed |
-| Elements missing | Hidden by CSS or too small | Adjust size thresholds in JS (currently 1px visible minimum) |
-| Wrong positions | Viewport mismatch | Ensure `viewport_w`/`viewport_h` match HTML design dimensions |
-| JSON parse error | HTML entities in dump-dom output | Already handled by `html.unescape()` — check for new edge cases |
+| Empty layout / null return | Chrome not found | Check `CHROME_PATH` |
+| Elements missing | Hidden or too small | Check visibility and 1px minimum |
+| Wrong positions | Viewport mismatch | Match `viewport_w`/`viewport_h` to HTML |
 
-## Additional Resources
+## Reference Files
 
-### Reference Files
-
-- **`references/js-dom-walker.md`** — Detailed documentation of the JS_EXTRACT logic,
-  element classification rules, coordinate system, size filters, and depth limits
+- **`references/js-dom-walker.md`** — DOM walker details, coordinate system, depth limits

@@ -15,9 +15,9 @@ from pathlib import Path
 CHROME = os.environ.get("CHROME_PATH",
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
 
-# JavaScript injected into the page to extract layout data.
-# Walks the DOM, collects shapes (background/border elements) and text
-# (with inline run formatting for headings/paragraphs).
+# JavaScript injected into the page to extract raw layout data.
+# Walks the DOM and collects every visible element with its computed properties.
+# NO classification — the model decides what each element is.
 JS_EXTRACT = r'''
 (function() {
     var slide = document.querySelector('.slide') || document.body;
@@ -82,18 +82,15 @@ JS_EXTRACT = r'''
                 if (raw.length === 0) return;
                 var parent = node.parentElement;
                 var pcs = window.getComputedStyle(parent);
-                // Normalize whitespace unless pre-formatted (#29 bug 2)
                 var ws = pcs.whiteSpace || '';
                 var t;
                 if (ws === 'pre' || ws === 'pre-wrap' || ws === 'pre-line') {
                     t = raw;
                 } else {
                     t = raw.replace(/[\s\n\t]+/g, ' ');
-                    // Trim leading/trailing if this is a whitespace-only node
                     if (!/\S/.test(t)) return;
                 }
                 if (t.length === 0) return;
-                // Inject space at word boundaries between adjacent inline runs (#29 bug 1)
                 if (runs.length > 0 && !runs[runs.length - 1].br) {
                     var prev = runs[runs.length - 1].text;
                     if (/\w$/.test(prev) && /^\w/.test(t)) {
@@ -101,19 +98,15 @@ JS_EXTRACT = r'''
                     }
                 }
                 runs.push({
-                    text: t,
-                    color: pcs.color,
-                    fontSize: parseFloat(pcs.fontSize),
-                    fontWeight: pcs.fontWeight,
-                    fontStyle: pcs.fontStyle,
-                    textTransform: pcs.textTransform || ''
+                    text: t, color: pcs.color,
+                    fontSize: parseFloat(pcs.fontSize), fontWeight: pcs.fontWeight,
+                    fontStyle: pcs.fontStyle, textTransform: pcs.textTransform || ''
                 });
             } else if (node.nodeType === 1) {
                 var tn = node.tagName;
                 if (tn === 'SCRIPT' || tn === 'STYLE' || tn === 'SVG' || tn === 'NAV') return;
                 if (tn === 'BR') { runs.push({text: '\n', br: true}); return; }
                 if (!isVis(node)) return;
-                // Insert line break before block-level children (#29 bug 1)
                 var disp = window.getComputedStyle(node).display;
                 if (disp !== 'inline' && disp !== 'inline-block' && runs.length > 0 && !runs[runs.length - 1].br) {
                     runs.push({text: '\n', br: true});
@@ -126,7 +119,6 @@ JS_EXTRACT = r'''
     }
 
     function getRotation(styles) {
-        // Detect rotation from CSS transform matrix or writing-mode (#27)
         if (styles.writingMode === 'vertical-rl' || styles.writingMode === 'vertical-lr') return -90;
         var t = styles.transform;
         if (!t || t === 'none') return 0;
@@ -142,7 +134,6 @@ JS_EXTRACT = r'''
     function capturePseudo(el, pseudo, depth) {
         var cs = window.getComputedStyle(el, pseudo);
         if (!cs.content || cs.content === 'none' || cs.content === 'normal') return null;
-        // Allow content:"" when pseudo has a visible background or border (#29 bug 3)
         var rawContent = cs.content.replace(/^["']|["']$/g, '');
         var pBg = cs.backgroundColor;
         var hasPseudoBg = pBg && pBg !== 'rgba(0, 0, 0, 0)' && pBg !== 'transparent';
@@ -150,18 +141,17 @@ JS_EXTRACT = r'''
         if (!rawContent && !hasPseudoBg && !hasPseudoBorder) return null;
         var pseudoW = parseFloat(cs.width) || 0;
         var pseudoH = parseFloat(cs.height) || 0;
-        // Include border dimensions for CSS border-based shapes (#29 bug 4)
         pseudoW += (parseFloat(cs.borderLeftWidth) || 0) + (parseFloat(cs.borderRightWidth) || 0);
         pseudoH += (parseFloat(cs.borderTopWidth) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
         if (pseudoW < 2 || pseudoH < 2) return null;
         var parentRect = el.getBoundingClientRect();
         var pseudoLeft = parseFloat(cs.left) || 0;
         var pseudoTop = parseFloat(cs.top) || 0;
-        var x = (parentRect.left - slideRect.left + pseudoLeft) * scaleX;
-        var y = (parentRect.top - slideRect.top + pseudoTop) * scaleY;
-        var isCircle = parseFloat(cs.borderRadius) >= pseudoW / 2;
         return {
-            type: isCircle ? 'circle' : 'shape', rect: {x: x, y: y, w: pseudoW * scaleX, h: pseudoH * scaleY},
+            tag: '::pseudo', rect: {
+                x: (parentRect.left - slideRect.left + pseudoLeft) * scaleX,
+                y: (parentRect.top - slideRect.top + pseudoTop) * scaleY,
+                w: pseudoW * scaleX, h: pseudoH * scaleY},
             styles: {backgroundColor: cs.backgroundColor, color: cs.color,
                 fontSize: parseFloat(cs.fontSize), fontWeight: cs.fontWeight,
                 borderRadius: parseFloat(cs.borderRadius)},
@@ -169,6 +159,7 @@ JS_EXTRACT = r'''
         };
     }
 
+    // --- Collect SVGs separately (structural fact) ---
     var elements = [], svgs = [];
     slide.querySelectorAll('svg').forEach(function(svg) {
         if (!isVis(svg)) return;
@@ -177,60 +168,28 @@ JS_EXTRACT = r'''
         svgs.push({type: 'svg', rect: rect, lines: svg.outerHTML.split('\n').length});
     });
 
-    var richTextEls = new Set();
-    var richTags = {h1:1, h2:1, h3:1, h4:1, p:1, li:1};
-    var leafTags = {span:1, a:1, strong:1, b:1, em:1, i:1, label:1, td:1, th:1, div:1};
-
-    // Infer semantic layout role from CSS classes (#28 — enriched IR)
-    var rolePatterns = [
-        [/zone-header|slide-header|header/i, 'header'],
-        [/zone-content|slide-content|main-content/i, 'content'],
-        [/zone-footer|slide-footer|footer/i, 'footer'],
-        [/card|tile|panel/i, 'card'],
-        [/stat|metric|kpi|number/i, 'stat'],
-        [/badge|pill|tag|chip/i, 'badge'],
-        [/icon|emoji|symbol/i, 'icon'],
-        [/chart|graph|diagram|gauge/i, 'chart'],
-        [/progress|bar|meter/i, 'progress'],
-        [/timeline|roadmap/i, 'timeline'],
-        [/grid|row|column|flex/i, 'grid'],
-        [/quote|blockquote|testimonial/i, 'quote'],
-        [/cta|button|action/i, 'cta']
-    ];
-    function getLayoutRole(el) {
-        var cls = el.className ? String(el.className) : '';
-        for (var i = 0; i < rolePatterns.length; i++) {
-            if (rolePatterns[i][0].test(cls)) return rolePatterns[i][1];
-        }
-        return null;
-    }
-
-    function walkEl(el, depth, currentSlotRect) {
+    // --- Walk every visible element, emit raw facts ---
+    function walkEl(el, depth) {
         if (depth > 15) return;
         if (!isVis(el)) return;
         var tn = el.tagName;
         if (tn === 'SCRIPT' || tn === 'STYLE' || tn === 'NAV' || tn === 'SVG') return;
         if (el.closest && el.closest('svg')) return;
+
         var rect = relRect(el);
+        if (rect.w < 1 || rect.h < 1) return;
         var styles = gs(el);
         var tag = tn.toLowerCase();
         var cls = el.className ? String(el.className).split(/\s+/) : [];
-        var role = getLayoutRole(el);
-        var hasBg = (styles.backgroundColor !== 'rgba(0, 0, 0, 0)' && styles.backgroundColor !== 'transparent')
-            || ((styles.backgroundImage || '').indexOf('gradient') !== -1);
-        var hasBorder = styles.borderWidth > 0.5 && styles.borderColor !== 'rgba(0, 0, 0, 0)';
 
+        // --- Tables: extract structured data (factual, not a judgment call) ---
         if (tag === 'table' && rect.w > 50 && rect.h > 20) {
-            var tableData = {type: 'table', rect: rect, rows: [], styles: styles, classes: cls, layoutRole: role, depth: depth};
-            var trs = el.querySelectorAll(':scope > thead > tr, :scope > tbody > tr, :scope > tr');
-            trs.forEach(function(tr) {
+            var tableData = {tag: 'table', rect: rect, rows: [], styles: styles, classes: cls, depth: depth};
+            el.querySelectorAll(':scope > thead > tr, :scope > tbody > tr, :scope > tr').forEach(function(tr) {
                 var row = [];
                 tr.querySelectorAll(':scope > td, :scope > th').forEach(function(cell) {
-                    var cellRect = relRect(cell);
-                    var cellStyles = gs(cell);
-                    var runs = getRuns(cell);
                     row.push({
-                        rect: cellRect, styles: cellStyles, runs: runs,
+                        rect: relRect(cell), styles: gs(cell), runs: getRuns(cell),
                         text: cell.textContent.trim().substring(0, 300),
                         colspan: cell.colSpan || 1, rowspan: cell.rowSpan || 1,
                         tag: cell.tagName.toLowerCase()
@@ -242,133 +201,56 @@ JS_EXTRACT = r'''
             return;
         }
 
-        if (richTags[tag] && rect.w > 5 && rect.h > 3) {
-            var fullText = el.textContent.trim();
-            if (fullText.length > 0) {
-                var runs = getRuns(el);
-                if (runs.length > 0) {
-                    elements.push({
-                        type: 'richtext', tag: tag, classes: cls, layoutRole: role, rect: rect,
-                        runs: runs.map(function(r) {
-                            return {
-                                text: r.text.substring(0, 500), color: r.color,
-                                fontSize: r.fontSize, fontWeight: r.fontWeight,
-                                fontStyle: r.fontStyle, textTransform: r.textTransform || '',
-                                br: r.br || false
-                            };
-                        }),
-                        styles: {textAlign: styles.textAlign, letterSpacing: styles.letterSpacing,
-                                 whiteSpace: styles.whiteSpace,
-                                 paddingTop: styles.paddingTop, paddingRight: styles.paddingRight,
-                                 paddingBottom: styles.paddingBottom, paddingLeft: styles.paddingLeft},
-                        parentSlotRect: currentSlotRect || null,
-                        rotation: getRotation(styles),
-                        depth: depth
-                    });
-                    richTextEls.add(el);
-                    el.querySelectorAll('*').forEach(function(c) { richTextEls.add(c); });
-                }
-            }
-        } else if (leafTags[tag] && rect.w > 3 && rect.h > 3 && !richTextEls.has(el)) {
-            // Ask the DOM: does this element have visible child elements?
-            // If yes, it's a layout container — its children will be walked and
-            // emit their own text. Don't extract the parent's aggregate text.
-            var hasVisibleChildElements = false;
-            for (var i = 0; i < el.children.length; i++) {
-                if (isVis(el.children[i]) && el.children[i].textContent.trim().length > 0) {
-                    hasVisibleChildElements = true;
-                    break;
-                }
-            }
+        // --- Raw node: every visible element gets emitted with its facts ---
+        var node = {
+            tag: tag, classes: cls, rect: rect, depth: depth,
+            styles: styles, rotation: getRotation(styles)
+        };
 
-            if (!hasVisibleChildElements) {
-                // True leaf — no child elements with content. Extract text/badge.
-                var badgeBg = styles.backgroundColor !== 'rgba(0, 0, 0, 0)' && styles.backgroundColor !== 'transparent';
-                var gradSrc = (styles.backgroundImage || '') + ' ' + (styles.background || '');
-                var hasGradient = gradSrc.indexOf('gradient') !== -1;
-                var badgeRound = styles.borderRadius >= Math.min(rect.w, rect.h) * 0.15;
-                var isSmallRounded = styles.borderRadius >= 4 && rect.w < 200 && rect.h < 80;
-                if ((badgeBg || hasGradient) && (badgeRound || isSmallRounded) && rect.w > 8 && rect.h > 8) {
-                    var bgColor = styles.backgroundColor;
-                    if (!badgeBg && hasGradient) {
-                        var gradMatch = gradSrc.match(/rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+[^)]*\)/);
-                        if (gradMatch) bgColor = gradMatch[0];
-                    }
-                    elements.push({
-                        type: 'badge', tag: tag, classes: cls, layoutRole: role || 'badge', rect: rect,
-                        text: el.textContent.trim(),
-                        styles: {
-                            backgroundColor: bgColor,
-                            color: styles.color, fontSize: styles.fontSize,
-                            fontWeight: styles.fontWeight, borderRadius: styles.borderRadius
-                        },
-                        depth: depth
-                    });
-                    richTextEls.add(el);
-                    return;
-                }
-                // Unified text extraction via getRuns() (#30, #31).
-                var fullText = el.textContent.trim();
-                if (fullText.length > 0) {
-                    var runs = getRuns(el);
-                    if (runs.length > 0) {
-                        elements.push({
-                            type: 'richtext', tag: tag, classes: cls, layoutRole: role, rect: rect,
-                            runs: runs.map(function(r) {
-                                return {
-                                    text: r.text.substring(0, 500), color: r.color,
-                                    fontSize: r.fontSize, fontWeight: r.fontWeight,
-                                    fontStyle: r.fontStyle, textTransform: r.textTransform || '',
-                                    br: r.br || false
-                                };
-                            }),
-                            styles: {textAlign: styles.textAlign, letterSpacing: styles.letterSpacing,
-                                     whiteSpace: styles.whiteSpace,
-                                     paddingTop: styles.paddingTop, paddingRight: styles.paddingRight,
-                                     paddingBottom: styles.paddingBottom, paddingLeft: styles.paddingLeft},
-                            parentSlotRect: currentSlotRect || null,
-                            rotation: getRotation(styles),
-                            depth: depth
-                        });
-                        richTextEls.add(el);
-                        el.querySelectorAll('*').forEach(function(c) { richTextEls.add(c); });
-                    }
-                }
-            }
-            // else: container div with child elements — skip text, let children handle it
+        // Background/border facts
+        var bg = styles.backgroundColor;
+        node.hasBg = (bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent')
+            || ((styles.backgroundImage || '').indexOf('gradient') !== -1);
+        node.hasBorder = styles.borderWidth > 0.5
+            && styles.borderColor !== 'rgba(0, 0, 0, 0)';
+
+        // Text facts: does this element have its OWN text (not just children's)?
+        var directText = '';
+        for (var i = 0; i < el.childNodes.length; i++) {
+            var cn = el.childNodes[i];
+            if (cn.nodeType === 3) directText += cn.textContent;
+            else if (cn.nodeType === 1 && cn.tagName === 'BR') directText += '\n';
         }
+        node.directText = directText.trim().substring(0, 300);
+        node.childElementCount = el.children.length;
 
-        if ((hasBg || hasBorder) && tag !== 'body' && tag !== 'html' && rect.w > 8 && rect.h > 4) {
-            elements.push({
-                type: 'shape', tag: tag, classes: cls, layoutRole: role, rect: rect,
-                styles: {
-                    backgroundColor: styles.backgroundColor, borderColor: styles.borderColor,
-                    borderWidth: styles.borderWidth, borderRadius: styles.borderRadius,
-                    opacity: styles.opacity, borderLeftColor: styles.borderLeftColor,
-                    borderLeftWidth: styles.borderLeftWidth,
-                    background: styles.background
-                },
-                depth: depth
+        // Full text runs (inline formatting) — extracted by the browser, classified by the model
+        var fullText = el.textContent.trim();
+        if (fullText.length > 0 && node.childElementCount === 0) {
+            // True leaf: no child elements, all text is ours
+            node.runs = getRuns(el).map(function(r) {
+                return {text: r.text.substring(0, 500), color: r.color,
+                    fontSize: r.fontSize, fontWeight: r.fontWeight,
+                    fontStyle: r.fontStyle, textTransform: r.textTransform || '',
+                    br: r.br || false};
             });
         }
 
+        elements.push(node);
+
+        // Pseudo-elements
         ['::before', '::after'].forEach(function(pseudo) {
             var pn = capturePseudo(el, pseudo, depth);
             if (pn) elements.push(pn);
         });
 
-        if (styles.display === 'flex' || styles.display === 'grid' ||
-            styles.display === 'inline-flex' || styles.display === 'inline-grid') {
-            for (var i = 0; i < el.children.length; i++) {
-                var childRect = relRect(el.children[i]);
-                walkEl(el.children[i], depth + 1, childRect);
-            }
-        } else {
-            for (var i = 0; i < el.children.length; i++) walkEl(el.children[i], depth + 1, currentSlotRect);
+        // Recurse into children
+        for (var i = 0; i < el.children.length; i++) {
+            walkEl(el.children[i], depth + 1);
         }
     }
 
-    walkEl(slide, 0, null);
+    walkEl(slide, 0);
     var ss = gs(slide);
     document.getElementById('__layout_output__').textContent = JSON.stringify({
         slideWidth: SLIDE_W, slideHeight: SLIDE_H,
@@ -440,6 +322,107 @@ def extract_layout(html_path, tmpdir, viewport_w=1280, viewport_h=720, hide_sele
         except json.JSONDecodeError:
             return None
     return None
+
+
+def classify_elements(raw_data):
+    """Apply default classification to raw extracted elements.
+
+    Converts raw nodes into the typed format the builder expects.
+    This is the deterministic default — the model can override any decision
+    by looking at the screenshot and editing the classified output.
+
+    Returns a new dict with the same structure but typed elements.
+    """
+    if not raw_data:
+        return raw_data
+
+    classified = []
+    sw = raw_data.get('slideWidth', 1280)
+    sh = raw_data.get('slideHeight', 720)
+
+    for node in raw_data.get('elements', []):
+        tag = node.get('tag', '')
+        r = node.get('rect', {})
+        styles = node.get('styles', {})
+        cls = node.get('classes', [])
+        depth = node.get('depth', 0)
+
+        # Tables pass through as-is (already structured)
+        if tag == 'table':
+            node['type'] = 'table'
+            classified.append(node)
+            continue
+
+        # Pseudo-elements pass through as shapes
+        if tag == '::pseudo':
+            node['type'] = 'shape'
+            classified.append(node)
+            continue
+
+        has_bg = node.get('hasBg', False)
+        has_border = node.get('hasBorder', False)
+        runs = node.get('runs')
+        direct_text = node.get('directText', '')
+        child_count = node.get('childElementCount', 0)
+
+        # Elements with runs (true leaves with text) → richtext
+        if runs and len(runs) > 0:
+            classified.append({
+                'type': 'richtext', 'tag': tag, 'classes': cls, 'rect': r,
+                'runs': runs,
+                'styles': {
+                    'textAlign': styles.get('textAlign', 'left'),
+                    'letterSpacing': styles.get('letterSpacing'),
+                    'whiteSpace': styles.get('whiteSpace'),
+                    'paddingTop': styles.get('paddingTop', 0),
+                    'paddingRight': styles.get('paddingRight', 0),
+                    'paddingBottom': styles.get('paddingBottom', 0),
+                    'paddingLeft': styles.get('paddingLeft', 0),
+                },
+                'rotation': node.get('rotation', 0),
+                'depth': depth,
+            })
+            # Also emit shape if it has a visible background
+            if has_bg and tag not in ('body', 'html') and r.get('w', 0) > 8 and r.get('h', 0) > 4:
+                classified.append({
+                    'type': 'shape', 'tag': tag, 'classes': cls, 'rect': r,
+                    'styles': {
+                        'backgroundColor': styles.get('backgroundColor'),
+                        'borderColor': styles.get('borderColor'),
+                        'borderWidth': styles.get('borderWidth', 0),
+                        'borderRadius': styles.get('borderRadius', 0),
+                        'opacity': styles.get('opacity', 1),
+                        'borderLeftColor': styles.get('borderLeftColor'),
+                        'borderLeftWidth': styles.get('borderLeftWidth', 0),
+                        'background': styles.get('background'),
+                    },
+                    'depth': depth,
+                })
+            continue
+
+        # Elements with background/border but no text → shape
+        if (has_bg or has_border) and tag not in ('body', 'html') and r.get('w', 0) > 8 and r.get('h', 0) > 4:
+            classified.append({
+                'type': 'shape', 'tag': tag, 'classes': cls, 'rect': r,
+                'styles': {
+                    'backgroundColor': styles.get('backgroundColor'),
+                    'borderColor': styles.get('borderColor'),
+                    'borderWidth': styles.get('borderWidth', 0),
+                    'borderRadius': styles.get('borderRadius', 0),
+                    'opacity': styles.get('opacity', 1),
+                    'borderLeftColor': styles.get('borderLeftColor'),
+                    'borderLeftWidth': styles.get('borderLeftWidth', 0),
+                    'background': styles.get('background'),
+                },
+                'depth': depth,
+            })
+
+        # Container divs with children and no direct text → skip (children handle it)
+        # Container divs with bg → shape already emitted above
+
+    result = dict(raw_data)
+    result['elements'] = classified
+    return result
 
 
 def screenshot_html(html_path, png_path, tmpdir, viewport_w=1280, viewport_h=720,

@@ -24,7 +24,7 @@ sys.path.insert(0, str(_root / "chrome-extract" / "scripts"))
 sys.path.insert(0, str(_root / "slide-pptx-builder" / "scripts"))
 sys.path.insert(0, str(_root / "slide-html-standardize" / "scripts"))
 
-from chrome_extract import extract_layout, screenshot_html, crop_region, screenshot_svg_isolated
+from chrome_extract import extract_layout, classify_elements, screenshot_html, crop_region, screenshot_svg_isolated
 from pptx_builder import SlideBuilder
 from html_standardize import standardize_html
 from pptx import Presentation
@@ -87,8 +87,9 @@ def _extract_single_slide(args):
         os.makedirs(slide_tmpdir, exist_ok=True)
 
         # Extract layout via Chrome headless
-        layout = extract_layout(html_path, slide_tmpdir, viewport_w, viewport_h,
-                                hide_selectors)
+        raw_layout = extract_layout(html_path, slide_tmpdir, viewport_w, viewport_h,
+                                    hide_selectors)
+        layout = classify_elements(raw_layout)
         result['layout'] = layout
 
         # Take the full-page screenshot once — used for SVG cropping and fallback

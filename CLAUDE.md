@@ -140,7 +140,7 @@ Project-level config stays in `skills/slide-config/config.json` (per-project ove
 
 1. **Let the browser do layout** — Chrome resolves all cascading styles, flexbox, grid, absolute positioning. We just read the computed result.
 
-2. **Unified richtext extraction** — All text elements (headings, paragraphs, and leaf tags like span/div/a) use the same `getRuns()` extraction path with inline run formatting. This handles `<br>`, block-level children, and inline spans uniformly. There is no separate "simple text" path.
+2. **Raw extraction + model classification** — Chrome extracts every visible element with computed properties (rect, styles, text, runs). No classification in the JS. A `classify_elements()` function provides deterministic defaults (leaf with text → richtext, element with bg → shape). The model can override any decision by looking at the screenshot and raw element list.
 
 3. **Alpha blending** — CSS rgba colors are pre-blended against the slide background since PPTX shapes don't support CSS-style transparency.
 
