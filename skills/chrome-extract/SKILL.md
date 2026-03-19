@@ -36,7 +36,7 @@ Renders an HTML file in Chrome headless and returns structured layout JSON:
   "elements": [
     {"type": "shape", "tag": "div", "rect": {"x":0,"y":0,"w":400,"h":200}, "styles": {...}},
     {"type": "richtext", "tag": "h1", "rect": {...}, "runs": [...], "styles": {...}},
-    {"type": "text", "tag": "span", "rect": {...}, "text": "...", "styles": {...}}
+    {"type": "richtext", "tag": "span", "rect": {...}, "runs": [...], "styles": {...}}
   ],
   "svgElements": [
     {"type": "svg", "rect": {"x":100,"y":200,"w":600,"h":300}, "lines": 45}
@@ -46,8 +46,9 @@ Renders an HTML file in Chrome headless and returns structured layout JSON:
 
 **Element types**:
 - `shape` — Elements with background color or border (cards, containers)
-- `richtext` — `h1`/`h2`/`h3`/`h4`/`p`/`li` with inline run formatting
-- `text` — Leaf text nodes (`span`, `a`, `div`, etc.) not covered by richtext
+- `richtext` — All text elements with inline run formatting (headings, paragraphs, and leaf tags like `span`, `a`, `div`)
+- `badge` — Small rounded elements with background fill (pills, chips, tags)
+- `table` — Native HTML tables with per-cell run formatting
 - `svg` — SVG elements with bounding rects
 
 **How it works**: Injects CSS to hide specified selectors, injects the
@@ -84,10 +85,11 @@ Key behaviors:
 
 - Walks from `.slide` element (or `body` fallback)
 - Coordinates are relative to the slide container, scaled to source dimensions
-- Richtext elements (`h1`-`h4`, `p`, `li`) capture inline runs with per-run
-  color, fontSize, fontWeight, fontStyle
-- Elements inside richtext parents are excluded from simple text to prevent
-  duplicates
+- All text elements use unified richtext extraction with per-run formatting
+  (color, fontSize, fontWeight, fontStyle) — handles `<br>`, block children,
+  and inline spans uniformly
+- Elements inside richtext parents are excluded from deeper extraction to
+  prevent duplicates
 - SVGs are collected separately with line counts (used for size filtering)
 - Max depth of 15 to avoid infinite recursion
 - Skips `script`, `style`, `nav`, and invisible elements

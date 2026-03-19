@@ -8,22 +8,24 @@ and extracts computed positions, colors, fonts, and inline formatting.
 
 ## Element Classification
 
-### Richtext Elements (h1, h2, h3, h4, p, li)
+### Richtext Elements (all text)
 
-These get full inline run extraction via `getRuns()`. Each child text node
-preserves its own color, fontSize, fontWeight, fontStyle, and textTransform.
+All text elements — both block-level (`h1`-`h4`, `p`, `li`) and leaf-level
+(`span`, `a`, `div`, `label`, etc.) — use unified `getRuns()` extraction.
+Each child text node preserves its own color, fontSize, fontWeight, fontStyle,
+and textTransform. `<br>` elements and block-level children produce line breaks.
 
-This prevents the "Go Faster" overlap bug where inline-styled spans (e.g.,
-`<span style="color:purple">Go</span> <span style="color:white">Faster</span>`)
-would become separate text boxes that overlap.
+This prevents the "Go Faster" overlap bug where inline-styled spans would
+become separate text boxes, and fixes text concatenation bugs where `<br>`
+or block children were dropped by the old simple-text path.
 
 Once an element is classified as richtext, all its descendants are added to
-`richTextEls` set and excluded from simple text extraction.
+`richTextEls` set and excluded from further extraction.
 
-### Simple Text Elements (span, a, strong, b, em, i, label, td, th, div)
+### Badge Elements (small rounded with background)
 
-Leaf-level text that is NOT covered by a richtext ancestor. Only direct text
-node content is captured (not nested element text).
+Leaf tags with a visible background and border-radius are extracted as badges
+with their `textContent` rather than individual runs.
 
 ### Shape Elements
 
@@ -59,8 +61,8 @@ Scale factors normalize coordinates to the slide's natural dimensions
 | Element Type | Minimum Size | Rationale |
 |---|---|---|
 | Visibility check | 1x1 px | Skip invisible elements |
-| Richtext | 5x3 px | Skip empty headings |
-| Simple text | 3x3 px | Skip spacer elements |
+| Richtext (block) | 5x3 px | Skip empty headings |
+| Richtext (leaf) | 3x3 px | Skip spacer elements |
 | Shapes | 8x4 px | Skip hairline dividers |
 | SVGs | 20x20 px | Skip tiny icon SVGs |
 

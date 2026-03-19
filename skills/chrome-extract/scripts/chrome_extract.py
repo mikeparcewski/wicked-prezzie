@@ -296,25 +296,11 @@ JS_EXTRACT = r'''
                 richTextEls.add(el);
                 return;
             }
-            // Check if this leafTag has inline leaf children with text (mixed content).
-            // e.g. <span><strong>bold</strong> normal</span> — extract as richtext
-            // to avoid parent/child overlap (#20). Only for inline-level elements,
-            // not large block containers.
-            var inlineLeafs = {strong:1, b:1, em:1, i:1, a:1, span:1, label:1};
-            var hasInlineLeafChild = false;
-            var hasDirectText = false;
-            for (var i = 0; i < el.childNodes.length; i++) {
-                if (el.childNodes[i].nodeType === 3 && el.childNodes[i].textContent.trim().length > 0) {
-                    hasDirectText = true;
-                }
-                if (el.childNodes[i].nodeType === 1) {
-                    var childTag = el.childNodes[i].tagName.toLowerCase();
-                    if (inlineLeafs[childTag] && el.childNodes[i].textContent.trim().length > 0 && isVis(el.childNodes[i])) {
-                        hasInlineLeafChild = true;
-                    }
-                }
-            }
-            if (hasInlineLeafChild && hasDirectText && el.textContent.trim().length > 0) {
+            // Unified text extraction: all leaf tags go through getRuns() (#30, #31).
+            // This handles <br>, block-level children, and inline formatting uniformly
+            // instead of the old simple-text path that dropped non-text nodes.
+            var fullText = el.textContent.trim();
+            if (fullText.length > 0) {
                 var runs = getRuns(el);
                 if (runs.length > 0) {
                     elements.push({
@@ -337,30 +323,7 @@ JS_EXTRACT = r'''
                     });
                     richTextEls.add(el);
                     el.querySelectorAll('*').forEach(function(c) { richTextEls.add(c); });
-                    return;
                 }
-            }
-            var dtext = '';
-            for (var i = 0; i < el.childNodes.length; i++) {
-                if (el.childNodes[i].nodeType === 3) dtext += el.childNodes[i].textContent;
-            }
-            dtext = dtext.trim();
-            if (dtext.length > 0) {
-                elements.push({
-                    type: 'text', tag: tag, classes: cls, layoutRole: role, text: dtext.substring(0, 300), rect: rect,
-                    styles: {
-                        color: styles.color, fontSize: styles.fontSize,
-                        fontWeight: styles.fontWeight, fontStyle: styles.fontStyle,
-                        textAlign: styles.textAlign, letterSpacing: styles.letterSpacing,
-                        textTransform: styles.textTransform,
-                        whiteSpace: styles.whiteSpace,
-                        paddingTop: styles.paddingTop, paddingRight: styles.paddingRight,
-                        paddingBottom: styles.paddingBottom, paddingLeft: styles.paddingLeft
-                    },
-                    parentSlotRect: currentSlotRect || null,
-                    rotation: getRotation(styles),
-                    depth: depth
-                });
             }
         }
 

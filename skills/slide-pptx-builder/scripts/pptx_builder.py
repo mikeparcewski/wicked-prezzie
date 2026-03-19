@@ -263,7 +263,7 @@ class SlideBuilder:
             # Collect non-SVG element top edges for overlap detection (#19)
             non_svg_tops = []
             for e in elements:
-                if e['type'] in ('richtext', 'text', 'shape', 'badge'):
+                if e['type'] in ('richtext', 'shape', 'badge'):
                     non_svg_tops.append(e['rect']['y'])
 
             for svg in svg_elements:
@@ -311,40 +311,8 @@ class SlideBuilder:
             except Exception:
                 pass
 
-        # Separate richtext and simple text
+        # All text elements (including former leaf tags) are now richtext
         richtext_data = [e for e in elements if e['type'] == 'richtext']
-        simple_text_data = sorted([e for e in elements if e['type'] == 'text'],
-                                  key=lambda e: e['depth'])
-
-        richtext_rects = [rt['rect'] for rt in richtext_data]
-
-        def is_covered_by_richtext(r):
-            for rr in richtext_rects:
-                if (r['x'] >= rr['x'] - 5 and r['y'] >= rr['y'] - 5 and
-                    r['x'] + r['w'] <= rr['x'] + rr['w'] + 10 and
-                    r['y'] + r['h'] <= rr['y'] + rr['h'] + 10):
-                    return True
-            return False
-
-        filtered_texts = []
-        for t in simple_text_data:
-            r = t['rect']
-            if r['x'] > self.src_w or r['y'] > self.src_h: continue
-            text = t.get('text', '').strip()
-            if not text: continue
-            if is_covered_by_richtext(r): continue
-            dup = False
-            for ex in filtered_texts:
-                if (ex['text'].strip() == text and
-                    abs(ex['rect']['x'] - r['x']) < 15 and
-                    abs(ex['rect']['y'] - r['y']) < 15):
-                    if t['depth'] > ex['depth']:
-                        filtered_texts.remove(ex)
-                    else:
-                        dup = True
-                    break
-            if not dup:
-                filtered_texts.append(t)
 
         # Render richtext elements
         for rt in richtext_data:
@@ -424,60 +392,6 @@ class SlideBuilder:
                             self._add_run(p, part, run_data)
                     continue
                 self._add_run(p, text, run_data)
-
-        # Render simple text
-        for t in filtered_texts:
-            r = t['rect']
-            st = t['styles']
-            text = t.get('text', '').strip()
-            if not text: continue
-
-            rotation = t.get('rotation', 0)
-            tt = st.get('textTransform', '')
-            if tt == 'uppercase':
-                text = text.upper()
-
-            parent = find_containment_rect(t)
-            if parent:
-                px = parent['x'] + 4
-                pw = parent['w'] - 8
-                x = self.px2emu_x(max(0, px))
-                w = self.px2emu_x(max(20, min(pw, parent['w'])))
-            else:
-                x = self.px2emu_x(max(0, r['x']))
-                w = self.px2emu_x(min(r['w'] * 1.02, self.src_w - max(0, r['x'])))
-            y = self.px2emu_y(max(0, r['y']))
-            h = self.px2emu_y(min(max(r['h'], 14), self.src_h - max(0, r['y'])))
-            if w < 5000 or h < 5000: continue
-
-            # For rotated text, swap dimensions (#27)
-            if rotation and abs(rotation) >= 5:
-                w, h = h, w
-            tb = slide.shapes.add_textbox(x, y, w, h)
-            if rotation and abs(rotation) >= 5:
-                tb.rotation = rotation
-            tb.fill.background()
-            tb.line.fill.background()
-            tf = tb.text_frame
-            tf.word_wrap = True
-            self._apply_margins(tf, st)
-
-            p = tf.paragraphs[0]
-            p.alignment = pp_align(st.get('textAlign', 'left'))
-            p.space_before = Pt(0)
-            p.space_after = Pt(0)
-
-            run = p.add_run()
-            decoded_text = decode_entities(text)
-            run.text = decoded_text
-            run.font.name = EMOJI_FONT if _has_emoji(decoded_text) else self.font
-            fs = st.get('fontSize', 14)
-            run.font.size = Pt(round(max(6, min(52, fs * 0.75)), 1))
-            run.font.bold = is_bold(st.get('fontWeight'))
-            run.font.italic = st.get('fontStyle') == 'italic'
-            color = parse_css_color(st.get('color'), (255, 255, 255))
-            if color:
-                run.font.color.rgb = color
 
         # Speaker notes
         if notes_text:

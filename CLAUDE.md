@@ -60,9 +60,9 @@ skills/
   slide-html-to-pptx/      — Batch convert HTML slides to PPTX (conversion stage)
     SKILL.md
     scripts/html_to_pptx.py      (imports: chrome-extract, slide-pptx-builder)
-  slide-validate/          — Post-conversion QA: bounds, overflow, scoring, audit
+  slide-validate/          — Structural QA: bounds, overflow, empty slides
     SKILL.md
-    scripts/slide_validate.py    (imports: slide-render)
+    scripts/slide_validate.py    (structural checks only — no visual/scoring)
     references/overflow-detection.md
     references/deck-audit.md       (5-category weighted quality audit)
     references/content-lint.md     (bullets, titles, stats, quotes, passive voice, CTAs)
@@ -76,12 +76,10 @@ skills/
     references/quality-rubric.md
     references/css-contract.md     (zone CSS naming, type rules, fallback layout)
     references/hints.md            (contextual hints + REVIEW flags in speaker notes)
-  slide-compare/           — Visual comparison: HTML screenshots vs PPTX renders
+  slide-compare/           — Visual comparison workflow (no script — uses chrome-extract + slide-render)
     SKILL.md
-    scripts/slide_compare.py     (imports: chrome-extract)
-  slide-pipeline/          — End-to-end orchestrator (chains all stages)
+  slide-pipeline/          — End-to-end workflow (no script — Claude orchestrates directly)
     SKILL.md
-    scripts/slide_pipeline.py    (imports: all skills)
     references/fidelity-tiers.md   (best/draft/rough quality tiers, multi-pass loops)
     references/versioning.md       (deck versioning, naming, metadata, diff)
     references/output-formats.md   (PPTX + Reveal.js HTML dual-format output)
@@ -142,7 +140,7 @@ Project-level config stays in `skills/slide-config/config.json` (per-project ove
 
 1. **Let the browser do layout** — Chrome resolves all cascading styles, flexbox, grid, absolute positioning. We just read the computed result.
 
-2. **Richtext extraction** — h1/h2/h3/p elements are extracted with inline run formatting. Prevents the "Go Faster" overlap bug where inline-styled spans became separate text boxes.
+2. **Unified richtext extraction** — All text elements (headings, paragraphs, and leaf tags like span/div/a) use the same `getRuns()` extraction path with inline run formatting. This handles `<br>`, block-level children, and inline spans uniformly. There is no separate "simple text" path.
 
 3. **Alpha blending** — CSS rgba colors are pre-blended against the slide background since PPTX shapes don't support CSS-style transparency.
 
@@ -152,9 +150,9 @@ Project-level config stays in `skills/slide-config/config.json` (per-project ove
 
 6. **LibreOffice for rendering** — PPTX→PDF via `soffice --headless`, then pdftoppm for PDF→PNG. No Microsoft PowerPoint required — runs headless without GUI, permission dialogs, or automation consent. Handles sandboxed environments automatically.
 
-7. **Iterative visual verification** — After conversion, render both HTML (Chrome) and PPTX (LibreOffice) to PNG, then visually compare each slide. Fix issues and re-convert until all slides pass or no further improvement is possible. This is a Claude-in-the-loop pattern (like literal-extractor): Claude uses its vision to judge quality, not pixel math. The scripts are single-pass tools; the iteration logic lives in the SKILL.md workflow.
+7. **Iterative visual verification** — After conversion, render both HTML (Chrome) and PPTX (LibreOffice) to PNG, then Claude visually compares each slide. Fix issues and re-convert until all slides pass or no further improvement is possible. Claude uses its vision to judge quality, not pixel math. Scripts are single-pass tools; the iteration logic lives in `slide-pipeline/SKILL.md`. There is no orchestrator script — Claude drives the loop directly.
 
-8. **Overflow detection** — pad+render+check pattern: enlarge PPTX with grey padding, render via LibreOffice, check margins for non-grey pixels indicating content overflow.
+8. **Structural validation only** — `slide_validate.py` checks shape bounds, negative coords, empty slides, and text overflow heuristics. Visual fidelity is judged by Claude comparing rendered images, not by automated pixel scanning.
 
 9. **Hybrid fix architecture** — Scripts handle the deterministic 90% (geometry translation, color parsing, zone dispatch). SKILL.md guides the model for the 10% slide-specific edge cases using EDL specs (declarative JSON edits) or python-pptx recipes. Decision framework enforced in `slide-pipeline/SKILL.md`: script fix for systemic patterns (2+ decks), direct fix for slide-specific layout issues.
 

@@ -10,71 +10,54 @@ description: >
 
 # Slide Visual Comparison
 
-Generate side-by-side comparison images of original HTML slides versus the
-converted PPTX output. Essential for verifying conversion fidelity and
-identifying layout differences.
+Compare original HTML slides against the converted PPTX output by rendering
+both to PNG and visually inspecting them. No script — use chrome-extract and
+slide-render directly.
 
 ## When to Use
 
-- After running HTML-to-PPTX conversion to verify output quality
-- When debugging specific slides that look wrong in PowerPoint
+- After HTML-to-PPTX conversion to verify output quality
+- When debugging specific slides that look wrong
 - To compare a subset of slides for targeted review
 
-## Architecture
+## How to Compare
 
-1. **HTML screenshots** — Chrome headless captures each HTML slide as PNG
-2. **PPTX rendering** — LibreOffice exports the .pptx to PDF via headless mode,
-   then `pdftoppm` converts PDF pages to PNG
-3. **Output** — Paired PNG files in `html/` and `pptx/` subdirectories for
-   manual or automated visual comparison
-
-## Usage
-
-Run the comparison script at `scripts/slide_compare.py`:
+### 1. Screenshot the HTML source
 
 ```bash
-# Compare all slides
-python ${CLAUDE_SKILL_DIR}/scripts/slide_compare.py \
-  --html-dir ./slides --pptx deck.pptx --output-dir ./compare
-
-# Compare specific slides (1-based indices)
-python ${CLAUDE_SKILL_DIR}/scripts/slide_compare.py \
-  --html-dir ./slides --pptx deck.pptx --slides 1,5,10
+python skills/chrome-extract/scripts/chrome_extract.py \
+  --screenshot slides/slide-01.html \
+  --output ~/.something-wicked/wicked-prezzie/output/html/slide-01.png
 ```
 
-### Options
+### 2. Render the PPTX
 
-| Flag | Default | Purpose |
-|---|---|---|
-| `--html-dir`, `-d` | (required) | Directory with HTML slide files |
-| `--pptx`, `-p` | (required) | PPTX file to compare against |
-| `--output-dir`, `-o` | `./compare` | Output directory for comparison images |
-| `--slides`, `-s` | (all) | Comma-separated 1-based slide indices |
-| `--hide` | `.slide-nav` | CSS selectors to hide in HTML screenshots |
-
-### Output Structure
-
+```bash
+python skills/slide-render/scripts/slide_render.py deck.pptx \
+  -o ~/.something-wicked/wicked-prezzie/output/renders/
 ```
-compare/
-  html/         # PNG screenshots of original HTML slides
-  pptx/         # PNG renders of PPTX slides (via PDF)
-  deck.pdf      # Intermediate PDF export
-```
+
+### 3. Read both images
+
+Use the Read tool to view the HTML screenshot and the corresponding PPTX render.
+Compare visually using the grading criteria in slide-pipeline.
+
+## What to Look For
+
+- **Missing elements** — cards, backgrounds, icons present in HTML but absent in PPTX
+- **Text issues** — concatenation, missing line breaks, wrong spacing
+- **Color shifts** — backgrounds missing or wrong color
+- **Layout shifts** — elements present but in wrong position or size
+
+## What to Ignore
+
+- CSS→Calibri font metric differences
+- Sub-pixel alignment
+- Gradients rendered as solid colors
+- Stripped animations/transitions
 
 ## Dependencies
 
-Verify before running:
-
 - Google Chrome (for HTML screenshots)
-- **LibreOffice** (exports PPTX to PDF via headless mode)
-- `pdftoppm` from poppler (`brew install poppler`)
-
-## Reviewing Results
-
-After running, open the `html/` and `pptx/` directories side by side.
-Common differences to look for:
-
-- **Text wrapping** — Calibri font metrics differ from CSS; headings may wrap differently
-- **Color shifts** — Alpha-blended colors may appear slightly different
-- **Missing elements** — SVGs below the size threshold are intentionally skipped
-- **Fallback slides** — Screenshot-only slides indicate extraction failures to investigate
+- LibreOffice (for PPTX→PDF→PNG rendering)
+- `pdftoppm` from poppler
