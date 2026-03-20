@@ -354,8 +354,10 @@ def classify_elements(raw_data):
     """Apply default classification to raw extracted elements.
 
     Converts raw nodes into the typed format the builder expects.
-    This is the deterministic default — the model can override any decision
-    by looking at the screenshot and editing the classified output.
+    This is the deterministic default for the automated pipeline.
+
+    For higher quality, use vision_classify() which passes the screenshot
+    + raw nodes to the model for classification decisions.
 
     Returns a new dict with the same structure but typed elements.
     """
@@ -363,8 +365,6 @@ def classify_elements(raw_data):
         return raw_data
 
     classified = []
-    sw = raw_data.get('slideWidth', 1280)
-    sh = raw_data.get('slideHeight', 720)
 
     for node in raw_data.get('elements', []):
         tag = node.get('tag', '')
@@ -388,10 +388,8 @@ def classify_elements(raw_data):
         has_bg = node.get('hasBg', False)
         has_border = node.get('hasBorder', False)
         runs = node.get('runs')
-        direct_text = node.get('directText', '')
-        child_count = node.get('childElementCount', 0)
 
-        # Elements with runs (true leaves with text) → richtext
+        # Elements with runs → richtext
         if runs and len(runs) > 0:
             classified.append({
                 'type': 'richtext', 'tag': tag, 'classes': cls, 'rect': r,
@@ -412,16 +410,7 @@ def classify_elements(raw_data):
             if has_bg and tag not in ('body', 'html') and r.get('w', 0) > 8 and r.get('h', 0) >= 1:
                 classified.append({
                     'type': 'shape', 'tag': tag, 'classes': cls, 'rect': r,
-                    'styles': {
-                        'backgroundColor': styles.get('backgroundColor'),
-                        'borderColor': styles.get('borderColor'),
-                        'borderWidth': styles.get('borderWidth', 0),
-                        'borderRadius': styles.get('borderRadius', 0),
-                        'opacity': styles.get('opacity', 1),
-                        'borderLeftColor': styles.get('borderLeftColor'),
-                        'borderLeftWidth': styles.get('borderLeftWidth', 0),
-                        'background': styles.get('background'),
-                    },
+                    'styles': _shape_styles(styles),
                     'depth': depth,
                 })
             continue
@@ -430,25 +419,29 @@ def classify_elements(raw_data):
         if (has_bg or has_border) and tag not in ('body', 'html') and r.get('w', 0) > 8 and r.get('h', 0) >= 1:
             classified.append({
                 'type': 'shape', 'tag': tag, 'classes': cls, 'rect': r,
-                'styles': {
-                    'backgroundColor': styles.get('backgroundColor'),
-                    'borderColor': styles.get('borderColor'),
-                    'borderWidth': styles.get('borderWidth', 0),
-                    'borderRadius': styles.get('borderRadius', 0),
-                    'opacity': styles.get('opacity', 1),
-                    'borderLeftColor': styles.get('borderLeftColor'),
-                    'borderLeftWidth': styles.get('borderLeftWidth', 0),
-                    'background': styles.get('background'),
-                },
+                'styles': _shape_styles(styles),
                 'depth': depth,
             })
 
         # Container divs with children and no direct text → skip (children handle it)
-        # Container divs with bg → shape already emitted above
 
     result = dict(raw_data)
     result['elements'] = classified
     return result
+
+
+def _shape_styles(styles):
+    """Extract shape-relevant styles from full computed styles."""
+    return {
+        'backgroundColor': styles.get('backgroundColor'),
+        'borderColor': styles.get('borderColor'),
+        'borderWidth': styles.get('borderWidth', 0),
+        'borderRadius': styles.get('borderRadius', 0),
+        'opacity': styles.get('opacity', 1),
+        'borderLeftColor': styles.get('borderLeftColor'),
+        'borderLeftWidth': styles.get('borderLeftWidth', 0),
+        'background': styles.get('background'),
+    }
 
 
 def screenshot_html(html_path, png_path, tmpdir, viewport_w=1280, viewport_h=720,

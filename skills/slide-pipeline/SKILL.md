@@ -32,8 +32,12 @@ compare. This is where actual quality is measured. **Never skip this phase.**
 ## Workflow
 
 ```
-Step 1: Convert all slides (produces deck.pptx)
+Step 1: Convert all slides (produces deck.pptx + raw extraction JSON)
         Run structural checks. Fix any bounds/overflow issues.
+
+Step 1b (optional): Vision classification
+        For slides that look wrong, read the HTML screenshot + raw extraction
+        JSON. Reclassify elements using vision, rebuild that slide.
 
 Step 2: For each slide:
   a. Screenshot HTML source + render PPTX slide to PNG
@@ -59,6 +63,47 @@ issues = validate_pptx("deck.pptx")
 ```
 
 Fix any structural issues (bounds overflow, negative coords) before Phase 2.
+
+## Step 1b: Vision Classification (when needed)
+
+When the default `classify_elements()` produces wrong results for a slide,
+use vision to reclassify. This replaces heuristic classification with
+model judgment.
+
+### When to Use
+
+- After Step 2 identifies a slide with `missing_element` or `text_error`
+- When the raw extraction JSON has elements that the default classifier
+  put in the wrong category
+- For complex slides with unusual HTML patterns
+
+### How It Works
+
+1. Read the HTML screenshot for the slide
+2. Read the raw extraction JSON (saved in the output dir during Step 1)
+3. For each raw element, decide:
+   - **richtext** — this element should be a text box with its runs
+   - **shape** — this element should be a rectangle/rounded rect
+   - **skip** — this element is a container; its children handle the content
+4. Rebuild the classified element list
+5. Re-run the builder for just that slide
+
+### Classification Prompt
+
+When looking at the screenshot + raw elements, answer for each element:
+
+```
+Element [index]: tag={tag} rect=({x},{y},{w},{h}) hasBg={bool} runs={count} directText="{text}"
+→ Type: richtext | shape | skip
+→ Reason: (one line)
+```
+
+**Rules:**
+- If an element has `runs` and you can see its text in the screenshot → **richtext**
+- If an element has `hasBg` and you can see a colored rectangle → **shape**
+- If an element is a container whose children are separately extracted → **skip**
+- If you can see content in the screenshot that no element captures → flag as **missing**
+- Low confidence? Mark it. The render-compare loop will catch it.
 
 ## Step 2: Per-Slide Verification Loop
 
