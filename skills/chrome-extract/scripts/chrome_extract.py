@@ -248,9 +248,12 @@ JS_EXTRACT = r'''
                 }
             }
 
-            if (node.childElementCount === 0 || allChildrenInline) {
-                // True leaf OR inline container (h1 > span, p > strong, etc.)
-                // This element owns its text. Claim all descendants.
+            // Also extract runs if the element has its own direct text content,
+            // even if children are block-level (e.g. flex row with emoji span + text)
+            var hasOwnText = node.directText.length > 0;
+            if (node.childElementCount === 0 || allChildrenInline || hasOwnText) {
+                // True leaf, inline container, or element with own text.
+                // Claim all descendants.
                 node.runs = getRuns(el).map(function(r) {
                     return {text: r.text.substring(0, 500), color: r.color,
                         fontSize: r.fontSize, fontWeight: r.fontWeight,
