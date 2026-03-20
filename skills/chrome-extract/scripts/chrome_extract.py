@@ -169,6 +169,10 @@ JS_EXTRACT = r'''
     });
 
     // --- Walk every visible element, emit raw facts ---
+    // Track elements whose text has been claimed by a parent's getRuns() call.
+    // Prevents duplicate text when both parent and child have runs.
+    var claimedEls = new Set();
+
     function walkEl(el, depth) {
         if (depth > 15) return;
         if (!isVis(el)) return;
@@ -214,7 +218,7 @@ JS_EXTRACT = r'''
         node.hasBorder = styles.borderWidth > 0.5
             && styles.borderColor !== 'rgba(0, 0, 0, 0)';
 
-        // Text facts: does this element have its OWN text (not just children's)?
+        // Text facts
         var directText = '';
         for (var i = 0; i < el.childNodes.length; i++) {
             var cn = el.childNodes[i];
@@ -224,16 +228,38 @@ JS_EXTRACT = r'''
         node.directText = directText.trim().substring(0, 300);
         node.childElementCount = el.children.length;
 
-        // Full text runs (inline formatting) — extracted by the browser, classified by the model
+        // Extract runs if this element has text AND hasn't been claimed by a parent.
+        // Runs are extracted for ALL text-bearing elements — not just leaves (#32, #36).
+        // The claimedEls set prevents duplicate text: when an element gets runs,
+        // all its descendants are marked as claimed.
         var fullText = el.textContent.trim();
-        if (fullText.length > 0 && node.childElementCount === 0) {
-            // True leaf: no child elements, all text is ours
-            node.runs = getRuns(el).map(function(r) {
-                return {text: r.text.substring(0, 500), color: r.color,
-                    fontSize: r.fontSize, fontWeight: r.fontWeight,
-                    fontStyle: r.fontStyle, textTransform: r.textTransform || '',
-                    br: r.br || false};
-            });
+        if (fullText.length > 0 && !claimedEls.has(el)) {
+            // Check if all children are inline-level (text formatting, not layout).
+            // If so, this element owns the text — extract runs and claim descendants.
+            var allChildrenInline = true;
+            for (var i = 0; i < el.children.length; i++) {
+                var childTag = el.children[i].tagName;
+                if (childTag === 'BR' || childTag === 'SVG' || childTag === 'IMG'
+                    || childTag === 'CANVAS') continue; // decorative, skip
+                var childDisplay = window.getComputedStyle(el.children[i]).display;
+                if (childDisplay !== 'inline' && childDisplay !== 'inline-block') {
+                    allChildrenInline = false;
+                    break;
+                }
+            }
+
+            if (node.childElementCount === 0 || allChildrenInline) {
+                // True leaf OR inline container (h1 > span, p > strong, etc.)
+                // This element owns its text. Claim all descendants.
+                node.runs = getRuns(el).map(function(r) {
+                    return {text: r.text.substring(0, 500), color: r.color,
+                        fontSize: r.fontSize, fontWeight: r.fontWeight,
+                        fontStyle: r.fontStyle, textTransform: r.textTransform || '',
+                        br: r.br || false};
+                });
+                // Claim descendants so they don't emit duplicate runs
+                el.querySelectorAll('*').forEach(function(c) { claimedEls.add(c); });
+            }
         }
 
         elements.push(node);
@@ -383,7 +409,7 @@ def classify_elements(raw_data):
                 'depth': depth,
             })
             # Also emit shape if it has a visible background
-            if has_bg and tag not in ('body', 'html') and r.get('w', 0) > 8 and r.get('h', 0) > 4:
+            if has_bg and tag not in ('body', 'html') and r.get('w', 0) > 8 and r.get('h', 0) >= 1:
                 classified.append({
                     'type': 'shape', 'tag': tag, 'classes': cls, 'rect': r,
                     'styles': {
@@ -401,7 +427,7 @@ def classify_elements(raw_data):
             continue
 
         # Elements with background/border but no text → shape
-        if (has_bg or has_border) and tag not in ('body', 'html') and r.get('w', 0) > 8 and r.get('h', 0) > 4:
+        if (has_bg or has_border) and tag not in ('body', 'html') and r.get('w', 0) > 8 and r.get('h', 0) >= 1:
             classified.append({
                 'type': 'shape', 'tag': tag, 'classes': cls, 'rect': r,
                 'styles': {
