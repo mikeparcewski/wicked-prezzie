@@ -23,10 +23,19 @@ from paths import output_path
 sys.path.insert(0, str(_root / "chrome-extract" / "scripts"))
 sys.path.insert(0, str(_root / "slide-pptx-builder" / "scripts"))
 sys.path.insert(0, str(_root / "slide-html-standardize" / "scripts"))
+sys.path.insert(0, str(_root / "slide-triage" / "scripts"))
+sys.path.insert(0, str(_root / "slide-prep" / "scripts"))
 
 from chrome_extract import extract_layout, classify_elements, screenshot_html, crop_region, screenshot_svg_isolated
 from pptx_builder import SlideBuilder
 from html_standardize import standardize_html
+
+try:
+    from slide_triage import triage_slide
+    from slide_prep import auto_resolve
+    _TRIAGE_AVAILABLE = True
+except ImportError:
+    _TRIAGE_AVAILABLE = False
 from pptx import Presentation
 from pptx.util import Inches
 from bs4 import BeautifulSoup
@@ -89,8 +98,53 @@ def _extract_single_slide(args):
         # Extract layout via Chrome headless
         raw_layout = extract_layout(html_path, slide_tmpdir, viewport_w, viewport_h,
                                     hide_selectors)
+
+        # Cache raw extraction JSON before classification (used by triage)
+        raw_layout_path = os.path.join(slide_tmpdir, 'raw-layout.json')
+        if raw_layout:
+            with open(raw_layout_path, 'w') as f:
+                json.dump(raw_layout, f)
+            result['raw_layout_path'] = raw_layout_path
+
         layout = classify_elements(raw_layout)
         result['layout'] = layout
+
+        # Cache classified layout JSON (used by triage + prep)
+        if layout:
+            classified_layout_path = os.path.join(slide_tmpdir, 'classified-layout.json')
+            with open(classified_layout_path, 'w') as f:
+                json.dump(layout, f)
+            result['classified_layout_path'] = classified_layout_path
+
+        # Run triage + auto-prep (model-driven triage pipeline)
+        if _TRIAGE_AVAILABLE and raw_layout and layout:
+            try:
+                findings = triage_slide(
+                    raw_layout=raw_layout,
+                    classified_layout=layout,
+                    slide_index=index,
+                    source_file=filename,
+                    slide_width_px=viewport_w,
+                    slide_height_px=viewport_h,
+                    html_path=html_path,
+                )
+                findings_path = os.path.join(slide_tmpdir, 'findings.json')
+                with open(findings_path, 'w') as f:
+                    json.dump(findings, f)
+                result['findings_path'] = findings_path
+                result['findings'] = findings
+
+                manifest = auto_resolve(findings, layout)
+                # Inject speaker notes into manifest
+                manifest['notes'] = result.get('notes', '')
+                manifest_path = os.path.join(slide_tmpdir, 'manifest.json')
+                with open(manifest_path, 'w') as f:
+                    json.dump(manifest, f)
+                result['manifest_path'] = manifest_path
+                result['manifest'] = manifest
+            except Exception as triage_err:
+                # Triage/prep failure is non-fatal — fall back to legacy build path
+                result['triage_error'] = str(triage_err)
 
         # Take the full-page screenshot once — used for SVG cropping and fallback
         ss_path = os.path.join(cache_dir, f"screenshot-{index:03d}.png")
@@ -244,8 +298,18 @@ def build_deck(slides, input_dir, output_path, hide_selectors=None,
                     return None
 
                 notes = f"[{act}] {title}\n\n{result['notes']}" if act else result['notes']
+                manifest = result.get('manifest')
+                use_manifest = (
+                    manifest is not None and
+                    not any(e.get('type') is None
+                            for e in manifest.get('elements', []))
+                )
                 try:
-                    builder.build_slide(prs, layout, screenshot_svg, notes)
+                    if use_manifest:
+                        manifest['notes'] = notes
+                        builder.build_slide_from_manifest(prs, manifest, screenshot_svg)
+                    else:
+                        builder.build_slide(prs, layout, screenshot_svg, notes)
                     stats['layout'] += 1
                 except Exception as e:
                     # Layout build failed — try fallback

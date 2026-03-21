@@ -210,6 +210,22 @@ def _is_external_url(url):
     return False
 
 
+def strip_navigation(soup):
+    """Remove navigation elements that shouldn't appear in the PPTX (#35).
+
+    Strips <nav> tags and elements with slide-nav/slide-number classes.
+    Must run before extraction AND screenshots to prevent nav content
+    from appearing in SVG fallback images.
+    """
+    # Remove all <nav> elements
+    for nav in soup.find_all('nav'):
+        nav.decompose()
+    # Remove slide navigation and slide number elements by class
+    for sel in ['.slide-nav', '.slide-number']:
+        for el in soup.select(sel):
+            el.decompose()
+
+
 COMPLEXITY_SIGNALS = re.compile(
     r'(linear-gradient|radial-gradient|writing-mode\s*:\s*vertical|'
     r'transform\s*:\s*rotate|::before|::after|clip-path|mask-image)',
@@ -283,6 +299,7 @@ def standardize_html(html_path, output_path=None, viewport_w=1280, viewport_h=72
     normalize_viewport(soup, w=viewport_w, h=viewport_h)
     strip_animations(soup)
     strip_external_resources(soup)
+    strip_navigation(soup)
     annotate_complexity(soup)
 
     # Determine output path

@@ -1,6 +1,6 @@
 {
   "name": "wicked-prezzie",
-  "description": "HTML slides to native editable PowerPoint — plan, generate, convert, validate, and refine. 13 skills covering the full presentation lifecycle from blank page to polished deck.",
+  "description": "HTML slides to native editable PowerPoint — plan, generate, convert, validate, and refine. 16 skills covering the full presentation lifecycle with model-driven triage pipeline.",
   "owner": {
     "name": "Mike Parcewski",
     "url": "https://github.com/mikeparcewski"
@@ -8,8 +8,8 @@
   "plugins": [
     {
       "name": "wicked-prezzie",
-      "description": "HTML slides to native editable PowerPoint — plan, generate, convert, validate, and refine. Extracts real shapes and formatted text via Chrome headless, builds PPTX with python-pptx, validates structure, then iterates per-slide with visual comparison. Supports model-driven fixes via EDL specs and python-pptx recipes.",
-      "version": "2.2.1",
+      "description": "HTML slides to native editable PowerPoint — model-driven triage pipeline with per-slide confidence scoring, manifest-driven builder, and known-patterns reference. Extracts via Chrome headless, builds PPTX with python-pptx, validates with visual comparison.",
+      "version": "3.0.0",
       "source": "./",
       "author": {
         "name": "Mike Parcewski",

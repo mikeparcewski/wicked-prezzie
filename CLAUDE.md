@@ -4,17 +4,20 @@ HTML slide decks → editable PowerPoint conversion toolkit.
 
 ## Architecture
 
-**Full pipeline**: Topic → outline → generate → standardize → convert → validate → render → compare
+**Full pipeline**: Topic → outline → generate → standardize → triage → prep → build → validate → render → compare
 
 ```
-Topic/brief → slide-outline → slide-generate → slide-html-standardize → chrome-extract → slide-pptx-builder → slide-validate
-               Pyramid          outline→HTML       normalize          DOM walk        layout→PPTX     bounds+overflow
-               Principle         + theme            viewport          bounding boxes                        |
-               narrative arc     CSS vars           strip anim        colors/fonts                    slide-render
-                    ↑                                                                                (PPTX→PNG)
-              slide-theme                                                                                  |
-              (brand/colors/                                                                         slide-compare
-               fonts/spacing)                                                                       (HTML vs PPTX)
+Topic/brief → slide-outline → slide-generate → slide-html-standardize → chrome-extract → slide-triage → slide-prep → slide-pptx-builder → slide-validate
+               Pyramid          outline→HTML       normalize          DOM walk         confidence    manifest      layout→PPTX     bounds+overflow
+               Principle         + theme            viewport          bounding boxes   scoring +     JSON with                           |
+               narrative arc     CSS vars           strip anim        colors/fonts     pattern       resolvedRect              slide-render
+                    ↑                                                                  detection      geometry                 (PPTX→PNG)
+              slide-theme                                                              (findings                                      |
+              (brand/colors/                                                            JSON)                               slide-compare
+               fonts/spacing)                                                                                               (HTML vs PPTX)
+                                                                                         ↓ fix history
+                                                                               slide-treatment-log
+                                                                               (known-patterns.md feedback)
 ```
 
 ## Project Structure
@@ -59,7 +62,16 @@ skills/
     scripts/html_standardize.py  (+ complexity annotation for pipeline routing)
   slide-html-to-pptx/      — Batch convert HTML slides to PPTX (conversion stage)
     SKILL.md
-    scripts/html_to_pptx.py      (imports: chrome-extract, slide-pptx-builder)
+    scripts/html_to_pptx.py      (imports: chrome-extract, slide-pptx-builder, slide-triage, slide-prep)
+  slide-triage/            — Confidence scoring + pattern detection per slide (model-driven pipeline)
+    SKILL.md
+    scripts/slide_triage.py      (triage_slide() → findings JSON with confidence scores + collision risks)
+    references/known-patterns.md (10 seed patterns: SVG bleed, accent bar, rotation, card overflow, badge collision...)
+  slide-prep/              — Auto-resolve triage findings into build manifests
+    SKILL.md
+    scripts/slide_prep.py        (auto_resolve() → manifest JSON with resolvedRect geometry transforms)
+  slide-treatment-log/     — Per-slide fix history + promotion candidates for known-patterns.md
+    SKILL.md
   slide-validate/          — Structural QA: bounds, overflow, empty slides
     SKILL.md
     scripts/slide_validate.py    (structural checks only — no visual/scoring)
@@ -140,13 +152,13 @@ Project-level config stays in `skills/slide-config/config.json` (per-project ove
 
 1. **Let the browser do layout** — Chrome resolves all cascading styles, flexbox, grid, absolute positioning. We just read the computed result.
 
-2. **Raw extraction + model classification** — Chrome extracts every visible element with computed properties (rect, styles, text, runs). No classification in the JS. A `classify_elements()` function provides deterministic defaults (leaf with text → richtext, element with bg → shape). The model can override any decision by looking at the screenshot and raw element list.
+2. **Model-driven triage pipeline** — After extraction, `classify_elements()` adds confidence scores (0.0–1.0) and `flagReason` to every element. `slide-triage` checks each element against 10 known-pattern signatures and detects collision risks. `slide-prep` auto-resolves high-confidence elements (>= 0.85) with geometry transforms, and flags low-confidence elements for model inspection. The builder receives a fully-resolved manifest with no ambiguous types.
 
 3. **Alpha blending** — CSS rgba colors are pre-blended against the slide background since PPTX shapes don't support CSS-style transparency.
 
-4. **Card text clamping** — text inside card shapes is constrained to the card's width (not Chrome's tight bounding box).
+4. **Card text clamping** — text inside card shapes is constrained to the card's width (not Chrome's tight bounding box). Encoded as PATTERN-004 in `known-patterns.md`; applied as `resolvedRect` in the manifest.
 
-5. **SVG handling** — SVG charts rendered via isolated screenshot (hide all non-SVG content, screenshot, crop). Small decorative SVGs (<30px) skipped. Eliminates crop bleed from overlapping content.
+5. **SVG handling** — SVG charts rendered via isolated screenshot (hide all non-SVG content, screenshot, crop). Small decorative SVGs (<30px) skipped. PATTERN-001 (SVG crop bleed) clamps SVG height when content is within 30px below the SVG boundary.
 
 6. **LibreOffice for rendering** — PPTX→PDF via `soffice --headless`, then pdftoppm for PDF→PNG. No Microsoft PowerPoint required — runs headless without GUI, permission dialogs, or automation consent. Handles sandboxed environments automatically.
 
@@ -154,7 +166,7 @@ Project-level config stays in `skills/slide-config/config.json` (per-project ove
 
 8. **Structural validation only** — `slide_validate.py` checks shape bounds, negative coords, empty slides, and text overflow heuristics. Visual fidelity is judged by Claude comparing rendered images, not by automated pixel scanning.
 
-9. **Hybrid fix architecture** — Scripts handle the deterministic 90% (geometry translation, color parsing, zone dispatch). SKILL.md guides the model for the 10% slide-specific edge cases using EDL specs (declarative JSON edits) or python-pptx recipes. Decision framework enforced in `slide-pipeline/SKILL.md`: script fix for systemic patterns (2+ decks), direct fix for slide-specific layout issues.
+9. **Manifest-based build** — `pptx_builder.build_slide_from_manifest()` reads a fully-resolved manifest and executes PPTX API calls mechanically with no classification logic. The manifest is the contract between model judgment (prep) and builder execution. All geometry transforms are pre-resolved as `resolvedRect` fields before the builder runs. `build_slide()` is a legacy wrapper that converts layout_data to a manifest via triage+prep before delegating.
 
 10. **Enriched IR** — Extraction includes `layoutRole` (inferred from CSS class patterns like `card`, `stat`, `badge`, `progress`, `chart`) and full `classes` on every element. The builder can dispatch by semantic role instead of guessing from pixel geometry.
 

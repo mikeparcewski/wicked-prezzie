@@ -42,6 +42,55 @@ def _has_emoji(text):
     return False
 
 
+def _is_emoji_char(ch):
+    """Check if a single character is a symbol/emoji that Calibri can't render well.
+
+    Covers emoji, dingbats, geometric shapes, bullets, arrows, enclosed
+    alphanumerics (①②③), checkmarks, and other decorative Unicode.
+    """
+    cp = ord(ch)
+    if cp >= 0x1F300: return True               # Emoji (pictographs+)
+    if 0x2600 <= cp <= 0x27BF: return True       # Misc symbols + dingbats
+    if 0x2500 <= cp <= 0x25FF: return True       # Box drawing + geometric shapes (●▸◆)
+    if 0x2B00 <= cp <= 0x2BFF: return True       # Misc symbols (⬢⬤)
+    if 0xFE00 <= cp <= 0xFE0F: return True       # Variation selectors
+    if cp == 0x200D: return True                 # Zero-width joiner
+    if cp == 0x2022: return True                 # Bullet •
+    if 0x2000 <= cp <= 0x206F: return True       # General punctuation (bullets •, dashes)
+    if 0x2190 <= cp <= 0x21FF: return True       # Arrows (→←↑↓)
+    if 0x2300 <= cp <= 0x23FF: return True       # Misc technical (⌘)
+    if 0x2400 <= cp <= 0x24FF: return True       # Enclosed alphanumerics (①②③)
+    if 0x2700 <= cp <= 0x27BF: return True       # Dingbats (✓✗✦)
+    if 0x2010 <= cp <= 0x2027: return True       # Bullets and hyphens (•‣)
+    if 0x2030 <= cp <= 0x205E: return True       # Per mille, primes, etc.
+    if 0x2200 <= cp <= 0x22FF: return True       # Math operators (≈≠≤)
+    if 0x2100 <= cp <= 0x214F: return True       # Letterlike symbols (™℃)
+    return False
+
+
+def _split_emoji(text):
+    """Split text into (segment, is_emoji) tuples for font splitting.
+
+    Adjacent emoji chars are grouped. Adjacent non-emoji chars are grouped.
+    Returns list of (text, bool) tuples.
+    """
+    if not text:
+        return []
+    segments = []
+    current = text[0]
+    current_emoji = _is_emoji_char(text[0])
+    for ch in text[1:]:
+        ch_emoji = _is_emoji_char(ch)
+        if ch_emoji == current_emoji:
+            current += ch
+        else:
+            segments.append((current, current_emoji))
+            current = ch
+            current_emoji = ch_emoji
+    segments.append((current, current_emoji))
+    return segments
+
+
 def pp_align(css_align):
     """Convert CSS text-align to python-pptx alignment."""
     if css_align == 'center': return PP_ALIGN.CENTER
@@ -137,295 +186,134 @@ class SlideBuilder:
 
     def build_slide(self, prs, layout_data, screenshot_fn=None, notes_text=None):
         """
-        Build a single PPTX slide from layout data.
+        Build a single PPTX slide from layout data (legacy compatibility wrapper).
+
+        Converts layout_data to a build manifest via slide-prep's auto_resolve(),
+        then delegates to build_slide_from_manifest(). All classification logic
+        and geometry transforms live in slide-prep (known-patterns.md).
 
         Args:
             prs: python-pptx Presentation object
-            layout_data: dict from chrome_extract.extract_layout()
+            layout_data: dict from chrome_extract.classify_elements()
             screenshot_fn: callable(svg_rect) -> png_path for SVG rendering
             notes_text: optional speaker notes text
 
         Returns:
             The created slide object
         """
-        slide = prs.slides.add_slide(prs.slide_layouts[6])  # Blank
+        # Convert layout_data to a manifest via auto_resolve
+        try:
+            import sys as _sys
+            _root = Path(__file__).parent.parent.parent
+            if str(_root / "slide-triage" / "scripts") not in _sys.path:
+                _sys.path.insert(0, str(_root / "slide-triage" / "scripts"))
+            if str(_root / "slide-prep" / "scripts") not in _sys.path:
+                _sys.path.insert(0, str(_root / "slide-prep" / "scripts"))
+            from slide_triage import triage_slide
+            from slide_prep import auto_resolve
 
-        # Background
-        bg_color = parse_css_color(layout_data.get('slideBg'))
-        slide_cls = layout_data.get('slideClasses', [])
-        if 'section-divider' in slide_cls:
-            if not bg_color or bg_color == RGBColor(0, 0, 0):
-                bg_color = RGBColor(0x14, 0x00, 0x24)
-        elif 'title-slide' in slide_cls:
-            if not bg_color:
-                bg_color = RGBColor(0, 0, 0)
-        bg = slide.background
-        bg.fill.solid()
-        bg.fill.fore_color.rgb = bg_color or RGBColor(0x0A, 0x0A, 0x0F)
+            findings = triage_slide(raw_layout=layout_data,
+                                    classified_layout=layout_data)
+            manifest = auto_resolve(findings, layout_data)
+        except Exception:
+            # Fallback: build a minimal manifest from layout_data directly
+            manifest = self._layout_to_manifest(layout_data)
 
-        slide_bg_rgb = (10, 10, 15)
-        if bg_color:
-            slide_bg_rgb = (bg_color[0], bg_color[1], bg_color[2])
-
-        elements = layout_data.get('elements', [])
-        svg_elements = layout_data.get('svgElements', [])
-
-        shapes_data = sorted([e for e in elements if e['type'] == 'shape'],
-                            key=lambda e: e['depth'])
-
-        # Filter shapes
-        filtered_shapes = []
-        for s in shapes_data:
-            r = s['rect']
-            if r['w'] > 1250 and r['h'] > 680: continue
-            if r['w'] * r['h'] < 16: continue  # truly tiny
-            if r['w'] < 2 and r['h'] < 2: continue
-            if r['x'] > self.src_w or r['y'] > self.src_h: continue
-            if r['x'] + r['w'] < 0 or r['y'] + r['h'] < 0: continue
-            filtered_shapes.append(s)
-
-        # Helper: find parent card shape for text clamping
-        def find_parent_card(text_rect):
-            best = None
-            best_area = float('inf')
-            for s in filtered_shapes:
-                sr = s['rect']
-                if (text_rect['x'] >= sr['x'] - 5 and text_rect['y'] >= sr['y'] - 5 and
-                    text_rect['x'] + text_rect['w'] <= sr['x'] + sr['w'] + 30 and
-                    text_rect['y'] + text_rect['h'] <= sr['y'] + sr['h'] + 10):
-                    area = sr['w'] * sr['h']
-                    if area < best_area and sr['w'] > 20 and sr['h'] > 20:
-                        best = sr
-                        best_area = area
-            return best
-
-        def find_containment_rect(text_node):
-            """Tightest ancestor rect: explicit flex/grid slot, or card ancestor."""
-            if text_node.get('parentSlotRect'):
-                return text_node['parentSlotRect']
-            return find_parent_card(text_node['rect'])
-
-        # Render shapes
-        for s in filtered_shapes:
-            r = s['rect']
-            st = s['styles']
-            x = self.px2emu_x(max(0, r['x']))
-            y = self.px2emu_y(max(0, r['y']))
-            w = self.px2emu_x(min(r['w'], self.src_w - max(0, r['x'])))
-            h = self.px2emu_y(min(r['h'], self.src_h - max(0, r['y'])))
-            if w < 10000 and h < 8000: continue  # allow thin decorative lines
-
-            br = st.get('borderRadius', 0)
-            if br > 5:
-                shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, w, h)
-                try:
-                    shape.adjustments[0] = min(0.12, br / min(r['w'], r['h']))
-                except: pass
-            else:
-                shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, x, y, w, h)
-
-            fill_c = parse_css_color(st.get('backgroundColor'), slide_bg_rgb)
-            if fill_c:
-                shape.fill.solid()
-                shape.fill.fore_color.rgb = fill_c
-            else:
-                shape.fill.background()
-
-            # Try gradient fill from raw CSS background
-            bg_raw = st.get('background', '')
-            if bg_raw and 'linear-gradient' in str(bg_raw):
-                angle, stops = _parse_css_gradient(bg_raw)
-                if stops:
-                    _apply_gradient_fill(shape, angle, stops, slide_bg_rgb)
-
-            border_c = parse_css_color(st.get('borderColor'), slide_bg_rgb)
-            bw = st.get('borderWidth', 0)
-            blw = st.get('borderLeftWidth', 0)
-            blc = parse_css_color(st.get('borderLeftColor'), slide_bg_rgb)
-            if blc and blw > 2:
-                # Create separate accent bar instead of full outline (#25)
-                accent_w = self.px2emu_x(max(3, min(blw, 6)))
-                accent = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, x, y, accent_w, h)
-                accent.fill.solid()
-                accent.fill.fore_color.rgb = blc
-                accent.line.fill.background()
-                accent.text_frame.clear()
-                shape.line.fill.background()
-            elif border_c and bw > 0.3:
-                shape.line.color.rgb = border_c
-                shape.line.width = Pt(max(0.25, bw * 0.75))  # CSS px → PPTX pt at 96 DPI
-            else:
-                shape.line.fill.background()
-            shape.text_frame.clear()
-
-        # Render SVGs as images
-        if screenshot_fn:
-            # Collect non-SVG element top edges for overlap detection (#19)
-            non_svg_tops = []
-            for e in elements:
-                if e['type'] in ('richtext', 'shape', 'badge'):
-                    non_svg_tops.append(e['rect']['y'])
-
-            for svg in svg_elements:
-                r = svg['rect']
-                if r['w'] < 30 or r['h'] < 30: continue
-                if svg.get('lines', 0) < 3: continue
-                # Clamp SVG bottom to avoid bleeding into content below (#19)
-                # Elements within 30px below SVG can bleed through transparent areas
-                svg_bottom = r['y'] + r['h']
-                crop_r = dict(r)
-                nearest_below = None
-                for ey in sorted(non_svg_tops):
-                    if ey > r['y'] + r['h'] * 0.5 and ey <= svg_bottom + 30:
-                        nearest_below = ey
-                        break
-                if nearest_below is not None:
-                    new_h = nearest_below - r['y'] - 8
-                    if new_h > r['h'] * 0.5 and new_h < r['h']:
-                        crop_r['h'] = new_h
-                png_path = screenshot_fn(crop_r)
-                if png_path and os.path.exists(png_path):
-                    x = self.px2emu_x(max(0, crop_r['x']))
-                    y = self.px2emu_y(max(0, crop_r['y']))
-                    w = self.px2emu_x(crop_r['w'])
-                    h = self.px2emu_y(crop_r['h'])
-                    try:
-                        slide.shapes.add_picture(png_path, x, y, w, h)
-                    except: pass
-
-        # Render native tables
-        table_data = [e for e in elements if e['type'] == 'table'
-                      and e['rect']['x'] < self.src_w and e['rect']['y'] < self.src_h
-                      and e['rect']['x'] + e['rect']['w'] > 0 and e['rect']['y'] + e['rect']['h'] > 0]
-        for td in table_data:
-            try:
-                self.build_table(slide, td, slide_bg_rgb)
-            except Exception:
-                pass
-
-        # Render badges and circles
-        badge_data = [e for e in elements if e['type'] in ('badge', 'circle')]
-        for bd in badge_data:
-            try:
-                self.build_badge(slide, bd, slide_bg_rgb)
-            except Exception:
-                pass
-
-        # All text elements (including former leaf tags) are now richtext
-        richtext_data = [e for e in elements if e['type'] == 'richtext']
-
-        # Render richtext elements
-        for rt in richtext_data:
-            r = rt['rect']
-            if r['x'] > self.src_w or r['y'] > self.src_h: continue
-            runs = rt.get('runs', [])
-            if not runs: continue
-            full_text = ''.join(run.get('text', '') for run in runs).strip()
-            if not full_text: continue
-
-            rotation = rt.get('rotation', 0)
-            align = rt.get('styles', {}).get('textAlign', 'left')
-            tag = rt.get('tag', '')
-            parent = find_containment_rect(rt)
-
-            if parent and tag not in ('h1',):
-                px = parent['x'] + 4
-                pw = parent['w'] - 8
-                x = self.px2emu_x(max(0, px))
-                y = self.px2emu_y(max(0, r['y']))
-                # Card width is a hard ceiling (#29 bug 7)
-                w = self.px2emu_x(max(20, min(pw, parent['w'])))
-            elif align == 'center' and tag in ('h1', 'h2', 'h3', 'p'):
-                # Center within actual width, not forced to full-slide (#29 bug 7)
-                actual_w = min(r['w'] * 1.05, self.src_w - 96)
-                cx = (self.src_w - actual_w) / 2
-                x = self.px2emu_x(max(0, cx))
-                y = self.px2emu_y(max(0, r['y']))
-                w = self.px2emu_x(actual_w)
-            else:
-                x = self.px2emu_x(max(0, r['x']))
-                y = self.px2emu_y(max(0, r['y']))
-                extra = 1.05 if tag in ('h1', 'h2', 'h3') else 1.03
-                w = self.px2emu_x(min(r['w'] * extra, self.src_w - max(0, r['x'])))
-
-            h = self.px2emu_y(min(max(r['h'], 14), self.src_h - max(0, r['y'])))
-            if w < 5000 or h < 5000: continue
-
-            # For rotated text, swap dimensions and apply PPTX rotation (#27)
-            if rotation and abs(rotation) >= 5:
-                w, h = h, w
-            tb = slide.shapes.add_textbox(x, y, w, h)
-            if rotation and abs(rotation) >= 5:
-                tb.rotation = rotation
-            tb.fill.background()
-            tb.line.fill.background()
-            tf = tb.text_frame
-            tf.word_wrap = True
-            ws = rt.get('styles', {}).get('whiteSpace', '')
-            if ws == 'nowrap':
-                tf.word_wrap = False
-            self._apply_margins(tf, rt.get('styles', {}))
-
-            p = tf.paragraphs[0]
-            p.alignment = pp_align(align)
-            p.space_before = Pt(0)
-            p.space_after = Pt(0)
-
-            for run_data in runs:
-                text = run_data.get('text', '')
-                if not text: continue
-                if run_data.get('br'):
-                    p = tf.add_paragraph()
-                    p.alignment = pp_align(align)
-                    p.space_before = Pt(0)
-                    p.space_after = Pt(0)
-                    continue
-                if '\n' in text:
-                    parts = text.split('\n')
-                    for pi, part in enumerate(parts):
-                        if pi > 0:
-                            p = tf.add_paragraph()
-                            p.alignment = pp_align(align)
-                            p.space_before = Pt(0)
-                            p.space_after = Pt(0)
-                        if part.strip():
-                            self._add_run(p, part, run_data)
-                    continue
-                self._add_run(p, text, run_data)
-
-        # Speaker notes
+        # Inject notes and slide class background overrides
         if notes_text:
-            try:
-                slide.notes_slide.notes_text_frame.text = notes_text
-            except: pass
+            manifest['notes'] = notes_text
+        slide_cls = layout_data.get('slideClasses', [])
+        if not manifest.get('slideBg') or manifest.get('slideBg') == '#0A0A0F':
+            if 'section-divider' in slide_cls:
+                manifest['slideBg'] = '#140024'
+            elif 'title-slide' in slide_cls:
+                manifest['slideBg'] = '#000000'
 
-        return slide
+        return self.build_slide_from_manifest(prs, manifest, screenshot_fn)
 
-    def _add_run(self, paragraph, text, run_data):
-        """Add a formatted run to a paragraph."""
+    def _layout_to_manifest(self, layout_data):
+        """Minimal manifest from classify_elements() output (emergency fallback)."""
+        elements = []
+        for i, e in enumerate(layout_data.get('elements', [])):
+            entry = dict(e)
+            entry.setdefault('manifestId', f'e-{i:03d}')
+            entry.setdefault('confidence', 0.85)
+            entry.setdefault('flagReason', None)
+            entry.setdefault('classificationSource', 'auto')
+            entry.setdefault('skipRender', False)
+            elements.append(entry)
+        svgs = []
+        for i, s in enumerate(layout_data.get('svgElements', [])):
+            entry = dict(s)
+            entry.setdefault('manifestId', f'svg-{i:03d}')
+            entry['type'] = 'svg_image'
+            entry.setdefault('skipRender', False)
+            entry['confidence'] = 1.0
+            entry['flagReason'] = None
+            entry['classificationSource'] = 'auto'
+            svgs.append(entry)
+        return {
+            'schemaVersion': 1,
+            'slideIndex': 0,
+            'sourceFile': '',
+            'slideBg': layout_data.get('slideBg', '#0A0A0F'),
+            'slideWidthPx': layout_data.get('slideWidth', 1280),
+            'slideHeightPx': layout_data.get('slideHeight', 720),
+            'complexity': 'low',
+            'triageFlags': [],
+            'elements': elements,
+            'svgElements': svgs,
+            'notes': '',
+        }
+
+    def _add_run(self, paragraph, text, run_data, max_emoji_pt=None):
+        """Add a formatted run to a paragraph, splitting emoji from regular text (#34).
+
+        Mixed runs like "⚠ Wrong naming" are split into separate PPTX runs:
+        one with emoji font for the symbol, one with Calibri for the text.
+        This prevents colored squares from font mismatch.
+
+        Args:
+            max_emoji_pt: If set, clamp emoji font size to this value (pts).
+                Used for small icon elements where emoji renders larger than
+                the bounding box (#38 systemic icon overlap).
+        """
         tt = run_data.get('textTransform', '')
         if tt == 'uppercase':
             text = text.upper()
-        run = paragraph.add_run()
-        run.text = decode_entities(text)
-        run.font.name = EMOJI_FONT if _has_emoji(text) else self.font
-        fs = run_data.get('fontSize', 14)
-        run.font.size = Pt(round(max(6, min(52, fs * 0.75)), 1))
-        run.font.bold = is_bold(run_data.get('fontWeight'))
-        run.font.italic = run_data.get('fontStyle') == 'italic'
-        ls = run_data.get('letterSpacing')
-        if ls and ls != 'normal':
-            try:
-                px = float(ls) if isinstance(ls, (int, float)) else float(str(ls).replace('px', ''))
-                if abs(px) >= 0.1:
-                    rPr = run._r.get_or_add_rPr()
-                    rPr.set('spc', str(int(px * 75)))  # px → 100ths of pt
-            except (ValueError, TypeError):
-                pass
-        color = parse_css_color(run_data.get('color'), (255, 255, 255))
-        if color:
-            run.font.color.rgb = color
-        return run
+        decoded = decode_entities(text)
+
+        # Split into emoji and non-emoji segments
+        segments = _split_emoji(decoded)
+        last_run = None
+        for seg_text, is_emoji in segments:
+            if not seg_text:
+                continue
+            run = paragraph.add_run()
+            run.text = seg_text
+            run.font.name = EMOJI_FONT if is_emoji else self.font
+            fs = run_data.get('fontSize', 14)
+            pt_size = round(max(6, min(52, fs * 0.75)), 1)
+            # Clamp emoji to fit bounding box for small icon elements (#38)
+            if is_emoji and max_emoji_pt and pt_size > max_emoji_pt:
+                pt_size = max_emoji_pt
+            run.font.size = Pt(pt_size)
+            run.font.bold = is_bold(run_data.get('fontWeight'))
+            run.font.italic = run_data.get('fontStyle') == 'italic'
+            ls = run_data.get('letterSpacing')
+            if ls and ls != 'normal':
+                try:
+                    px = float(ls) if isinstance(ls, (int, float)) else float(str(ls).replace('px', ''))
+                    if abs(px) >= 0.1:
+                        rPr = run._r.get_or_add_rPr()
+                        rPr.set('spc', str(int(px * 75)))
+                except (ValueError, TypeError):
+                    pass
+            color = parse_css_color(run_data.get('color'), (255, 255, 255))
+            if color:
+                run.font.color.rgb = color
+            last_run = run
+        return last_run
 
     def build_table(self, slide, table_node, slide_bg_rgb):
         """Build a native PPTX table from extracted table data."""
@@ -545,8 +433,244 @@ class SlideBuilder:
             tf.paragraphs[0].alignment = PP_ALIGN.CENTER
             run = tf.paragraphs[0].add_run()
             run.text = text
-            run.font.name = self.font
-            run.font.size = Pt(round(max(6, st.get('fontSize', 12) * 0.75), 1))
+            fs = st.get('fontSize', 12)
+            pt_size = round(max(6, fs * 0.75), 1)
+            # Clamp emoji in small badges to fit bounding box (#38)
+            is_emoji_text = all(_is_emoji_char(ch) for ch in text if not ch.isspace())
+            if is_emoji_text and r['h'] < 60:
+                max_pt = max(6, r['h'] * 0.55)
+                pt_size = min(pt_size, max_pt)
+            run.font.name = EMOJI_FONT if is_emoji_text else self.font
+            run.font.size = Pt(pt_size)
             color = parse_css_color(st.get('color'), (255, 255, 255))
             if color:
                 run.font.color.rgb = color
+
+    # -------------------------------------------------------------------------
+    # Manifest-driven build path (model-driven triage pipeline)
+    # -------------------------------------------------------------------------
+
+    def build_slide_from_manifest(self, prs, manifest, screenshot_fn=None):
+        """
+        Build a PPTX slide from a fully-resolved build manifest.
+
+        Args:
+            prs: python-pptx Presentation object
+            manifest: dict conforming to the build manifest schema (from slide-prep)
+            screenshot_fn: callable(svg_rect) -> png_path for SVG rendering
+
+        Returns:
+            The created slide object
+        """
+        slide = prs.slides.add_slide(prs.slide_layouts[6])  # Blank
+
+        # Background
+        bg_color = parse_css_color(manifest.get('slideBg'))
+        bg = slide.background
+        bg.fill.solid()
+        bg.fill.fore_color.rgb = bg_color or parse_css_color('#0A0A0F')
+        slide_bg_rgb = (bg_color[0], bg_color[1], bg_color[2]) if bg_color else (10, 10, 15)
+
+        elements = manifest.get('elements', [])
+        svg_elements = manifest.get('svgElements', [])
+
+        def _active(e, *types):
+            return e.get('type') in types and not e.get('skipRender') and e.get('type') != 'skip'
+
+        # Rendering order: shapes → accent_bars → svgs → tables → badges → richtexts
+        shapes = sorted([e for e in elements if _active(e, 'shape')],
+                        key=lambda e: e.get('depth', 0))
+        accent_bars = [e for e in elements if _active(e, 'accent_bar')]
+        tables = [e for e in elements if _active(e, 'table')]
+        badges = [e for e in elements if _active(e, 'badge', 'circle')]
+        richtexts = [e for e in elements if _active(e, 'richtext')]
+        svg_items = [e for e in svg_elements if not e.get('skipRender')]
+
+        for s in shapes:
+            self._render_shape(slide, s, slide_bg_rgb)
+
+        for a in accent_bars:
+            self._render_accent_bar(slide, a, slide_bg_rgb)
+
+        if screenshot_fn:
+            for svg in svg_items:
+                self._render_svg_image(slide, svg, screenshot_fn)
+
+        for td in tables:
+            try:
+                self.build_table(slide, td, slide_bg_rgb)
+            except Exception:
+                pass
+
+        for bd in badges:
+            self._render_badge(slide, bd, slide_bg_rgb)
+
+        for rt in richtexts:
+            self._render_richtext(slide, rt)
+
+        notes = manifest.get('notes')
+        if notes:
+            try:
+                slide.notes_slide.notes_text_frame.text = notes
+            except Exception:
+                pass
+
+        return slide
+
+    def _eff_rect(self, element):
+        """Return resolvedRect if present, else rect. resolvedRect wins always."""
+        return element.get('resolvedRect') or element['rect']
+
+    def _render_shape(self, slide, element, slide_bg_rgb):
+        """Render a shape element from manifest onto slide."""
+        r = self._eff_rect(element)
+        st = element.get('styles', {})
+        x = self.px2emu_x(max(0, r['x']))
+        y = self.px2emu_y(max(0, r['y']))
+        w = self.px2emu_x(min(r['w'], self.src_w - max(0, r['x'])))
+        h = self.px2emu_y(min(r['h'], self.src_h - max(0, r['y'])))
+        if w < 10000 and h < 8000:
+            return  # allow thin decorative lines
+
+        br = st.get('borderRadius', 0)
+        if br > 5:
+            shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, w, h)
+            try:
+                shape.adjustments[0] = min(0.12, br / min(r['w'], r['h']))
+            except Exception:
+                pass
+        else:
+            shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, x, y, w, h)
+
+        fill_c = parse_css_color(st.get('backgroundColor'), slide_bg_rgb)
+        if fill_c:
+            shape.fill.solid()
+            shape.fill.fore_color.rgb = fill_c
+        else:
+            shape.fill.background()
+
+        bg_raw = st.get('background', '')
+        if bg_raw and 'linear-gradient' in str(bg_raw):
+            angle, stops = _parse_css_gradient(bg_raw)
+            if stops:
+                _apply_gradient_fill(shape, angle, stops, slide_bg_rgb)
+
+        border_c = parse_css_color(st.get('borderColor'), slide_bg_rgb)
+        bw = st.get('borderWidth', 0)
+        if border_c and bw > 0.3:
+            shape.line.color.rgb = border_c
+            shape.line.width = Pt(max(0.25, bw * 0.75))
+        else:
+            shape.line.fill.background()
+        shape.text_frame.clear()
+
+    def _render_accent_bar(self, slide, element, slide_bg_rgb):
+        """Render a left-border accent bar (PATTERN-002)."""
+        r = self._eff_rect(element)
+        x = self.px2emu_x(max(0, r['x']))
+        y = self.px2emu_y(max(0, r['y']))
+        w = self.px2emu_x(r['w'])
+        h = self.px2emu_y(r['h'])
+        fill_color_str = element.get('fill') or element.get('styles', {}).get('backgroundColor')
+        fill_c = parse_css_color(fill_color_str, slide_bg_rgb)
+        shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, x, y, w, h)
+        if fill_c:
+            shape.fill.solid()
+            shape.fill.fore_color.rgb = fill_c
+        shape.line.fill.background()
+        shape.text_frame.clear()
+
+    def _render_richtext(self, slide, element):
+        """Render a richtext element from manifest onto slide."""
+        r = self._eff_rect(element)
+        runs = element.get('runs', [])
+        if not runs:
+            return
+        full_text = ''.join(run.get('text', '') for run in runs).strip()
+        if not full_text:
+            return
+
+        rotation = element.get('rotation', 0)
+        align = element.get('styles', {}).get('textAlign', 'left')
+
+        x = self.px2emu_x(max(0, r['x']))
+        y = self.px2emu_y(max(0, r['y']))
+        w = self.px2emu_x(min(r['w'], self.src_w - max(0, r['x'])))
+        h = self.px2emu_y(min(max(r['h'], 14), self.src_h - max(0, r['y'])))
+
+        if w < 5000 or h < 5000:
+            return
+
+        # For rotated text, swap dimensions and apply PPTX rotation (#27)
+        if rotation and abs(rotation) >= 5:
+            w, h = h, w
+
+        tb = slide.shapes.add_textbox(x, y, w, h)
+        if rotation and abs(rotation) >= 5:
+            tb.rotation = rotation
+        tb.fill.background()
+        tb.line.fill.background()
+        tf = tb.text_frame
+        tf.word_wrap = True
+        ws = element.get('styles', {}).get('whiteSpace', '')
+        if ws == 'nowrap':
+            tf.word_wrap = False
+        self._apply_margins(tf, element.get('styles', {}))
+
+        p = tf.paragraphs[0]
+        p.alignment = pp_align(align)
+        p.space_before = Pt(0)
+        p.space_after = Pt(0)
+
+        # Emoji font size cap for small icon elements (#38)
+        max_emoji_pt = None
+        if r['h'] < 60 and r['w'] < 80:
+            all_text = ''.join(rd.get('text', '') for rd in runs).strip()
+            if all_text and all(_is_emoji_char(ch) for ch in all_text if not ch.isspace()):
+                max_emoji_pt = max(6, r['h'] * 0.55)
+
+        for run_data in runs:
+            text = run_data.get('text', '')
+            if not text:
+                continue
+            if run_data.get('br'):
+                p = tf.add_paragraph()
+                p.alignment = pp_align(align)
+                p.space_before = Pt(0)
+                p.space_after = Pt(0)
+                continue
+            if '\n' in text:
+                parts = text.split('\n')
+                for pi, part in enumerate(parts):
+                    if pi > 0:
+                        p = tf.add_paragraph()
+                        p.alignment = pp_align(align)
+                        p.space_before = Pt(0)
+                        p.space_after = Pt(0)
+                    if part.strip():
+                        self._add_run(p, part, run_data, max_emoji_pt=max_emoji_pt)
+                continue
+            self._add_run(p, text, run_data, max_emoji_pt=max_emoji_pt)
+
+    def _render_badge(self, slide, element, slide_bg_rgb):
+        """Render a badge/circle element from manifest (delegates to build_badge)."""
+        # build_badge already handles bounds checks and shape creation
+        self.build_badge(slide, element, slide_bg_rgb)
+
+    def _render_svg_image(self, slide, element, screenshot_fn):
+        """Render an SVG image element from manifest using screenshot callback."""
+        r = self._eff_rect(element)
+        if r['w'] < 30 or r['h'] < 30:
+            return
+        if element.get('lines', 0) < 3:
+            return
+        png_path = screenshot_fn(r)
+        if png_path and os.path.exists(png_path):
+            x = self.px2emu_x(max(0, r['x']))
+            y = self.px2emu_y(max(0, r['y']))
+            w = self.px2emu_x(r['w'])
+            h = self.px2emu_y(r['h'])
+            try:
+                slide.shapes.add_picture(png_path, x, y, w, h)
+            except Exception:
+                pass

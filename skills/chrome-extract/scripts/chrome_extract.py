@@ -353,11 +353,78 @@ def extract_layout(html_path, tmpdir, viewport_w=1280, viewport_h=720, hide_sele
     return None
 
 
+def _confidence_for_element(node, runs, has_bg, child_count):
+    """Compute confidence score and flagReason for a classified element.
+
+    Returns (confidence: float, flagReason: str|None).
+
+    Thresholds (from architecture.md):
+      table tag                          → 1.0  (structural fact)
+      ::pseudo tag                       → 0.95 (CSS fact)
+      has runs + leaf (childCount == 0)  → 0.90
+      has runs + block children          → 0.70 (may be container with inline descendants)
+      hasBg only, no runs                → 0.85
+      hasBg + runs (dual-emit candidate) → 0.72
+      small emoji-only element           → 0.65 (badge vs decorative ambiguous)
+    """
+    tag = node.get('tag', '')
+    r = node.get('rect', {})
+
+    # Small emoji-only check (applies before other rules)
+    if runs and r.get('w', 0) < 80 and r.get('h', 0) < 80:
+        all_text = ''.join(rd.get('text', '') for rd in runs if not rd.get('br')).strip()
+        if all_text and all(_is_emoji_char_py(ch) for ch in all_text if not ch.isspace()):
+            return 0.65, "small emoji-only element — badge or decorative icon unclear"
+
+    if runs and len(runs) > 0:
+        if has_bg:
+            # Dual-emit: has both text and background
+            return 0.72, "element has both runs and background — dual-emit shape+richtext, verify type"
+        if child_count == 0:
+            return 0.90, None
+        else:
+            return 0.70, "element has runs but also block children — may be container with inline descendants"
+
+    if has_bg:
+        return 0.85, None
+
+    # Fallback: low confidence
+    return 0.60, "no runs and no background — element purpose unclear"
+
+
+def _is_emoji_char_py(ch):
+    """Python mirror of the JS _is_emoji_char check used in pptx_builder."""
+    cp = ord(ch)
+    if cp >= 0x1F300: return True
+    if 0x2600 <= cp <= 0x27BF: return True
+    if 0x2500 <= cp <= 0x25FF: return True
+    if 0x2B00 <= cp <= 0x2BFF: return True
+    if 0xFE00 <= cp <= 0xFE0F: return True
+    if cp == 0x200D: return True
+    if cp == 0x2022: return True
+    if 0x2000 <= cp <= 0x206F: return True
+    if 0x2190 <= cp <= 0x21FF: return True
+    if 0x2300 <= cp <= 0x23FF: return True
+    if 0x2400 <= cp <= 0x24FF: return True
+    if 0x2700 <= cp <= 0x27BF: return True
+    if 0x2010 <= cp <= 0x2027: return True
+    if 0x2030 <= cp <= 0x205E: return True
+    if 0x2200 <= cp <= 0x22FF: return True
+    if 0x2100 <= cp <= 0x214F: return True
+    return False
+
+
 def classify_elements(raw_data):
     """Apply default classification to raw extracted elements.
 
     Converts raw nodes into the typed format the builder expects.
     This is the deterministic default for the automated pipeline.
+
+    Every returned element dict includes:
+      - type: the classified element type
+      - confidence: float 0.0–1.0 (how certain the classification is)
+      - flagReason: string or None (human-readable reason when confidence < 0.85)
+      - classificationSource: "auto" (all elements from this function)
 
     For higher quality, use vision_classify() which passes the screenshot
     + raw nodes to the model for classification decisions.
@@ -379,21 +446,29 @@ def classify_elements(raw_data):
         # Tables pass through as-is (already structured)
         if tag == 'table':
             node['type'] = 'table'
+            node['confidence'] = 1.0
+            node['flagReason'] = None
+            node['classificationSource'] = 'auto'
             classified.append(node)
             continue
 
         # Pseudo-elements pass through as shapes
         if tag == '::pseudo':
             node['type'] = 'shape'
+            node['confidence'] = 0.95
+            node['flagReason'] = None
+            node['classificationSource'] = 'auto'
             classified.append(node)
             continue
 
         has_bg = node.get('hasBg', False)
         has_border = node.get('hasBorder', False)
         runs = node.get('runs')
+        child_count = node.get('childElementCount', 0)
 
         # Elements with runs → richtext
         if runs and len(runs) > 0:
+            confidence, flag_reason = _confidence_for_element(node, runs, has_bg, child_count)
             classified.append({
                 'type': 'richtext', 'tag': tag, 'classes': cls, 'rect': r,
                 'runs': runs,
@@ -408,13 +483,19 @@ def classify_elements(raw_data):
                 },
                 'rotation': node.get('rotation', 0),
                 'depth': depth,
+                'confidence': confidence,
+                'flagReason': flag_reason,
+                'classificationSource': 'auto',
             })
-            # Also emit shape if it has a visible background
+            # Also emit shape if it has a visible background (dual-emit)
             if has_bg and tag not in ('body', 'html') and r.get('w', 0) > 8 and r.get('h', 0) >= 1:
                 classified.append({
                     'type': 'shape', 'tag': tag, 'classes': cls, 'rect': r,
                     'styles': _shape_styles(styles),
                     'depth': depth,
+                    'confidence': 0.72,
+                    'flagReason': 'dual-emit shape from element with runs — verify not a container',
+                    'classificationSource': 'auto',
                 })
             continue
 
@@ -424,6 +505,9 @@ def classify_elements(raw_data):
                 'type': 'shape', 'tag': tag, 'classes': cls, 'rect': r,
                 'styles': _shape_styles(styles),
                 'depth': depth,
+                'confidence': 0.85,
+                'flagReason': None,
+                'classificationSource': 'auto',
             })
 
         # Container divs with children and no direct text → skip (children handle it)

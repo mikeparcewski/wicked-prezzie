@@ -20,10 +20,10 @@ Claude orchestrates the loop directly using vision to judge quality.
 
 ## Two-Phase Quality Model
 
-**Phase 1 — Conversion + Structural Checks** (automated, fast)
-: Converts all slides and runs structural validation: shapes in bounds, no empty
-slides, no text overflow. A clean structural check means the PPTX is well-formed.
-**It does NOT mean the slides look correct.**
+**Phase 1 — Triage + Prep + Build** (structured, deterministic baseline)
+: For each slide: score element confidence, detect known-pattern risks, apply
+geometry transforms, build PPTX. A clean build means the manifest was fully
+resolved and no elements were skipped unexpectedly.
 
 **Phase 2 — Per-Slide Visual Comparison** (model-driven, thorough)
 : For each slide, render both HTML source and PPTX output to PNG, then visually
@@ -32,29 +32,82 @@ compare. This is where actual quality is measured. **Never skip this phase.**
 ## Workflow
 
 ```
-Step 1: Convert all slides (produces deck.pptx + raw extraction JSON)
-        Run structural checks. Fix any bounds/overflow issues.
-
-Step 1b (optional): Vision classification
-        For slides that look wrong, read the HTML screenshot + raw extraction
-        JSON. Reclassify elements using vision, rebuild that slide.
-
-Step 2: For each slide:
-  a. Screenshot HTML source + render PPTX slide to PNG
-  b. Read both images. Grade PPTX against HTML source.
-  c. If PASS → next slide
-  d. If FIX → diagnose, fix, re-convert, go to (a)
-  e. Stop when: passes, converged, regressed, or 4 attempts
-
-Step 3: Render final montage, report results
+Step 0:  Triage all slides
+Step 0b: Prep manifests (auto + model for flagged)
+Step 1:  Build PPTX (manifest-driven) + structural checks
+Step 2+: Per-slide render-compare loop
+Step N:  Treatment log entry
+Step Final: Render montage, report
 ```
 
-## Step 1: Convert All Slides
+## Step 0: Triage All Slides
+
+During extraction (`html_to_pptx.py` Phase 1), triage runs automatically
+alongside Chrome extraction. For each slide, `triage_slide()` is called and
+`findings.json` is written to `{cache_dir}/slide-{N:03d}/`.
+
+```python
+# Findings are produced automatically. To run triage manually:
+from slide_triage import triage_slide
+import json
+
+raw_layout = json.load(open("slide-000/raw-layout.json"))
+classified_layout = json.load(open("slide-000/classified-layout.json"))
+findings = triage_slide(raw_layout, classified_layout, slide_index=0,
+                        source_file="slide-01.html")
+```
+
+Each findings JSON records:
+- `flaggedCount`: elements with `confidence < 0.85`
+- `patterns`: known patterns detected (e.g. `["PATTERN-002", "PATTERN-004"]`)
+- `complexity`: `"low"` | `"high"`
+
+Slides with `flaggedCount == 0` proceed directly to Step 1 (no model needed).
+
+## Step 0b: Prep Manifests
+
+For each slide, `auto_resolve()` runs automatically in Phase 1 and writes
+`manifest.json`. High-confidence elements (>= 0.85) are fully resolved with
+geometry transforms applied. Flagged elements (< 0.85) are left as stubs with
+`type = None`.
+
+**If manifest has unresolved elements** (`type = None`): read the HTML
+screenshot and resolve them before Step 1.
+
+```python
+from slide_prep import auto_resolve
+import json
+
+findings = json.load(open("slide-000/findings.json"))
+classified_layout = json.load(open("slide-000/classified-layout.json"))
+manifest = auto_resolve(findings, classified_layout)
+
+# Check for unresolved stubs
+unresolved = [e for e in manifest["elements"] if e.get("type") is None]
+```
+
+### Resolving Flagged Elements (model step)
+
+1. Read `findings.json` for the slide — note `flaggedCount` and `flagReason` for each element.
+2. Read the HTML screenshot PNG for the slide.
+3. For each element with `type = None`:
+   - Locate it in the screenshot using `rect` coordinates (1280x720 space).
+   - Decide: correct type? skip? needs geometry adjustment?
+   - Update `type`, `classificationSource = "model"`, and `flagReason` with your conclusion.
+   - If geometry differs, set `resolvedRect` with `source = "model"`.
+4. Write the updated manifest back to `manifest.json`.
+5. Run manifest validation checklist (see `slide-prep/SKILL.md`).
+
+## Step 1: Build PPTX
 
 ```bash
 python skills/slide-html-to-pptx/scripts/html_to_pptx.py \
   --input-dir ./slides --output deck.pptx
 ```
+
+The pipeline automatically uses `build_slide_from_manifest()` when all elements
+are resolved. Falls back to legacy `build_slide()` if manifest has unresolved
+elements (with a warning).
 
 Then run structural checks:
 ```python
@@ -63,47 +116,8 @@ issues = validate_pptx("deck.pptx")
 ```
 
 Fix any structural issues (bounds overflow, negative coords) before Phase 2.
-
-## Step 1b: Vision Classification (when needed)
-
-When the default `classify_elements()` produces wrong results for a slide,
-use vision to reclassify. This replaces heuristic classification with
-model judgment.
-
-### When to Use
-
-- After Step 2 identifies a slide with `missing_element` or `text_error`
-- When the raw extraction JSON has elements that the default classifier
-  put in the wrong category
-- For complex slides with unusual HTML patterns
-
-### How It Works
-
-1. Read the HTML screenshot for the slide
-2. Read the raw extraction JSON (saved in the output dir during Step 1)
-3. For each raw element, decide:
-   - **richtext** — this element should be a text box with its runs
-   - **shape** — this element should be a rectangle/rounded rect
-   - **skip** — this element is a container; its children handle the content
-4. Rebuild the classified element list
-5. Re-run the builder for just that slide
-
-### Classification Prompt
-
-When looking at the screenshot + raw elements, answer for each element:
-
-```
-Element [index]: tag={tag} rect=({x},{y},{w},{h}) hasBg={bool} runs={count} directText="{text}"
-→ Type: richtext | shape | skip
-→ Reason: (one line)
-```
-
-**Rules:**
-- If an element has `runs` and you can see its text in the screenshot → **richtext**
-- If an element has `hasBg` and you can see a colored rectangle → **shape**
-- If an element is a container whose children are separately extracted → **skip**
-- If you can see content in the screenshot that no element captures → flag as **missing**
-- Low confidence? Mark it. The render-compare loop will catch it.
+To diagnose a structural issue, read the slide's `manifest.json` — the
+`resolvedRect` fields show exactly what geometry was used.
 
 ## Step 2: Per-Slide Verification Loop
 
@@ -159,21 +173,62 @@ rendered as solid colors, stripped animations.
 
 | Condition | Fix path | Why |
 |---|---|---|
-| Issue in 2+ distinct decks | **Script fix** in `pptx_builder.py` or `chrome_extract.py` | Systemic |
-| Affects >15% of slides | **Script fix** | General enough |
-| Specific to this slide's CSS | **Direct fix** via EDL or recipe | No general heuristic |
-| Reposition, resize, recolor | **EDL spec** → `edl_apply.py` | Declarative, safe |
-| Structural replacement | **Recipe** from `pptx-recipes.md` | Needs python-pptx code |
+| Issue in 2+ distinct decks | Update `known-patterns.md` + `classify_elements()` confidence score | Systemic — improve triage |
+| Affects >15% of slides | Add to `known-patterns.md`, update triage confidence thresholds | General pattern |
+| Wrong manifest classification for this slide | Edit `manifest.json`, set `classificationSource = "override"`, rebuild slide | Prep missed it — model override |
+| Specific geometry off for this slide | **EDL spec** → `edl_apply.py` | Slide-specific — no general pattern |
+| Structural replacement needed | **Recipe** from `pptx-recipes.md` | Needs python-pptx code |
 
-After fixing, re-convert only the affected slide and go back to 2a.
+### How to Fix via Manifest Override
+
+When the manifest has a wrong classification for a specific slide:
+
+1. Read `{cache_dir}/slide-{N:03d}/manifest.json`.
+2. Find the element by `manifestId`.
+3. Update `type`, `resolvedRect`, or `skipRender` as needed.
+4. Set `classificationSource = "override"`.
+5. Re-run the builder for this slide only using `build_slide_from_manifest()`.
 
 ### Complexity Routing
 
 The standardize step annotates each slide with `<!-- COMPLEXITY: high|low -->`.
-- **Low complexity** — expect 1-2 passes. If not, likely a script bug.
+- **Low complexity** — expect 1-2 passes. If not, likely a manifest classification error.
 - **High complexity** — expect EDL or recipes for the last mile.
 
-## Step 3: Finalize
+## Step N: Treatment Log
+
+After each slide completes (PASS or converge), record a treatment log entry:
+
+```python
+import json
+from datetime import datetime, timezone
+
+entry = {
+    "schemaVersion": 1,
+    "deckSlug": "my-deck",
+    "slideIndex": slide_index,
+    "sourceFile": source_file,
+    "attempt": attempt_number,
+    "timestamp": datetime.now(timezone.utc).isoformat(),
+    "triageSummary": findings_summary,
+    "prepSummary": prep_summary,
+    "buildSummary": build_counts,
+    "renderCompareVerdict": verdict,
+    "issueCategories": issue_tags,
+    "issueDescription": issue_text,
+    "fixApplied": {"type": "edl", "description": "..."},
+    "nextAttemptVerdict": next_verdict,
+    "promotionCandidate": {"recommend": False}
+}
+log_path = f"{slide_tmpdir}/treatment-{slide_index:03d}-attempt-{attempt}.json"
+json.dump(entry, open(log_path, 'w'), indent=2)
+```
+
+If `promotionCandidate.recommend = True`, update `known-patterns.md` with the
+new pattern entry. See `slide-treatment-log/SKILL.md` for the full schema and
+promotion process.
+
+## Step Final: Finalize
 
 ```bash
 python skills/slide-render/scripts/slide_render.py deck.pptx \
@@ -181,7 +236,20 @@ python skills/slide-render/scripts/slide_render.py deck.pptx \
   --montage ~/.something-wicked/wicked-prezzie/output/montage.png
 ```
 
-Report which slides passed, which have REVIEW flags.
+Report which slides passed, which have REVIEW flags, and which patterns were
+detected by triage (from each slide's `findings.json`).
+
+## Cache Files (per slide)
+
+Each slide writes to `{cache_dir}/slide-{N:03d}/`:
+
+| File | Contents |
+|---|---|
+| `raw-layout.json` | Raw `extract_layout()` output (before classification) |
+| `classified-layout.json` | `classify_elements()` output (with confidence scores) |
+| `findings.json` | Triage output (flagged elements, patterns, collision risks) |
+| `manifest.json` | Fully-resolved build manifest (input to builder) |
+| `treatment-{N:03d}-attempt-{M}.json` | Treatment log entry per attempt |
 
 ## Reference Files
 
@@ -193,4 +261,8 @@ Read on demand — do not load all at once.
 | [versioning.md](references/versioning.md) | Deck versioning, naming, metadata, diff |
 | [output-formats.md](references/output-formats.md) | PPTX + Reveal.js dual-format output |
 | [edit-coordination.md](references/edit-coordination.md) | Session locks for concurrent edits |
-| [pptx-recipes.md](../slide-pptx-builder/references/pptx-recipes.md) | python-pptx fix recipes |
+| [../slide-triage/SKILL.md](../slide-triage/SKILL.md) | Triage: findings JSON schema, pattern detection |
+| [../slide-prep/SKILL.md](../slide-prep/SKILL.md) | Prep: manifest schema, auto + model resolution |
+| [../slide-treatment-log/SKILL.md](../slide-treatment-log/SKILL.md) | Treatment log: schema, promotion process |
+| [../slide-triage/references/known-patterns.md](../slide-triage/references/known-patterns.md) | All documented patterns with signatures + treatments |
+| [../slide-pptx-builder/references/pptx-recipes.md](../slide-pptx-builder/references/pptx-recipes.md) | python-pptx fix recipes |
