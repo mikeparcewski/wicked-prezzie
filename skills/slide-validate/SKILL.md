@@ -58,3 +58,5 @@ Read on demand — do not load all at once.
 | [deck-audit.md](references/deck-audit.md) | Full 5-category quality audit |
 | [content-lint.md](references/content-lint.md) | Content quality checks |
 | [consistency-checks.md](references/consistency-checks.md) | Within-deck and cross-deck consistency |
+| [validation-lenses.md](references/validation-lenses.md) | Four parallel validation agents: POV Clarity, RFP Coverage, Making It Real, Know Them |
+| [balance-audit.md](references/balance-audit.md) | Content ratio (30/40/30), redundancy clusters, flow cohesion, council punch list format |

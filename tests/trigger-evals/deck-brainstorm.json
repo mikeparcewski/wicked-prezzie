@@ -1,0 +1,16 @@
+{
+  "skill": "deck-brainstorm",
+  "evals": [
+    {"prompt": "brainstorm ideas for the presentation deck", "should_trigger": true},
+    {"prompt": "run a dreamer-skeptic session for this deck", "should_trigger": true},
+    {"prompt": "set up brainstorm teams for the proposal", "should_trigger": true},
+    {"prompt": "ideation session for the client deck", "should_trigger": true},
+    {"prompt": "run a brainstorm with persona pairs", "should_trigger": true},
+    {"prompt": "synthesize the brainstorm outputs into architecture", "should_trigger": true},
+    {"prompt": "generate slides from the brainstorm", "should_trigger": false},
+    {"prompt": "build a full deck end to end", "should_trigger": false},
+    {"prompt": "outline the presentation structure", "should_trigger": false},
+    {"prompt": "validate content balance in the deck", "should_trigger": false},
+    {"prompt": "index these source documents", "should_trigger": false}
+  ]
+}

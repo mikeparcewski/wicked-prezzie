@@ -261,6 +261,8 @@ Read on demand — do not load all at once.
 | [versioning.md](references/versioning.md) | Deck versioning, naming, metadata, diff |
 | [output-formats.md](references/output-formats.md) | PPTX + Reveal.js dual-format output |
 | [edit-coordination.md](references/edit-coordination.md) | Session locks for concurrent edits |
+| [export-safety.md](references/export-safety.md) | Version bumping, visual verification protocol, no-tmp rule, path audit, rollback, PDF and bundled HTML |
+| [constraint-persistence.md](references/constraint-persistence.md) | constraints.json schema, injection protocol, Learn Constraint protocol, severity levels, lifecycle |
 | [../slide-triage/SKILL.md](../slide-triage/SKILL.md) | Triage: findings JSON schema, pattern detection |
 | [../slide-prep/SKILL.md](../slide-prep/SKILL.md) | Prep: manifest schema, auto + model resolution |
 | [../slide-treatment-log/SKILL.md](../slide-treatment-log/SKILL.md) | Treatment log: schema, promotion process |

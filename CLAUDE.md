@@ -18,6 +18,15 @@ Topic/brief → slide-outline → slide-generate → slide-html-standardize → 
                                                                                          ↓ fix history
                                                                                slide-treatment-log
                                                                                (known-patterns.md feedback)
+
+Offline utility (not an inline pipeline step):
+  slide-learn       Source docs → two-pass index → markdown indexes with YAML frontmatter
+                    (PDFs, PPTX,    per-doc + cross-doc    _insights/ fast-path,
+                     DOCX, HTML)    extraction + synthesis  _tags/, _relationships/)
+
+Deck-level methodology (Claude-orchestrated, no scripts):
+  deck-pipeline     Hub-and-spoke orchestrator: phase state machine, constraint injection, gate conditions
+  deck-brainstorm   Dreamer-skeptic teams, 12-persona framework, synthesis rules, content principles
 ```
 
 ## Project Structure
@@ -100,6 +109,27 @@ skills/
     SKILL.md
     scripts/slide_config.py
     config.json                  (auto-created on first `set`)
+  slide-learn/             — Source document indexing (offline utility, not inline pipeline)
+    SKILL.md
+    scripts/slide_learn.py       (two-pass indexing orchestrator)
+    references/
+      index-schema.md            (markdown index format, YAML frontmatter schema)
+      chunk-strategy.md          (document chunking rules by type)
+      vision-templates.md        (vision extraction prompts for images/charts)
+      search-patterns.md         (how to query indexes efficiently)
+      integration.md             (how pipeline skills consume indexes)
+  deck-pipeline/           — Deck-building orchestrator (methodology only, no script)
+    SKILL.md
+    references/
+      phase-definitions.md       (8-phase state machine, gate conditions)
+      constraint-registry.md     (constraint format + 10 default constraints)
+      agent-catalog.md           (agent definitions with prompt templates)
+  deck-brainstorm/         — Dreamer-skeptic brainstorm methodology (no script)
+    SKILL.md
+    references/
+      brainstorm-teams.md        (3-team structure, roles, interaction protocol)
+      content-principles.md      (8 content skills: mechanism-before-outcome, etc.)
+      persona-framework.md       (12-persona system, pass/fail criteria, pairing)
 
 tests/                     — Test fixtures, evals, and trigger-evals
   test-slide-01.html       — Title slide (heading, subtitle, accent bar)
@@ -146,7 +176,19 @@ Project-level config stays in `skills/slide-config/config.json` (per-project ove
 **Resolution order**: defaults → user config → project config (project wins).
 
 **User-level keys**: `default_font`, `default_fidelity`, `unsplash_api_key`
-**Project-level keys**: `quality_threshold`, `viewport`, `hide_selectors`, `active_theme`, `slide_width_inches`, `slide_height_inches`
+**Project-level keys**: `quality_threshold`, `viewport`, `hide_selectors`, `active_theme`, `slide_width_inches`, `slide_height_inches`, `index_dirs`
+
+## Two Pipelines: deck-pipeline vs slide-pipeline
+
+These serve different purposes and should not be confused:
+
+- **slide-pipeline** — Technical conversion: takes existing HTML slides and converts them to native PPTX with visual verification. This is the "how do I turn these files into PowerPoint" tool. Entry point when the user already has slides.
+
+- **deck-pipeline** — Content workflow: takes a topic or brief through 8 phases (source inventory → personas → brainstorm → architecture → build → validate → polish → export) to produce a complete presentation from scratch. This is the "build me a deck about X" tool. Entry point when the user has a topic but no slides yet.
+
+During Phase 5 (Build), deck-pipeline delegates to slide-generate for HTML creation and slide-pipeline for PPTX conversion. They are complementary, not competing.
+
+**Routing rule**: If the user has HTML slides → slide-pipeline. If the user has a topic/brief/documents → deck-pipeline.
 
 ## Key Design Decisions
 
@@ -171,6 +213,10 @@ Project-level config stays in `skills/slide-config/config.json` (per-project ove
 10. **Enriched IR** — Extraction includes `layoutRole` (inferred from CSS class patterns like `card`, `stat`, `badge`, `progress`, `chart`) and full `classes` on every element. The builder can dispatch by semantic role instead of guessing from pixel geometry.
 
 11. **Complexity routing** — `html_standardize.py` annotates each slide with `<!-- COMPLEXITY: high|low -->` by scanning for SVGs, gradients, pseudo-elements, rotated text. The pipeline uses this to set expectations: low-complexity slides should pass in 1-2 attempts, high-complexity slides may need direct fixes.
+
+12. **Two-pass indexing** — `slide-learn` separates per-document extraction (parallelizable, stateless) from cross-document synthesis (sequential, requires full corpus). Pass 1 can be run incrementally as new documents arrive. Pass 2 rebuilds `_insights/` and `_relationships/` from the full set.
+
+13. **Hub-and-spoke deck orchestration** — `deck-pipeline` owns the phase state machine and constraint injection; phase-specific skills (`deck-brainstorm`, `slide-generate`, `slide-validate`) own execution. Constraints persist in `constraints.json` on disk, not in conversation context, surviving session boundaries.
 
 ## Dependencies
 

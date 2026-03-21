@@ -1,0 +1,17 @@
+{
+  "skill": "slide-learn",
+  "evals": [
+    {"prompt": "index this document for later reference", "should_trigger": true},
+    {"prompt": "learn from this PDF about their requirements", "should_trigger": true},
+    {"prompt": "extract key facts from the RFP", "should_trigger": true},
+    {"prompt": "build an index of these source files", "should_trigger": true},
+    {"prompt": "what do we know about their portfolio?", "should_trigger": true},
+    {"prompt": "index the reference materials in this folder", "should_trigger": true},
+    {"prompt": "scan these docs and create a knowledge base", "should_trigger": true},
+    {"prompt": "extract layout data from this HTML slide", "should_trigger": false},
+    {"prompt": "learn my brand colors from this PPTX", "should_trigger": false},
+    {"prompt": "generate slides from this outline", "should_trigger": false},
+    {"prompt": "convert these HTML slides to PowerPoint", "should_trigger": false},
+    {"prompt": "validate the slide deck for issues", "should_trigger": false}
+  ]
+}

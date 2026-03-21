@@ -122,6 +122,49 @@ When only some slides need attention after conversion.
 
 ---
 
+## Source intelligence workflows
+
+### "Index my reference materials before we start"
+
+Feed source documents to slide-learn before building a deck. The index becomes a searchable knowledge base that deck-building agents query instead of re-reading raw files.
+
+```
+1. "Index the RFP documents in ./source-materials/"
+2. "What financial figures did you find?"     → grep _insights/key-facts.md
+3. "Which documents mention their AI strategy?" → grep _tags/technical.md
+4. "Now build a deck using those materials"    → deck-pipeline reads the index
+```
+
+**Skills used**: slide-learn → deck-pipeline
+
+### "Brainstorm before building"
+
+Run structured ideation with dreamer-skeptic teams before committing to slide architecture. Three teams generate independent perspectives, then synthesis resolves conflicts into an approved plan.
+
+```
+1. "Run a brainstorm for the proposal deck — dreamer-skeptic teams"
+2. "Synthesize the three team outputs into a slide plan"
+3. "Run the three-team review — narrative, commercial, technical"
+4. "All three teams approve. Now build the slides."
+```
+
+**Skills used**: deck-brainstorm → deck-pipeline (architecture phase) → slide-generate
+
+### "I keep fixing the same bugs across sessions"
+
+Constraints persist in `constraints.json` — learned once, enforced everywhere. After fixing a recurring issue, the pipeline writes a constraint that every future build agent receives.
+
+```
+"The centering keeps breaking — add a constraint for that"
+→ constraint written to constraints.json
+→ every future build agent receives it in their prompt
+→ the bug never recurs
+```
+
+**Skills used**: deck-pipeline (constraint persistence)
+
+---
+
 ## Theming workflows
 
 ### Extract brand from existing assets

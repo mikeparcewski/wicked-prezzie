@@ -61,6 +61,7 @@ python ${CLAUDE_SKILL_DIR}/scripts/slide_config.py reset
 | `unsplash_api_key` | (none) | slide-generate | Unsplash API key for image sourcing (user-level) |
 | `slide_width_inches` | `13.333` | slide-pptx-builder | Slide width (project-level) |
 | `slide_height_inches` | `7.5` | slide-pptx-builder | Slide height (project-level) |
+| `index_dirs` | `[]` | slide-config | Additional directories scanned when listing decks or themes (project-level) |
 
 ## How Other Skills Read Config
 
@@ -84,3 +85,11 @@ def load_config():
 ```
 
 If neither config file exists, skills use their built-in defaults.
+
+## Reference Files
+
+Read on demand — do not load all at once.
+
+| File | Read when... |
+|---|---|
+| [constraint-format.md](references/constraint-format.md) | constraints.json schema, field definitions, severity levels, relationship to config.json, index_dirs key |

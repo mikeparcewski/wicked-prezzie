@@ -232,3 +232,5 @@ Read these on demand — do not load all at once.
 |---|---|
 | [templates.md](references/templates.md) | Slide template definitions, zone schemas, and selection logic |
 | [image-sourcing.md](references/image-sourcing.md) | Image modes (Unsplash/icons/none), attribution rules, placement strategies |
+| [css-constraints.md](references/css-constraints.md) | Definitive CSS contract with chrome-extract: centering rules, card flex, badges, forbidden patterns |
+| [html-template.md](references/html-template.md) | Canonical HTML slide template, CSS variables, notes-data.js format, component variations |

@@ -89,6 +89,19 @@ graph TD
 | **slide-config** | Two-tier configuration — user-level (`~/.something-wicked/wicked-prezzie/config.json`) for defaults shared across projects, project-level (`skills/slide-config/config.json`) for per-project overrides. |
 | **slide-pipeline** | End-to-end orchestrator. Three fidelity tiers (best/draft/rough) with multi-pass verification loops. Dual-format output (PPTX + Reveal.js HTML). Non-destructive versioning (`{slug}_v{N}.pptx`). Session-scoped edit coordination locks. |
 
+### Source Intelligence
+
+| Skill | Purpose |
+|---|---|
+| **slide-learn** | Indexes source documents (PDF, PPTX, DOCX, HTML, images) into searchable markdown with YAML frontmatter. Two-pass: per-document extraction (parallelizable, uses vision for binaries) then cross-document synthesis (`_insights/`, `_tags/`, `_relationships/`). Hash-based incremental re-indexing. |
+
+### Deck Methodology
+
+| Skill | Purpose |
+|---|---|
+| **deck-pipeline** | Hub-and-spoke orchestrator for full deck-building workflows. 8-phase state machine (source inventory → personas → brainstorm → architecture → build → validate → polish → export) with constraint injection, gate conditions, and 10 default constraints derived from production session analysis. |
+| **deck-brainstorm** | Dreamer-skeptic brainstorm methodology with 3-team structure (narrative/operational/commercial). 12-persona framework with pass/fail criteria. 8 reusable content principles (mechanism-before-outcome, two-layer proof, hallway line, etc.). Synthesis rules with conflict resolution. |
+
 ## Storage
 
 ```
@@ -98,6 +111,11 @@ graph TD
   profiles/                             Exported .pptprofile files
   registry/                             Shared design asset cache
   versions/                             Deck version metadata
+  index/                              Generated document indexes (per source dir)
+    _manifest.json                    Index metadata and freshness
+    _insights/                        Fast-path summaries (key-facts, themes, gaps)
+    _tags/                            Content-type cross-references
+    _relationships/                   Cross-document entity links
 
 skills/slide-config/config.json         Project-level overrides
   quality_threshold, viewport, active_theme, slide dimensions

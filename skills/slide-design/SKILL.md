@@ -90,3 +90,5 @@ Read these on demand — do not load all at once.
 | [quality-rubric.md](references/quality-rubric.md) | 100-point scoring system with 7 categories for slide quality |
 | [css-contract.md](references/css-contract.md) | CSS class naming conventions, zone types, and conservative fallback layout |
 | [hints.md](references/hints.md) | Contextual hints during creation flows and REVIEW flag system for speaker notes |
+| [spacing-negotiation.md](references/spacing-negotiation.md) | Non-negotiable minimums, three-options protocol, batch editing, compress vs. split guidance |
+| [content-principles.md](references/content-principles.md) | Assertion-evidence structure, one message per slide, bullet discipline, title as claim, proof not pitch |

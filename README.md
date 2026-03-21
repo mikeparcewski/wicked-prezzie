@@ -2,9 +2,11 @@
 
 HTML slides to editable PowerPoint. Native shapes and formatted text, not screenshots.
 
-A Claude Code plugin that handles the full presentation lifecycle — plan content, generate themed slides, convert existing HTML, validate output, and iterate until it matches.
+A Claude Code / Gemini CLI plugin that handles the full presentation lifecycle — index source documents, plan content with structured brainstorming, generate themed slides, convert HTML to native PPTX, validate output, and iterate until it matches.
 
 ## Quick start
+
+### Claude Code
 
 ```bash
 git clone https://github.com/mikeparcewski/wicked-prezzie.git
@@ -12,13 +14,39 @@ cd wicked-prezzie
 claude
 ```
 
-That's it. Claude discovers all 13 skills automatically. Then just talk to it:
+Claude discovers all skills automatically.
+
+### Gemini CLI
+
+```bash
+git clone https://github.com/mikeparcewski/wicked-prezzie.git
+cd wicked-prezzie
+gemini
+```
+
+Gemini uses the same skills with its own tool names (see [GEMINI.md](GEMINI.md) for the mapping).
+
+### Prerequisites
+
+```bash
+pip install python-pptx beautifulsoup4 lxml Pillow
+```
+
+- **Google Chrome** — headless layout extraction
+- **LibreOffice** — PPTX rendering (`brew install --cask libreoffice` / `apt install libreoffice`)
+- **poppler** — PDF to PNG (`brew install poppler` / `apt install poppler-utils`)
+
+Missing dependencies are auto-detected on first run.
+
+16 skills cover the full pipeline. Just talk to it:
 
 ```
 "Make me a presentation about our Q1 results"
 "Convert the HTML slides in my-deck/ to PowerPoint"
 "Use our brand — navy and gold, dark background"
 "Check my deck for layout issues"
+"Index the RFP documents in ./source-materials/"
+"Run a brainstorm for the client deck — use dreamer-skeptic teams"
 ```
 
 ## What it does
@@ -31,6 +59,10 @@ That's it. Claude discovers all 13 skills automatically. Then just talk to it:
 
 **Validate** — Five-category deck audit (structure, content, layout, consistency, lint) with automatic remediation. Visual diff compares HTML source against PPTX output.
 
+**Learn** — Index source documents (PDFs, PPTX, DOCX, images) into searchable markdown with YAML frontmatter. Two-pass architecture: per-document extraction with vision, then cross-document synthesis of themes, relationships, and key facts.
+
+**Orchestrate** — Full deck-building methodology with dreamer-skeptic brainstorming, 12-persona validation, constraint persistence, and phased gate reviews. Hub-and-spoke architecture keeps context lean across long sessions.
+
 Works with HTML from anywhere — ChatGPT, Claude, Gemini, reveal.js, or hand-coded.
 
 ## How it works
@@ -42,20 +74,6 @@ Topic → slide-outline → slide-generate → standardize → chrome-extract �
 ```
 
 Each stage is independent. Jump in anywhere — bring your own HTML, start from an outline, or go from a blank page.
-
-**[Pipeline architecture →](PIPELINE.md)** · **[Use cases & examples →](USE-CASES.md)**
-
-## Prerequisites
-
-```bash
-pip install python-pptx beautifulsoup4 lxml Pillow
-```
-
-- **Google Chrome** — headless layout extraction
-- **LibreOffice** — PPTX rendering (`brew install --cask libreoffice` / `apt install libreoffice`)
-- **poppler** — PDF to PNG (`brew install poppler` / `apt install poppler-utils`)
-
-Missing dependencies are auto-detected and installed on first run.
 
 ## Themes
 
@@ -97,7 +115,17 @@ skills/
   slide-pipeline/          End-to-end orchestrator
   slide-design/            Design principles (reference)
   slide-config/            Project + user settings
+  slide-learn/             Source document indexing
+  deck-pipeline/           Full deck orchestrator (methodology)
+  deck-brainstorm/         Brainstorm + persona framework
 ```
+
+## Documentation
+
+- **[Pipeline architecture](PIPELINE.md)** — Stage-by-stage technical breakdown with Mermaid diagram
+- **[Use cases & examples](USE-CASES.md)** — Practical paths from simplest to most involved
+- **[How it works](ARCHITECTURE.md)** — Technical deep-dive: extraction, building, triage, indexing
+- **[Gemini CLI](GEMINI.md)** — Tool name mapping for Gemini users
 
 ## License
 

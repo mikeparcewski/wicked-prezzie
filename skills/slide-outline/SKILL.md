@@ -185,6 +185,12 @@ The `--validate` flag checks:
 These are guidelines — data-heavy slides need more time, title/divider slides
 need less.
 
+## Reference Files
+
+| File | Read when... |
+|---|---|
+| [pyramid-principle.md](references/pyramid-principle.md) | Deeper guidance on the Pyramid Principle, SCQA structure, and assertion-based titles |
+
 ## How Claude Should Use This Skill
 
 When a user asks for a presentation, follow this workflow:

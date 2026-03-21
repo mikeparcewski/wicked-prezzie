@@ -1,0 +1,16 @@
+{
+  "skill": "deck-pipeline",
+  "evals": [
+    {"prompt": "build a full deck from these source materials", "should_trigger": true},
+    {"prompt": "run the deck workflow end to end", "should_trigger": true},
+    {"prompt": "start the deck pipeline for this project", "should_trigger": true},
+    {"prompt": "orchestrate the full slide creation process", "should_trigger": true},
+    {"prompt": "what phase are we in for the deck pipeline?", "should_trigger": true},
+    {"prompt": "resume the deck building workflow", "should_trigger": true},
+    {"prompt": "convert these HTML slides to PowerPoint", "should_trigger": false},
+    {"prompt": "brainstorm ideas for the presentation", "should_trigger": false},
+    {"prompt": "validate the slide deck quality", "should_trigger": false},
+    {"prompt": "generate HTML slides from this outline", "should_trigger": false},
+    {"prompt": "index these reference documents", "should_trigger": false}
+  ]
+}

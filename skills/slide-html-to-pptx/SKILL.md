@@ -1,5 +1,5 @@
 ---
-name: HTML to PowerPoint
+name: Slide HTML to PPTX
 description: >
   Single-stage HTML-to-PPTX conversion with native shapes and formatted text.
   Use only when the user wants just conversion without QA — "just convert",
