@@ -1,7 +1,7 @@
 {
   "name": "wicked-prezzie",
-  "version": "3.0.0",
-  "description": "HTML slides to native editable PowerPoint — plan, generate, convert, validate, and refine. Model-driven triage pipeline: per-slide confidence scoring, manifest-driven builder, known-patterns reference for self-improving quality. 16 skills covering the full presentation lifecycle.",
+  "version": "4.0.0",
+  "description": "HTML slides to native editable PowerPoint — plan, generate, convert, validate, and refine. Source document indexing with vision extraction. Full deck-building methodology with dreamer-skeptic brainstorming and 12-persona validation. Model-driven triage pipeline with constraint persistence. 19 skills covering the full presentation lifecycle.",
   "author": {
     "name": "Mike Parcewski",
     "url": "https://github.com/mikeparcewski"
@@ -21,6 +21,11 @@
     "edl",
     "visual-comparison",
     "slide-generation",
-    "theming"
+    "theming",
+    "document-indexing",
+    "brainstorming",
+    "deck-building",
+    "source-learning",
+    "constraint-persistence"
   ]
 }
