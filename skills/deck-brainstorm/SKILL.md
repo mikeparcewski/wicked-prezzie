@@ -181,7 +181,7 @@ are built. Treat the synthesized architecture document as a contract.
 | File | Purpose |
 |------|---------|
 | `references/brainstorm-teams.md` | Detailed team structure, persona pairs, interaction protocol, synthesis rules with examples |
-| `references/content-principles.md` | 8 reusable content skills (mechanism before outcome, two-layer proof, drumbeat threading, hallway line, protagonist arc, proof not pitch, client specificity, [union-agreement]-safe language) + speaker notes format |
+| `references/content-principles.md` | 8 content patterns (mechanism before outcome, two-layer proof, protagonist arc, threading, client specificity, assertion titles, language sensitivity, speaker notes) + review scoring |
 | `references/persona-framework.md` | Full 12-persona system with pass/fail criteria, dreamer-skeptic pairing recommendations, tier rankings, and usage across phases |
 
 ---

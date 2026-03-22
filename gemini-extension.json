@@ -1,6 +1,6 @@
 {
   "name": "wicked-prezzie",
   "description": "HTML slides to native editable PowerPoint — plan, generate, convert, validate, and refine. Source document indexing, deck-building methodology, and constraint persistence. 20 skills covering the full presentation lifecycle.",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "contextFileName": "GEMINI.md"
 }

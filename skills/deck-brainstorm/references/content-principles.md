@@ -1,331 +1,199 @@
 # Content Principles — 8 Reusable Patterns
 
-Reference for `deck-brainstorm` skill. Eight content skills extracted from the [CLIENT]
-deck project. Each pattern includes when to use it, what it produces, key rules, and a
-concrete example. Apply these during brainstorm team sessions and as review criteria
-against the finished deck.
+Reference for `deck-brainstorm` skill. Eight content patterns that apply to any
+presentation. Each pattern includes when to use it, what it produces, and key
+rules. Apply during brainstorm sessions and as review criteria.
 
 ---
 
 ## 1. Mechanism Before Outcome
 
-**When to use**: Every slide that makes a claim about results or capabilities.
+**When to use**: Every slide that claims results or capabilities.
 
-**What it produces**: Slides where the audience understands HOW something works before
-being told WHAT it delivers. Credibility earned through demonstration, not assertion.
+**What it produces**: Slides where the audience understands HOW something works
+before being told WHAT it delivers. Credibility through demonstration, not assertion.
 
 **Key rules**:
 - Show the mechanism first, then state the outcome. Never reverse this.
-- Name the specific components, not just the category. Not "AI reviews code" but
-  "Our agents review code changes to YOUR provisioning system."
+- Name specific components, not just categories. Not "AI reviews code" but
+  "Agents review changes to your provisioning system using these 4 criteria."
 - If a concept is named but not explained, it is a label, not a capability.
-- Target 30-37% mechanism density across the deck (mechanism slides as share of total).
-  Below 25% is a credibility failure; above 45% risks losing narrative flow.
+  Labels fail. Mechanisms convince.
+- Target 30-37% mechanism density (mechanism slides as share of total).
+  Below 25% is a credibility gap; above 45% risks losing narrative flow.
 
-**Concrete example**: V1 slide 10 (Scoring Engine) showed 4 scoring dimensions, routing
-logic, and the output dashboard BEFORE stating the 25% YoY savings claim. The council
-punch list caught when v3 reversed this: "V1 built mechanism first, then asserted outcomes.
-V3 reversed this." V3 had 5 of 6 core concepts rated ASPIRATIONAL because they were
-named but not explained. The fix: add mechanism content to each aspirational slide before
-reordering the narrative sequence.
+**Test**: For each capability slide, can a skeptical audience member explain
+HOW it works to a colleague after seeing the slide? If not, it needs mechanism.
 
 ---
 
 ## 2. Two-Layer Proof
 
-**When to use**: Every slide that claims domain knowledge or operational capability.
+**When to use**: Every slide that presents evidence for a claim.
 
-**What it produces**: Slides with both an operational scenario AND execution evidence.
-Neither layer alone constitutes proof. Together they are defensible.
+**What it produces**: Proof slides with operational scenarios grounded in
+concrete evidence. The audience feels it AND can verify it.
 
 **Key rules**:
-- **Layer 1 — Operational scenario**: What happens at 2am? What does the engineer
-  experience? What does the failure event look like from inside the system? This layer
-  makes the claim feel real. It earns emotional credibility.
-- **Layer 2 — Execution evidence**: The specific artifact, metric, decision log, or
-  audit trail. The output the system produced. The number at the end of the process.
-  This layer makes the claim defensible under technical scrutiny.
+- **Layer 1 — Scenario**: What happens in practice? Paint the scene. "At 2am
+  when the system alerts, here's what the engineer sees." Makes it feel real.
+- **Layer 2 — Evidence**: The specific artifact, metric, or output that backs
+  the claim. Makes it defensible.
 - You cannot have one without the other. A scenario without evidence is a story.
-  Evidence without scenario is a data table.
-- The scenario makes it real. The evidence makes it auditable.
+  Evidence without a scenario is a data table.
+- Every capability claim needs both layers before it enters the deck.
 
-**Concrete example**: V2 slide 08 (Pillar 1: Know Portfolio):
-- Layer 1: [System-A] degradation at 2:47am, criticality correctly identified despite no
-  explicit SLA tag — the scenario. Who was on call, what the system flagged, what the
-  human engineer saw.
-- Layer 2: Scored governance output showing the rationale, the override decision, and
-  the audit trail — the evidence. An artifact the evaluator can examine.
-
-The Operators team principle that emerged: "Every proof slide has two layers: operational
-scenario plus execution evidence. You cannot have one without the other."
+**Test**: Does the proof have a human moment (Layer 1) AND a verifiable artifact
+(Layer 2)? If either is missing, it's incomplete.
 
 ---
 
-## 3. Drumbeat Threading
+## 3. Protagonist Arc
 
-**When to use**: Any proposal with a commercial differentiator that needs to build
-throughout the deck. Also applies to any concept the deck wants the audience to carry
-with them from Act 1 through Act 5.
+**When to use**: The opening and closing of the deck, with callbacks in between.
 
-**What it produces**: A single concept that builds from plant to mechanics to culmination
-across the full deck, never appearing as a one-time mention. The audience should feel
-the concept growing in significance with each callback.
+**What it produces**: A human thread that creates emotional engagement. The deck
+has a protagonist. It cannot abandon the protagonist.
 
 **Key rules**:
-- **Plant** (Act 1): State the commitment as a headline. Create the question. Do not
-  elaborate. The audience leaves Act 1 wondering how it works.
-- **Build** (Acts 2-3): Brief callback per section — one sentence, not a slide. Ties
-  the current content back to the commitment. "This pillar's KPI: [metric]."
-- **Mechanics** (Act 3): Full reveal. Triggers, non-triggers, measurement methodology,
-  quarterly cadence, cure periods. This slide earns the plant.
-- **Culminate** (Act 4/5): Resolution. "What happens if we're wrong?" The emotional peak.
-- Must appear in at least 5 slides across the deck.
-- Never more than 3 consecutive slides without a mention.
-- The longest gap must not exceed 15 minutes of presentation time.
+- Open with a specific person in a specific situation. Not "teams face challenges"
+  but "The last time [system] went down at 2am, someone in this room spent six
+  hours on the phone."
+- The protagonist is a recognizable figure — someone the audience knows or can
+  see themselves as. Draw from real scenarios the audience has experienced.
+- Close by returning to the protagonist transformed. "That person at 2am — this
+  is what changes for them."
+- Callbacks between opening and close keep the protagonist alive. At least one
+  mention every 5-7 slides.
 
-**Concrete example**: V2 fee-at-risk threading map:
-- Slide 3 PLANT: "[total-value] savings exposure at [fee-value] fee-at-risk" — creates the question
-- Slides 8, 9, 10, 11 BUILD: Each pillar callback ("This pillar's KPI: [metric]")
-- Slide 12 MECHANICS: Full reveal of triggers, non-triggers, measurement, quarterly cadence
-- Slide 13 AI connection: Bridge sentence linking mechanism to intelligence layer
-- Slide 20 CULMINATION: "What happens if we're wrong?" — emotional peak
-- Slide 21 RESOLUTION: The answer to Act 1's question
-- Slide 22 INVITATION: Discussion questions
-
-Team B caught that slides 10-18 (15 minutes) had no fee-at-risk mention. Fix: added a
-bridge sentence to slide 13. Rule: review the threading map before architecture is approved.
+**Test**: If you remove the protagonist, does the deck lose emotional weight?
+If not, the protagonist isn't doing its job.
 
 ---
 
-## 4. The Hallway Line
+## 4. Threading (Plant → Build → Reveal → Resolve)
 
-**When to use**: At the close of the methodology or architecture section (typically the
-end of Act 2). One hallway line per deck; generate 3-5 candidates during brainstorm and
-select the strongest.
+**When to use**: For any key concept that must build across the deck.
 
-**What it produces**: A single sentence that a committee member can repeat in their
-debrief conversation, in the hallway, or to someone who did not attend the presentation.
-If it spreads, it does your selling for you.
+**What it produces**: A concept that appears, grows, and resolves — the audience
+feels it building rather than encountering it once.
 
 **Key rules**:
-- Maximum 10-15 words. If it is longer, it will not be remembered.
-- Must be surprising — not a restatement of what the audience already believes.
-  If they could have said it themselves before the presentation, it is not the hallway line.
-- Must teach something — not just inspire. The audience should understand something new
-  after hearing it.
-- Must differentiate — a competitor cannot say the same thing. If any vendor could claim
-  this line, it is not differentiated enough.
-- Test: "Would a committee member repeat this sentence in their debrief?"
+- **Plant**: Introduce the concept as a question or headline. Don't elaborate.
+  Create curiosity.
+- **Build**: Brief callbacks every 3-4 slides. One sentence, not a paragraph.
+  The audience knows the thread is alive.
+- **Reveal**: Full explanation in a dedicated section. This is where the detail
+  lives — mechanism, measurement, timeline.
+- **Resolve**: Return to the opening. Circle back. "What happens if we're wrong?"
 
-**Concrete examples from [CLIENT] session**:
-- Selected: "Don't give an agent a task. Give it a world to work in."
-  Surprising (inverts how people think about AI agents), teaching (context architecture
-  is the mechanism, not task assignment), differentiating (few vendors operate this way),
-  repeatable (12 words).
-- Alternate: "Your engineers aren't the bottleneck. Your ability to give AI the right
-  context is." Also strong — surprising, teaching, differentiating. Slightly longer.
-
-Generation process: Team 1 generates 3-5 candidates during the brainstorm session.
-The synthesis round selects one based on the four criteria. The selected line must appear
-on the hallway-line slide and in the speaker notes for Act 2's closing slide.
+**Verification**:
+- No key concept has fewer than 5 mentions across the deck
+- No gap of more than 3 consecutive slides without a mention
+- A reveal section exists for every threaded concept
 
 ---
 
-## 5. Protagonist Arc
+## 5. Client Specificity (Know Your Audience)
 
-**When to use**: When the deck opens with a human scenario or provocation. Applies to
-most proposal decks — the human opening is the most common and most effective opening.
+**When to use**: Every slide. This is not optional.
 
-**What it produces**: An emotional arc that begins with a specific human moment and
-returns to it in the close, transformed. The audience experiences a narrative resolution,
-not just a product presentation.
+**What it produces**: A deck that could only be for THIS audience, not a
+generic template with the logo swapped.
 
 **Key rules**:
-- Open with a specific human scenario, not an abstraction. Not "digital transformation
-  challenges" but "The last time [System-A] triggered a P1 at 2am, someone in this room was
-  on the phone for six hours."
-- Name the protagonist (the engineer at 2am, the PM on the phone, the ops director
-  during the [network-event] event). The person must be recognizable to the audience.
-- The protagonist must be revisited at the close of the deck. Act 5 must return to that
-  person transformed: "That engineer at 2am — this is what changes for them."
-- The close shows what changes for the PROTAGONIST, not just for the organization.
-  Organizational outcomes (cost savings, efficiency) are less emotionally resonant than
-  personal outcomes (that engineer sleeps through the night because the system escalates
-  correctly before they are called).
-- Abandoning the protagonist is the most common missed opportunity in proposal decks.
-  If you open with a person and never return, you have a dramatic setup with no resolution.
+- Named systems, not categories. Use the audience's actual terminology.
+- Named metrics from their world, not industry averages.
+- Named scenarios they recognize from their own experience.
+- Named people/roles they interact with (by title, not name).
+- If a slide could work for a different audience by changing the logo,
+  it fails the specificity test.
 
-**Concrete example**: Marketing brainstorm (session 17) caught the failure in V1:
-"The P1 story opens the deck and is never closed. That engineer at 2am — what happens
-to them? Act 5 should return: 'That engineer at 2am. This is what changes for them.'
-The deck has a protagonist it abandons." This finding led to the Act 5 resolution slide
-becoming a mandatory element of the approved architecture.
+**Test**: Read the slide without the logo. Can you tell who it's for? If not,
+it needs specificity.
 
 ---
 
-## 6. Proof Not Pitch
+## 6. Assertions, Not Topic Labels
 
-**When to use**: As the governing principle for every slide in the deck. This is not a
-technique for one slide — it is the standard that all content must meet.
+**When to use**: Every slide title.
 
-**What it produces**: Slides that earn credibility through demonstrated evidence rather
-than asserting it through confident language. Evaluators who test claims will find them
-defensible. Evaluators who read superficially will still find them compelling.
+**What it produces**: Titles that make claims the audience can agree or disagree
+with. "Revenue grew 40% YoY" not "Revenue Update."
 
 **Key rules**:
-- "Incumbents with real data don't pitch transformation. They demonstrate it." Every slide
-  that could be replaced with the word "trust us" has failed this test.
-- Every performance claim must specify which tier, segment, or workstream it applies to.
-  No averages across all applications. Show variance at the tail.
-- Every AI claim must have a client-specific example. Not "AI reviews code" but "Our
-  agents review code changes to YOUR provisioning system." The possessive matters.
-- Named systems, not categories. [System-A], CONNECT, [System-C] — not "mission-critical
-  applications." If the system has a name, use it.
-- Named metrics, not ranges. If a range is required, provide base/expected/upside.
-  A range without anchors is not a metric.
+- Titles are assertions — they contain a verb or a number.
+- The audience should be able to nod or shake their head at the title alone.
+- If a title could be the header on a blank template, it's a label.
+- Section dividers can be labels (they set context). Content slides cannot.
 
-**Concrete example**: V1 slide 3 was rated the "moat slide" — it named 31 platforms,
-9 personas with headcount, 11 elimination candidates, and specific programs (Cheetah,
-FIM-to-3GIS, Visible). That level of specificity cannot be faked. A competitor cannot
-replicate it. The validation brainstorm caught when v3 weakened this: "NorthStar
-authorship is buried in a legal caveat. 'We built this assessment' is not stated."
-The fix was one sentence: "There is no handover. We operate [System-A] today."
+**Test**: Cover the slide body. Does the title alone tell you something? If
+the title is "Market Overview," it tells you nothing. If it's "We're losing
+share in three segments," it makes a claim.
 
 ---
 
-## 7. Client Specificity
+## 7. Sensitive Language Awareness
 
-**When to use**: As a review test applied to every slide before the deck ships. Also
-applied during brainstorm as a filter on Team 2's proof slide requirements.
+**When to use**: Any deck touching workforce, cost reduction, organizational
+change, vendor transitions, or regulated industries.
 
-**What it produces**: Slides that could not be reused for another client without
-substantial changes. Slides that prove the team did the homework — not by claiming it,
-but by demonstrating it through specific content.
+**What it produces**: Language that passes a hostile reader's test. The hostile
+reader is the person in the room who is most threatened by the proposal.
 
 **Key rules**:
-- "Every slide that does not have an app name, a dollar figure, or a named metric should
-  be considered incomplete." This is the test. Apply it to every slide.
-- Acts 1-2 are most vulnerable to genericness. The impulse is to lead with the universal
-  argument and save the specific evidence for later. Resist this. Acts 1-2 need the same
-  specificity medicine as Acts 3-4.
-- The competitor test: "Could a capable-but-generic AI delivery vendor present this slide
-  list for Acts 1-2 and be indistinguishable from this proposal?" If yes, Acts 1-2 need work.
-- Must name the client's specific technology ecosystem (e.g., "Vertex AI and Gemini native
-  — we work in your stack"). Generic AI capability claims fail this test.
-- Must name operational history with specific programs. Not "extensive client experience"
-  but "Cheetah, FIM-to-3GIS, Visible — programs we ran, not programs we advised on."
-- Must include the client's internal terminology (application names, initiative names,
-  leadership names where appropriate for discussion questions).
+- Identify the sensitive stakeholder before writing. Who would be threatened?
+- Run a language audit: search for trigger words specific to the context.
+  Common triggers across contexts:
+  - Workforce: "leaner teams," "headcount reduction," "labor savings," "offshore"
+  - Vendor: "displacement," "starting from scratch," "legacy"
+  - Regulatory: any unqualified claims about compliance
+- Reframe: capacity expansion not reduction, evolution not displacement,
+  transformation not disruption.
+- The test: show the slide to the most hostile reader. Do they pick up the phone?
 
-**Concrete example**: Validation 4 ("Know Them") found Acts 1-2 named [System-A] but missed
-CONNECT, [System-C], NTAS, and vRepair. Operational history (Cheetah, FIM-3GIS,
-Visible) was absent. The client's AI ecosystem (GCP/Vertex/Gemini) had no slide reference.
-Three non-negotiable additions and five additional slide edits were required.
+**Test**: For each sensitive slide, identify who would object and what word
+would trigger them. If you can't find triggers, you haven't looked hard enough.
 
 ---
 
-## 8. [union-agreement]-Safe Language
+## 8. Speaker Notes as Preparation
 
-**When to use**: For any deck involving workforce transformation at a unionized client,
-or any client where workforce impact is politically sensitive. Apply as a slide-by-slide
-audit during the review phase.
+**When to use**: Every slide.
 
-**What it produces**: A deck that addresses workforce implications without triggering
-labor relations concerns. The workforce narrative feels affirmative and forward-looking,
-not defensive.
+**What it produces**: Notes that prepare the presenter for tough moments, not
+scripts that read aloud.
 
 **Key rules**:
+- Notes are NOT a script. They are objection handlers and talking points.
+- Structure per slide:
+  - **Delivery note**: How to present this (pause here, make eye contact, etc.)
+  - **Key talking points**: 2-3 substantive points with depth beyond the slide
+  - **Objection handlers**: "If challenged on X: [response]"
+  - **Source citations**: Where the numbers come from
+- Every stat needs a source citation in the notes, even if not shown on the slide.
+- Anticipate the hardest question per slide and prepare the response.
 
-Never say these terms:
-- Leaner teams
-- Fewer people
-- Headcount reduction
-- Labor savings
-- Offshore substitution
-- Right-sizing
-- Role elimination
-
-Always say instead:
-- Workforce effectiveness
-- Team throughput
-- Capacity for sophisticated work
-- Engineer productivity
-- Expanded capability model (not "role transformation")
-- Delivery model evolution
-- Capacity redeployment (for any numerical workforce data — not headcount figures)
-
-The governing principle: "AI handles volume, repetition, and low-judgment triage.
-Humans handle complexity, judgment, and high-stakes decisions." Frame AI as expanding
-human capability, not replacing it.
-
-[union-agreement]-impacted workflows must be explicitly routed to full-board review. Do not embed
-[union-agreement]-sensitive commitments in a slide deck without that routing documented.
-
-The workforce slide must feel affirmative, not defensive. If a reader's first reaction
-is to think about job losses, the framing has failed.
-
-**Concrete example**: Review Team C (session 08) flagged 5 slides for [union-agreement] sensitivity:
-- Slide 18: "Role Transformation" renamed to "Expanded Capability Model"
-- Slide 37: Workforce capacity data labeled as capacity redeployment, not headcount
-- C2 appendix: Framing rewritten to affirmative language
-- Slide 7: "right-sizing" phrase replaced
-- Slide 10: "Agile-era" replacement language applied
-The workforce slide was rewritten to follow the principle: "AI handles volume, repetition,
-and low-judgment triage. Humans handle complexity, judgment, and high-stakes decisions."
+**Test**: Can a presenter who didn't build the deck present confidently using
+only the slides and notes? If they'd need a briefing call, the notes are incomplete.
 
 ---
 
-## Speaker Notes with RFP Mapping
+## Using Principles as Review Criteria
 
-Every slide in an RFP-response deck requires structured speaker notes. Notes that simply
-restate the slide text are not speaker notes — they are a transcript. Speaker notes enable
-an unprepared presenter to deliver confidently while maintaining RFP traceability.
+After the brainstorm and during validation, score each slide against the
+8 principles:
 
-### Three-Section Format
+| Principle | Score | Notes |
+|-----------|-------|-------|
+| 1. Mechanism before outcome | PASS / PARTIAL / FAIL | |
+| 2. Two-layer proof | PASS / PARTIAL / FAIL | |
+| 3. Protagonist arc | PRESENT / CALLBACK / ABSENT | |
+| 4. Threading | THREADED / ORPHANED | |
+| 5. Client specificity | SPECIFIC / GENERIC | |
+| 6. Assertion titles | ASSERTION / LABEL | |
+| 7. Language sensitivity | CLEAN / FLAGGED | |
+| 8. Speaker notes quality | COMPLETE / PARTIAL / MISSING | |
 
-```
-notes: >
-  Delivery instructions. How to stand, what to pause on, what NOT to say.
-  Example: "Make eye contact before speaking. Read the quote slowly. Let two full
-  seconds of silence land before advancing."
-
-rfp:
-  - "Section: [Section Name] — '[exact RFP quote]'"
-  - "Section: [Section Name] — '[exact RFP quote]'"
-
-talking_points:
-  - "Substantive point with objection handler. Example: 'If challenged on the [revenue-figure]
-    figure: Source is [client]'s published IT spend disclosures. Not our estimate.'"
-  - "Additional substantive point."
-```
-
-### Format Rules
-
-- `notes` must NOT restate slide text. It provides delivery guidance: timing, tone,
-  what to make eye contact for, what silence to let land. Written for a presenter who
-  has seen the slide for the first time today.
-- `rfp` entries must include the RFP section name and the exact quote from the RFP
-  document. Not paraphrased. Not summarized. The exact language.
-- `talking_points` must include anticipate-the-objection framing for every controversial
-  or high-stakes claim. Format: state the claim, then "If challenged on [X]: [exact
-  response language]."
-
-### Slide-to-RFP Mapping Summary
-
-The final slide or a notes appendix should include a mapping table: every RFP requirement
-mapped to the slide(s) that address it. Evaluators use this to score submissions. If an
-RFP requirement has no corresponding slide, it is a gap — not a slide structure problem.
-
-### Example from [CLIENT] Session
-
-V1 slide 1 notes included:
-- Delivery: "Pause after 'that's the last time.' Let two full seconds of silence land."
-- 6 RFP citations with exact section quotes
-- 6 talking points including: "If challenged on the [revenue-figure] figure: 'Source is [CLIENT]'s
-  published IT spend disclosures, not our estimate. The line item is on slide 3 of the
-  2023 annual report.'"
-
-The format was codified in `notes-data.js` as a structured JavaScript object with keys
-for each slide number and three fields per slide: `notes`, `rfp` (array), `talking_points`
-(array). The nav.js reads this and renders a notes panel, toggled by pressing N during
-the presentation.
+A slide that scores FAIL on principle 1, GENERIC on principle 5, or LABEL on
+principle 6 needs rework before the deck is ready.
