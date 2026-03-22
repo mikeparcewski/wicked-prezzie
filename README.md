@@ -8,7 +8,7 @@ Idea → Refine → Generate → Refine with your team → Ship it
           └────────────────────────┘
 ```
 
-Brainstorm the narrative. Index your source docs. Structure with Pyramid Principle. Generate themed slides. Convert to native PowerPoint. Audit quality. Parse your team's feedback from Word comments. Iterate at any stage. A Claude Code and Gemini CLI plugin for the full presentation lifecycle — 21 skills, one loop.
+Brainstorm the narrative. Index your source docs. Structure with Pyramid Principle. Generate themed slides. Convert to native PowerPoint. Audit quality. Parse your team's feedback from Word comments. Iterate at any stage. A Claude Code and Gemini CLI plugin for the full presentation lifecycle — 23 skills, one loop.
 
 ### Jump in where you are
 
@@ -171,7 +171,7 @@ Export as PPTX, HTML (Reveal.js), or both. Versioned automatically.
 
 ## What you can do
 
-21 skills grouped by what you're trying to accomplish. You don't need to remember skill names — just say what you want.
+23 skills grouped by what you're trying to accomplish. You don't need to remember skill names — just say what you want.
 
 ### Deck strategy and planning
 
