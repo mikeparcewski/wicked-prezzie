@@ -148,7 +148,7 @@ Every agent prompt must follow this structure:
 ## Anti-Pattern Guards
 
 These six rules are always active, regardless of phase. They encode lessons from
-the [CLIENT] session analysis (32% rework rate, 18-hour session).
+the prior session analysis (32% rework rate, 18-hour session).
 
 **Guard 1 — Constraint inheritance**: Never dispatch a build agent without
 reading constraints.json first. The centering constraint was violated 7 times in

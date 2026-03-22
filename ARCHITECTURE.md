@@ -79,7 +79,7 @@ Pass 1 is incremental: SHA-256 hashes per source file are stored in `index/.cach
 
 **12-persona framework** provides pass/fail criteria for every slide. Personas are paired as dreamer-skeptic duos based on their evaluation tendencies.
 
-**8 content principles** guide quality: mechanism-before-outcome, two-layer proof, drumbeat threading, hallway line, protagonist arc, proof not pitch, client specificity, [union-agreement]-safe language.
+**8 content principles** guide quality: mechanism-before-outcome, two-layer proof, drumbeat threading, hallway line, protagonist arc, proof not pitch, client specificity, sensitive language awareness.
 
 **Hard gate:** No slide building until the synthesized architecture is approved. Building before brainstorming is complete is the single largest source of rework.
 

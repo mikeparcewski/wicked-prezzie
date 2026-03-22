@@ -109,7 +109,7 @@ with these active.
   "phase_added": "default",
   "severity": "blocking",
   "rule": "Slide main content container: display:flex; flex-direction:column; justify-content:center; align-items:center. Cards inside: never align-items:stretch, never height:100% or min-height:100% on card body. Use flex:1 ONLY on the main slide content div, never on cards.",
-  "reason": "7 recurrences, 22 CSS edits, 1 dedicated 783KB cleanup agent in [CLIENT] v3 session. align-items:stretch was independently chosen by every build agent that did not have this constraint.",
+  "reason": "7 recurrences, 22 CSS edits, 1 dedicated 783KB cleanup agent in prior session. align-items:stretch was independently chosen by every build agent that did not have this constraint.",
   "applies_to": ["build", "validate", "export"]
 }
 ```

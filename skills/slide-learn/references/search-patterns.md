@@ -34,17 +34,17 @@ grep -r "Revenue:" index/*/chunk-*.md
 
 ## 2. Find Content About a Named System
 
-Goal: find all chunks that mention a specific system (e.g., "ECHO", "CRM", "Data Lake").
+Goal: find all chunks that mention a specific system (e.g., "OrderHub", "CRM", "Data Lake").
 
 ```bash
-grep -rl "ECHO" index/
-grep -r "ECHO" index/_relationships/systems.md
+grep -rl "OrderHub" index/
+grep -r "OrderHub" index/_relationships/systems.md
 ```
 
 Then read the relationship entry for cross-source references:
 
 ```bash
-cat index/_relationships/systems.md | grep -A 5 "ECHO"
+cat index/_relationships/systems.md | grep -A 5 "OrderHub"
 ```
 
 ---

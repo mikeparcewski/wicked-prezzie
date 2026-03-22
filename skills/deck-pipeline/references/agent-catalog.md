@@ -55,7 +55,7 @@ a non-overlapping section (text-docs agent writes `source_documents` and
 writes `reference_implementations`). Orchestrator merges after all agents complete.
 
 **Key constraints**:
-- Must extract exact figures, not approximations. "[total-value]" not "approximately $800M"
+- Must extract exact figures, not approximations. "[total value]" not "approximately [rounded value]"
 - Must flag any figure that appears differently across two sources with
   `"conflict": true` and both values
 - Must include the source document path for every extracted fact
@@ -212,7 +212,7 @@ REJECT status and actionable conditions.
 ## review-commercial
 
 **Role**: Apply the commercial lens to the synthesized architecture and slide plan.
-Evaluate: financial accuracy, legal exposure, [union-agreement]-safe language, specificity of
+Evaluate: financial accuracy, legal exposure, sensitivity-safe language, specificity of
 financial claims.
 
 **Dispatch phase**: Phase 4 (Architecture)
@@ -223,10 +223,10 @@ financial claims.
 
 **Key constraints**:
 - Commercial lens scope: all financial figures must match facts manifest exactly,
-  [union-agreement] trigger words must be absent (check sensitivity_flags in facts manifest),
+  sensitivity trigger words must be absent (check sensitivity_flags in facts manifest),
   legal exposure from overcommitment or unqualified claims
 - Flag any figure that is not in the facts manifest as UNVERIFIED
-- Flag any [union-agreement] trigger word with the safe alternative from sensitivity_flags
+- Flag any sensitivity trigger word with the safe alternative from sensitivity_flags
 
 **"Done" means**: review-commercial.md written with clear status and all financial
 claims verified against facts manifest.

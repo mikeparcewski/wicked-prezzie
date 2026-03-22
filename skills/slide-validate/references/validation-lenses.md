@@ -76,9 +76,9 @@ Slide 15 — MECHANISM: Scoring Engine shows dimensions, routing, dashboard. PAS
 **Output format**:
 ```
 RFP Section 4.2 (Security Architecture) — MISSING
-  No slide addresses [regulatory-data] handling, data residency, or model cards.
-  Fix: Add security architecture slide covering [regulatory-data], residency policy, Model Card.
-  Blocking: YES — CISO is binary pass/fail.
+  No slide addresses regulatory compliance handling, data residency, or model cards.
+  Fix: Add security architecture slide covering regulatory compliance, residency policy, Model Card.
+  Blocking: YES — security evaluator is binary pass/fail.
 
 RFP Section 3.1 (Transition Plan) — COVERED: Slide 22. PASS.
 ```
@@ -125,7 +125,7 @@ Concept: Scoring Engine — CONCRETE: Slide 15. PASS.
 **Question**: Does the deck demonstrate deep client knowledge?
 
 **What to check**:
-- Named systems (not categories): [System-A], CONNECT, [System-C] — not "mission-critical applications"
+- Named systems (not categories): named client systems — not "mission-critical applications"
 - Operational history with specific programs and dates
 - Client's AI/technology ecosystem (named platforms, not generic)
 - Leadership awareness: named individuals, their stated priorities, their hardest questions
@@ -144,9 +144,9 @@ Concept: Scoring Engine — CONCRETE: Slide 15. PASS.
 **Output format**:
 ```
 Slide 5 — GENERIC: Names AI transformation benefits but no client systems.
-  Missing: [System-A], CONNECT, [System-C], GCP/Vertex ecosystem.
-  Fix: Replace "mission-critical applications" with "[System-A], CONNECT, and [System-C]."
-       Add: "We operate in your Vertex AI and Gemini native stack."
+  Missing: named client systems, cloud/AI ecosystem references.
+  Fix: Replace "mission-critical applications" with the client's specific system names.
+       Add: reference to the client's specific cloud/AI platform stack.
   Blocking: NO — but Acts 1-2 collectively feel like a generic proposal.
 
 Slide 3 — SPECIFIC: Names 31 platforms, 9 personas, 11 elimination candidates. PASS.
@@ -166,7 +166,7 @@ Each lens produces:
 ## Blocking Criteria
 
 A gap is **blocking** if:
-- It is a binary evaluator requirement (CISO security, financial specificity)
+- It is a binary evaluator requirement (security evaluator security, financial specificity)
 - The deck cannot be scored on a technical criterion because the mechanism is absent
 - An entire act fails the client specificity test
 - The concept density is below 70% CONCRETE/PARTIAL

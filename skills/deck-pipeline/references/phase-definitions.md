@@ -178,7 +178,7 @@ architecture must be revised before advancing.
 
 **Phase-specific rules**:
 - Narrative lens: flow, emotional arc, audience engagement, protagonist continuity
-- Commercial lens: financial accuracy, legal exposure, [union-agreement]-safe language,
+- Commercial lens: financial accuracy, legal exposure, language sensitivity,
   specificity of financial claims
 - Technical lens: data integrity, production feasibility, version audits
 - Slide plan must include a hard slide cap (recommended: 26-32 slides). Every

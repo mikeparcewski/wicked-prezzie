@@ -2,7 +2,7 @@
 
 ## Overview
 
-A Claude Code skill suite that orchestrates the full deck-building workflow — from source inventory through final export — using progressive disclosure to keep context lean and constraints persistent. Designed to prevent the six process anti-patterns identified in the [CLIENT] session analysis (32% rework rate) while preserving the workflow patterns that worked (dreamer-skeptic brainstorms, multi-lens validation, council punch lists).
+A Claude Code skill suite that orchestrates the full deck-building workflow — from source inventory through final export — using progressive disclosure to keep context lean and constraints persistent. Designed to prevent the six process anti-patterns identified in the prior session analysis (32% rework rate) while preserving the workflow patterns that worked (dreamer-skeptic brainstorms, multi-lens validation, council punch lists).
 
 The architecture uses a **hub-and-spoke model**: one orchestrator skill owns the phase state machine, and phase-specific skills load on demand. Constraints that caused the most rework (CSS centering, notes placement, visual verification) are enforced via hooks, not via instructions that agents can forget.
 
@@ -12,7 +12,7 @@ The architecture uses a **hub-and-spoke model**: one orchestrator skill owns the
 
 ### Decision: Hub-and-Spoke, Not Monolith
 
-One orchestrator skill (`deck-pipeline`) plus seven phase skills. Not a monolith because the [CLIENT] session hit context limits at ~18 hours. Not fully independent skills because phase transitions need a shared state contract.
+One orchestrator skill (`deck-pipeline`) plus seven phase skills. Not a monolith because the prior 18-hour session hit context limits. Not fully independent skills because phase transitions need a shared state contract.
 
 ```
 .claude/skills/
@@ -166,7 +166,7 @@ Each ref file is 200-300 lines, single-topic, self-contained.
 ### What Never Loads Unless Needed
 
 - Export recipes (bundled HTML, PDF, PPTX) — only during export phase
-- Deep-dive content principles (hallway line, protagonist arc, [union-agreement] audit) — only during brainstorm or validation
+- Deep-dive content principles (hallway line, protagonist arc, language sensitivity audit) — only during brainstorm or validation
 - Design system CSS variables and card patterns — only during build phase
 - Conflict resolution rules — only during architecture phase when brainstorm outputs disagree
 
@@ -196,7 +196,7 @@ Constraints are persisted in `state/constraints.json`, not in conversation conte
       "phase_added": "build",
       "severity": "blocking",
       "rule": "Slide main content must use display:flex; flex-direction:column; justify-content:center; align-items:center. Never use align-items:stretch. Never set height:100% on card body.",
-      "reason": "Caused 7 recurrences and 22 CSS edits in [CLIENT] v3 session",
+      "reason": "Caused 7 recurrences and 22 CSS edits in prior session",
       "applies_to": ["build", "validate", "export"]
     },
     {
@@ -221,7 +221,7 @@ New constraints are added when a bug is fixed during a session. The build skill 
 
 ### Problem Statement
 
-The [CLIENT] v3 session ran 18 hours, dispatched 53 subagents, and accumulated enough context that later agents lost earlier constraints. The architecture must keep the main orchestrator context lean while ensuring every subagent has the constraints it needs.
+The prior session ran 18 hours, dispatched 53 subagents, and accumulated enough context that later agents lost earlier constraints. The architecture must keep the main orchestrator context lean while ensuring every subagent has the constraints it needs.
 
 ### Strategy 1: Subagents for All Production Work
 
@@ -249,12 +249,12 @@ The source inventory phase reads all reference documents and produces `facts-man
 {
   "client": {
     "name": "...",
-    "named_systems": ["ECHO", "CONNECT", "[System-C]", "NTAS", "vRepair"],
-    "named_programs": ["Cheetah", "FIM-to-3GIS", "Visible"],
-    "leadership": ["Villanueva", "Tenorio"],
-    "ai_ecosystem": "GCP, Vertex AI, Gemini",
-    "portfolio_size": "323 applications",
-    "contract_value": "[total-value] total, [fee-value] annual"
+    "named_systems": ["System-A", "System-B", "System-C", "System-D", "System-E"],
+    "named_programs": ["Program-Alpha", "Program-Beta", "Program-Gamma"],
+    "leadership": ["Exec-1", "Exec-2"],
+    "ai_ecosystem": "cloud/AI platform stack",
+    "portfolio_size": "300+ applications",
+    "contract_value": "[total value], [annual value]"
   },
   "rfp_requirements": [
     {
@@ -265,15 +265,15 @@ The source inventory phase reads all reference documents and produces `facts-man
     }
   ],
   "financial_figures": {
-    "total_contract": "[total-value]",
-    "annual_value": "[fee-value]",
+    "total_contract": "[total value]",
+    "annual_value": "[annual value]",
     "savings_target": "25% YoY",
     "fee_at_risk": "25% of fees"
   },
   "sensitivity_flags": {
-    "sensitivity_unionized": true,
-    "sensitivity_trigger_words": ["leaner teams", "headcount reduction", "right-sizing", "Role Transformation"],
-    "sensitivity_safe_alternatives": ["workforce effectiveness", "team throughput", "Expanded Capability Model"]
+    "sensitivity_active": true,
+    "sensitivity_trigger_words": ["leaner teams", "headcount reduction", "right-sizing", "role transformation"],
+    "sensitivity_safe_alternatives": ["workforce effectiveness", "team throughput", "expanded capability model"]
   },
   "source_documents": [
     {
@@ -475,7 +475,7 @@ These are not persistent agents — they are prompt templates that the orchestra
 - **Output**: Review document with conditional approval, blocking conditions, reorder recommendations
 - **Key constraints**:
   - Narrative: flow, emotional arc, audience engagement, protagonist continuity
-  - Commercial: financial accuracy, legal exposure, [union-agreement]-safe language
+  - Commercial: financial accuracy, legal exposure, sensitivity-safe language
   - Technical: data integrity, production feasibility, version audits
 
 #### slide-builder
@@ -591,7 +591,7 @@ These are not persistent agents — they are prompt templates that the orchestra
 
 ## 7. Default Constraints (Ship With the Skill)
 
-The skill ships with a pre-populated `constraints.json` containing the lessons learned from the [CLIENT] project. These are the constraints that caused the most rework and should never be re-learned:
+The skill ships with a pre-populated `constraints.json` containing the lessons learned from prior projects. These are the constraints that caused the most rework and should never be re-learned:
 
 ```json
 {
@@ -601,7 +601,7 @@ The skill ships with a pre-populated `constraints.json` containing the lessons l
       "phase_added": "default",
       "severity": "blocking",
       "rule": "Slide main content container: display:flex; flex-direction:column; justify-content:center; align-items:center. Cards inside: never align-items:stretch, never height:100% or min-height:100% on card body. Use flex:1 ONLY on the main slide content div, never on cards.",
-      "reason": "7 recurrences, 22 CSS edits, 1 dedicated 783KB cleanup agent in [CLIENT] v3",
+      "reason": "7 recurrences, 22 CSS edits, 1 dedicated 783KB cleanup agent in prior session",
       "applies_to": ["build", "validate", "export"]
     },
     {
@@ -723,7 +723,7 @@ This is for Acme Corp, unionized workforce, 30 slide max.
 
 Claude: [Dispatches source-scanner agents, builds facts manifest]
 Found 8 source documents. Key facts extracted:
-- Client: Acme Corp (unionized — [union-agreement] language audit will apply)
+- Client: Acme Corp (unionized — language sensitivity audit will apply)
 - Contract value: $150M
 - Named systems: [list]
 - [etc.]
@@ -760,7 +760,7 @@ To add a new agent type:
 
 ### ADR-001: Hub-and-Spoke Over Monolith
 
-**Context**: The [CLIENT] session showed that a single long-running session accumulates context until constraints drift. A monolithic skill would load all phase instructions at once, wasting context on irrelevant phases.
+**Context**: A prior session showed that a single long-running session accumulates context until constraints drift. A monolithic skill would load all phase instructions at once, wasting context on irrelevant phases.
 
 **Decision**: One orchestrator skill with seven phase skills loaded on demand.
 
@@ -768,7 +768,7 @@ To add a new agent type:
 
 ### ADR-002: Hooks Over Instructions for Critical Constraints
 
-**Context**: The [CLIENT] session proved that instruction-based constraints ("do not use align-items: stretch") are forgotten by agents. The centering constraint was stated and broken 7 times.
+**Context**: A prior session proved that instruction-based constraints ("do not use align-items: stretch") are forgotten by agents. The centering constraint was stated and broken 7 times.
 
 **Decision**: The six highest-impact constraints are enforced via PostToolUse and PreToolUse hooks, not just instructions. Instructions remain as documentation; hooks provide enforcement.
 
@@ -776,7 +776,7 @@ To add a new agent type:
 
 ### ADR-003: Facts Manifest as Context Proxy
 
-**Context**: Build agents need client-specific data (names, figures, systems) but should not read entire source documents. The [CLIENT] session had agents hallucinating figures because they were working from incomplete context.
+**Context**: Build agents need client-specific data (names, figures, systems) but should not read entire source documents. A prior session had agents hallucinating figures because they were working from incomplete context.
 
 **Decision**: Phase 1 produces a structured JSON manifest. Subsequent agents receive the manifest, not raw documents.
 
@@ -794,7 +794,7 @@ To add a new agent type:
 
 **Context**: Every new project should not have to re-learn the centering bug, the notes-on-file:// bug, or the /tmp/ path bug. These are universal to HTML slide building.
 
-**Decision**: The skill ships with 10 default constraints derived from the [CLIENT] session analysis. Users can remove or modify defaults for their project.
+**Decision**: The skill ships with 10 default constraints derived from prior session analysis. Users can remove or modify defaults for their project.
 
 **Consequences**: New projects get protection from day one. The defaults may not apply to every project (e.g., a project using a build system with absolute paths would not need the no-tmp-for-html constraint). But having unnecessary constraints is cheaper than missing necessary ones.
 
@@ -810,9 +810,9 @@ To add a new agent type:
 
 4. **Agent prompt size limits**: The constraint injection approach adds ~50-100 lines to every agent prompt. For phases with many constraints (build phase has 6+ applicable constraints), does this meaningfully reduce the agent's working context? Need to measure.
 
-5. **Visual verification tooling**: The visual-reviewer agent needs screenshot capability. In the [CLIENT] project, this was Chrome headless + the Read tool's vision mode. Should the skill include a screenshot script, or assume the user's environment has one?
+5. **Visual verification tooling**: The visual-reviewer agent needs screenshot capability. In a prior project, this was Chrome headless + the Read tool's vision mode. Should the skill include a screenshot script, or assume the user's environment has one?
 
-6. **PPTX strategy**: The [CLIENT] analysis concluded PPTX should be a "handout format" — simplified layouts, not pixel-perfect conversion. Should the skill even include PPTX export, or should it be a separate optional skill that the user can install?
+6. **PPTX strategy**: Prior analysis concluded PPTX should be a "handout format" — simplified layouts, not pixel-perfect conversion. Should the skill even include PPTX export, or should it be a separate optional skill that the user can install?
 
 7. **Skill discovery**: When a user types `/deck-pipeline`, how does Claude Code discover all seven phase skills? Do they need to be registered in a manifest, or does the orchestrator's SKILL.md reference them by path?
 
@@ -820,9 +820,9 @@ To add a new agent type:
 
 ## 11. Migration Path
 
-### From the Current [CLIENT] Workflow
+### From an Existing Ad-Hoc Workflow
 
-The [CLIENT] project used ad-hoc agent dispatch with manual constraint management. To migrate:
+A prior project used ad-hoc agent dispatch with manual constraint management. To migrate:
 
 1. Extract the existing brainstorm outputs (19 brainstorm documents) into the facts manifest format
 2. Populate constraints.json from the session-log-analysis recommendations

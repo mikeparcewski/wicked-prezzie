@@ -61,7 +61,7 @@ them what to believe.
 | Our Approach | Three mechanisms deliver the result |
 | Timeline | Phase 1 completes in 90 days |
 | Security | Zero data leaves the client environment |
-| Team | 12 engineers with direct [System-A] experience |
+| Team | 12 engineers with direct [client system] experience |
 
 Every title should pass this test: "If a committee member reads only this title,
 do they know what we claim?" If the answer is "they know the topic", the title
@@ -72,7 +72,7 @@ is a label. If the answer is "they know the claim", it is an assertion.
 At the slide level, proof means the slide demonstrates rather than asserts.
 
 **Pitch**: "We have deep domain expertise in network operations."
-**Proof**: "We identified 11 elimination candidates across 31 [CLIENT] platforms in Phase 0."
+**Proof**: "We identified 11 elimination candidates across 31 client platforms in Phase 0."
 
 **Pitch**: "Our AI reduces manual effort."
 **Proof**: "The Scoring Engine routes 847 tickets/day. Engineers review exceptions only."
@@ -113,12 +113,12 @@ Acts 1-2 are most vulnerable to genericness. Apply the test to every slide in
 the deck's opening acts — they need the same specificity as the methodology acts.
 
 **Client specificity markers**:
-- Named application systems ([System-A], CONNECT, [System-C])
-- Named programs with dates (Cheetah migration 2022, FIM-to-3GIS)
+- Named application systems (specific client system names, not categories)
+- Named programs with dates (specific migration programs)
 - Named technology stack (GCP, Vertex AI, Gemini)
 - Named leadership (referenced by role, not by name in client-facing decks)
 - Specific dollar figures from client disclosures
-- Client-specific metrics (not "our customers see 40%" but "[CLIENT]'s [System-A] sees 40%")
+- Client-specific metrics (not "our customers see 40%" but "[Client]'s [System A] sees 40%")
 
 ## Whitespace as Content
 

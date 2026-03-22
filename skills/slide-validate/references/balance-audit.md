@@ -130,7 +130,7 @@ BLOCKING:
 3. [Act 2] No slides cover: Scoring Engine, Predictive Quality Engine, Self-Healing Pipeline.
 
 RECOMMENDED:
-4. [Slide 5] Genericness: Replace "mission-critical apps" with [System-A], CONNECT, Omega.
+4. [Slide 5] Genericness: Replace "mission-critical apps" with the client's named systems.
 5. [Act 3] One-line test fails: "Act 3 explains five pillars" — but pillars are named, not explained.
 ...
 
