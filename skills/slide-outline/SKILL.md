@@ -63,6 +63,7 @@ The outline is stored as JSON consumed by slide-generate:
   "theme": "midnight-purple",
   "target_audience": "Executive leadership",
   "key_message": "Our AI platform reduced decision latency by 60%",
+  "auto_dividers": true,
   "acts": [
     {
       "name": "Setup",

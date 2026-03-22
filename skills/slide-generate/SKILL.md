@@ -196,6 +196,21 @@ Press **N** when viewing the HTML to toggle the notes panel. The pipeline reads
 `.speaker-notes` and adds them as PowerPoint speaker notes. Notes are extracted
 before triage/prep so they survive into the final PPTX.
 
+## Section Dividers
+
+By default, slide-generate auto-inserts a **section divider slide** between
+acts (starting from the second act). This creates visual breaks that signal
+topic transitions in the deck.
+
+The divider uses the act's `name` as the slide title and renders with the
+`section` slide type. Dividers are skipped if:
+- The act already starts with a `type: "section"` or `type: "title"` slide
+- The outline sets `"auto_dividers": false`
+- The act has no name
+
+Auto-generated dividers are marked with `"auto_generated": true` in the manifest
+so they can be identified and removed if not wanted.
+
 ## Naming Convention
 
 Generated files use a **numbered slug** pattern derived from the slide title:

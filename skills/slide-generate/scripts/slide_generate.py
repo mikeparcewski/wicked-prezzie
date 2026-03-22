@@ -501,8 +501,43 @@ def generate_from_outline(outline, theme_name=None, output_dir=None):
     slide_num = 0
     used_slugs: set[str] = set()
 
-    for act in outline.get("acts", []):
+    acts = outline.get("acts", [])
+    auto_dividers = outline.get("auto_dividers", True)
+
+    for act_idx, act in enumerate(acts):
         act_name = act.get("name", "")
+
+        # Auto-insert section divider between acts (skip before first act)
+        if auto_dividers and act_idx > 0 and act_name:
+            # Check if the act already starts with a section/divider slide
+            first_slide_type = (act.get("slides") or [{}])[0].get("type", "")
+            if first_slide_type not in ("section", "title"):
+                slide_num += 1
+                divider_slug = _slugify(act_name)
+                base_slug = divider_slug
+                counter = 2
+                while divider_slug in used_slugs:
+                    divider_slug = f"{base_slug}-{counter}"
+                    counter += 1
+                used_slugs.add(divider_slug)
+
+                divider_slide = {"type": "section", "title": act_name}
+                divider_html = render_slide(divider_slide, css_vars)
+                divider_filename = f"{slide_num:02d}-{divider_slug}.html"
+                divider_filepath = output_path / divider_filename
+                divider_filepath.write_text(divider_html, encoding="utf-8")
+
+                manifest.append({
+                    "file": divider_filename,
+                    "order": slide_num,
+                    "slug": divider_slug,
+                    "type": "section",
+                    "title": act_name,
+                    "act": act_name,
+                    "auto_generated": True,
+                })
+                print(f"  Generated {divider_filename} (section divider: {act_name})")
+
         for slide in act.get("slides", []):
             slide_num += 1
             slug = _slugify(slide.get("title", "untitled"))
