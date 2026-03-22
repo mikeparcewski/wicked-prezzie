@@ -23,6 +23,10 @@ Primary source. Extract from slide XML and theme definitions:
   placeholders across all slide layouts, weight conventions
 - **Layout patterns**: analyze all slide layouts in slide master; count usage frequency across
   slides; identify top 5 most-used compositions
+- **Content alignment**: detect vertical centering (flexbox center, margin auto, absolute
+  transform centering) and horizontal justification. Record as `vertical_align` and
+  `content_justify` in the layout section. This is commonly missed — check the `.slide`
+  container's `display`, `align-items`, `justify-content`, and any wrapper `margin: auto`
 - **Spacing/density**: average text-to-whitespace ratio, margin conventions, object padding
 - **Logo/brand placement**: detect recurring small images in consistent positions (header/footer/corner)
 - **Icon usage**: detect small SVG or EMF shapes; classify style if possible

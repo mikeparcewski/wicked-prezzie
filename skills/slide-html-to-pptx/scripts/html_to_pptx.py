@@ -389,6 +389,9 @@ def main():
     if args.manifest:
         with open(args.manifest) as f:
             slides = json.load(f)
+        # Sort by 'order' field if present (allows reordering via manifest)
+        if slides and 'order' in slides[0]:
+            slides.sort(key=lambda s: s.get('order', 0))
     elif args.slides:
         slides = [{'file': f.strip()} for f in args.slides.split(',')]
     else:

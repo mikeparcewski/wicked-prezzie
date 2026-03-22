@@ -1,0 +1,171 @@
+{
+  "skill_name": "Slide Pipeline",
+  "description": "DEFAULT entry point for all slide conversion. Converts HTML to PPTX, then iterates per-slide \u2014 rendering, visually comparing against the source, fixing issues, and re-converting each slide until it matches or converges. Use for \"convert these slides\", \"make a PowerPoint\", \"turn these into a deck\", or any conversion request. Handles AI-generated HTML (ChatGPT, Claude, Gemini) automatically. Always prefer this over slide-html-to-pptx.",
+  "results": [
+    {
+      "query": "convert these HTML slides to PowerPoint \u2014 the full workflow with validation and everything",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "make a PowerPoint from the HTML in slides/ \u2014 these came from ChatGPT so they probably need cleaning up",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "turn these into a deck \u2014 standardize, convert, validate, the works",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "run this at best fidelity \u2014 I need multi-pass verification, this is going to the board",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "draft quality is fine for now, I'll polish later. Just get me a deck",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "render this as HTML too \u2014 I want both a PPTX and a Reveal.js version I can share as a link",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "show me version history for the sales-kickoff deck \u2014 how many versions do we have?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "diff v1 and v2 of quarterly-retro \u2014 what changed between the two versions?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "re-render sales-kickoff_v2 as HTML format \u2014 I already have the PPTX",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "rough fidelity \u2014 I just need the structure, images can wait",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "got a bunch of slides from Claude that I need as a .pptx. they're AI-generated so probably need cleanup first. do the whole thing end to end",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "just do the conversion step, skip validation and rendering",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "create a theme from our brand colors",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "create an outline for a presentation about Q4 results",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "generate HTML slides from the outline",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "validate my deck \u2014 check for overflow",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "audit the content of my deck for bullet overload",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "render the PPTX to PNG for review",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "set the quality threshold to 90",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "learn my brand from this PDF and save as a profile",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 20,
+    "passed": 9,
+    "failed": 11
+  }
+}

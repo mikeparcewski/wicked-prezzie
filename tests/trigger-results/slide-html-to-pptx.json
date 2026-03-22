@@ -1,0 +1,171 @@
+{
+  "skill_name": "HTML to PowerPoint",
+  "description": "Single-stage HTML-to-PPTX conversion with native shapes and formatted text. Use only when the user wants just conversion without QA \u2014 \"just convert\", \"skip validation\", \"re-convert slide 5 only\". For general \"make me a PowerPoint\" requests, prefer slide-pipeline which includes validation and per-slide refinement.",
+  "results": [
+    {
+      "query": "I have a folder of HTML slides in presentation/ that need to become a single PowerPoint file. They're already clean \u2014 no AI weirdness, just standard HTML",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "convert slide-01.html through slide-08.html into deck.pptx. I've already standardized them so skip that step",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "I have a JSON manifest with slide ordering and metadata. Run the conversion against the HTML files in my-deck/ and output to final.pptx",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "build a PowerPoint from these HTML slides. use the --hide flag to skip the nav bar during extraction",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "I need to re-export the deck after editing slide-05.html. Just reconvert that one slide if possible",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "just convert, no validation or rendering needed \u2014 I already know it's fine",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "I have this single HTML file I want to quickly convert to a slide. It's already well-structured, just need the PPTX",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "run the whole standardize-convert-validate workflow on the HTML in my presentation/ directory please",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "got a bunch of slides from Claude that I need as a .pptx. they're AI-generated so probably need cleanup first. do the whole thing end to end",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "convert these slides and make sure they look good \u2014 validate, render, the works",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "take everything in the tests/ folder and produce a PowerPoint with validation report and comparison images",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "generate HTML slides about our product roadmap from scratch \u2014 I don't have any HTML yet",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "the text in my PPTX is overflowing card borders. Can you fix the text clamping width?",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "validate deck.pptx and show me the quality score per slide",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "render my existing PowerPoint to PNG images so I can review them",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "these AI-generated slides need cleanup before conversion \u2014 strip animations and external font links",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "compare the HTML originals side-by-side with the PPTX output to check fidelity",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "the rgba colors on my cards are blending wrong \u2014 they look black instead of dark purple",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "what design principles should I follow for font sizes and whitespace?",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "I want to create a PowerPoint from scratch using python-pptx \u2014 no HTML involved",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 20,
+    "passed": 13,
+    "failed": 7
+  }
+}

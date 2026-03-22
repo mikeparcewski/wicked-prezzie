@@ -1,0 +1,155 @@
+{
+  "skill_name": "Slide HTML Standardize",
+  "description": "Normalizes AI-generated HTML slides before conversion \u2014 adds viewport, .slide wrapper, strips animations and external resources. Use whenever slides came from ChatGPT, Claude, Gemini, or any AI. Also use when Chrome extraction fails or returns empty results. Always the correct first step for AI-generated HTML that hasn't been preprocessed.",
+  "results": [
+    {
+      "query": "I have some HTML slides that ChatGPT generated but Chrome extraction is returning empty results. The HTML might be missing the right structure",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "these AI-generated slides need to be cleaned up before conversion \u2014 strip out the animations and external font links",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "normalize the HTML in slides/ so they all have consistent viewport and .slide wrappers",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "prepare these HTML files for extraction. They came from Claude and might not have the right structure for chrome-extract to work",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "my slides have CSS animations and Google Fonts links that break headless Chrome. Can you strip those out?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "standardize all the HTML slides in my-deck/ directory before running the conversion pipeline",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "the HTML doesn't have a .slide class wrapper and the viewport is wrong. Fix the structure so extraction works",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "clean up these Gemini-generated slides \u2014 they have external CDN scripts and inconsistent structure",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "convert these HTML slides to PowerPoint",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "the PPTX output has text overlapping. Can you fix the layout?",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "check my deck for quality issues and overflow",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "render the PPTX to PNG images for review",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "what are the color rules for slide design?",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "the Chrome extraction is finding elements but they're at wrong positions. Viewport is correct at 1280x720",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "write me some HTML slides about our product launch \u2014 clean, modern dark theme",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "can you edit my existing PowerPoint to fix the formatting?",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "fix the JavaScript DOM walker to handle a new element type",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "my slides already have proper .slide wrappers and viewports but the colors are wrong in PPTX",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 18,
+    "passed": 10,
+    "failed": 8
+  }
+}

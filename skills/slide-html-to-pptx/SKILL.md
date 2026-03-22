@@ -43,7 +43,7 @@ Run the conversion script at `scripts/html_to_pptx.py`:
 python ${CLAUDE_SKILL_DIR}/scripts/html_to_pptx.py --input-dir ./slides --output deck.pptx
 
 # Convert specific slides
-python ${CLAUDE_SKILL_DIR}/scripts/html_to_pptx.py --slides slide-01.html,slide-02.html --output deck.pptx
+python ${CLAUDE_SKILL_DIR}/scripts/html_to_pptx.py --slides 01-title-slide.html,02-hook-statement.html --output deck.pptx
 
 # Use a JSON manifest for ordering and metadata
 python ${CLAUDE_SKILL_DIR}/scripts/html_to_pptx.py --manifest slides.json --output deck.pptx
@@ -51,12 +51,14 @@ python ${CLAUDE_SKILL_DIR}/scripts/html_to_pptx.py --manifest slides.json --outp
 
 ### Manifest Format
 
-A JSON array where each entry has at least a `file` key:
+A JSON array where each entry has at least a `file` key. Include `order` to
+control presentation sequence (sorted ascending). Reorder slides by changing
+`order` values — no need to rename files.
 
 ```json
 [
-  {"file": "slide-01.html", "title": "Title Slide", "act": "Intro"},
-  {"file": "slide-02.html", "title": "Hook Statement", "act": "Intro"}
+  {"file": "01-title-slide.html", "order": 1, "slug": "title-slide", "title": "Title Slide", "act": "Intro"},
+  {"file": "02-hook-statement.html", "order": 2, "slug": "hook-statement", "title": "Hook Statement", "act": "Intro"}
 ]
 ```
 

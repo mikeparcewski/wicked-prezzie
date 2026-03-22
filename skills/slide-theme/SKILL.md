@@ -82,7 +82,9 @@ this structure:
     "viewport_height": 720,
     "content_width": 1184,
     "content_start_x": 48,
-    "content_start_y": 48
+    "content_start_y": 48,
+    "vertical_align": "center",
+    "content_justify": "center"
   },
   "card": {
     "background": "#1A1A2E",

@@ -31,7 +31,7 @@ visually consistent slides across the entire deck.
 ## Architecture
 
 ```
-outline.json + theme → slide-generate → slide-01.html, slide-02.html, ...
+outline.json + theme → slide-generate → 01-title.html, 02-hook.html, ... + slides.json
                                            ↓
                                     slide-html-standardize → chrome-extract → slide-pptx-builder
 ```
@@ -194,25 +194,37 @@ speaker notes.
 
 ## Naming Convention
 
-Generated files follow the pattern:
+Generated files use a **numbered slug** pattern derived from the slide title:
 
 ```
-slide-01.html    (first slide)
-slide-02.html    (second slide)
-slide-NN.html    (Nth slide, zero-padded to 2 digits)
+01-ai-powered-analytics.html      (title slide)
+02-decision-speed-is-our-advantage.html  (content slide)
+03-ai-reduced-latency-by-60.html  (stats slide)
 ```
 
-A manifest file `slides.json` is also generated alongside the HTML files:
+The numeric prefix sets the default filesystem sort order. The slug makes each
+file identifiable without opening it. Slugs are kebab-case, max 40 chars,
+with duplicates disambiguated (`-2`, `-3`, etc.).
+
+### Reordering Slides
+
+To reorder slides, edit the `order` field in `slides.json` — do NOT rename
+files. The manifest defines the canonical deck order. The numeric prefix in
+filenames reflects the original generation order, not the presentation order.
+
+A manifest file `slides.json` is generated alongside the HTML files:
 
 ```json
 [
-  {"file": "slide-01.html", "type": "title", "title": "AI-Powered Analytics", "act": "Setup"},
-  {"file": "slide-02.html", "type": "content", "title": "Decision speed is our advantage", "act": "Setup"},
-  {"file": "slide-03.html", "type": "stats", "title": "AI reduced latency by 60%", "act": "Evidence"}
+  {"file": "01-ai-powered-analytics.html", "order": 1, "slug": "ai-powered-analytics", "type": "title", "title": "AI-Powered Analytics", "act": "Setup"},
+  {"file": "02-decision-speed-is-our-advantage.html", "order": 2, "slug": "decision-speed-is-our-advantage", "type": "content", "title": "Decision speed is our advantage", "act": "Setup"},
+  {"file": "03-ai-reduced-latency-by-60.html", "order": 3, "slug": "ai-reduced-latency-by-60", "type": "stats", "title": "AI reduced latency by 60%", "act": "Evidence"}
 ]
 ```
 
 This manifest is consumed by slide-html-to-pptx for slide ordering and metadata.
+To reorder: change `order` values in `slides.json`. To remove a slide: delete
+its entry. To add a slide: create the HTML file and add a manifest entry.
 
 ## Troubleshooting
 

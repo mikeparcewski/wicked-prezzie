@@ -8,7 +8,7 @@ Usage:
     python slide-generate/scripts/slide_generate.py --list-templates
 """
 
-import argparse, json, os, sys
+import argparse, json, os, re, sys
 from pathlib import Path
 
 _root = Path(__file__).parent.parent.parent
@@ -21,12 +21,26 @@ VIEWPORT_W = 1280
 VIEWPORT_H = 720
 
 
+def _slugify(title: str, max_len: int = 40) -> str:
+    """Convert a slide title to a filesystem-safe kebab-case slug.
+
+    'AI reduced latency by 60%' → 'ai-reduced-latency-by-60'
+    """
+    s = title.lower().strip()
+    s = re.sub(r"[^\w\s-]", "", s)       # strip non-alphanumeric
+    s = re.sub(r"[\s_]+", "-", s)         # spaces/underscores → hyphens
+    s = re.sub(r"-{2,}", "-", s)          # collapse hyphens
+    s = s.strip("-")
+    return s[:max_len].rstrip("-") or "untitled"
+
+
 def _resolve_css_vars(theme):
     """Build a dict of CSS variable values from theme for inline resolution."""
     c = theme["colors"]
     f = theme["fonts"]
     s = theme["sizes"]
     sp = theme["spacing"]
+    layout = theme.get("layout", {})
     card = theme.get("card", {})
     return {
         "--bg": c["background"],
@@ -54,6 +68,8 @@ def _resolve_css_vars(theme):
         "--card-radius": card.get("border_radius", "12px"),
         "--card-padding": card.get("padding", "24px"),
         "--card-shadow": card.get("shadow", "none"),
+        "--vertical-align": layout.get("vertical_align", "start"),
+        "--content-justify": layout.get("content_justify", "start"),
     }
 
 
@@ -75,6 +91,14 @@ def _base_css():
       width: 1280px; height: 720px;
       position: relative; overflow: hidden;
       background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: var(--content-justify, start);
+      justify-content: var(--vertical-align, start);
+    }
+    .slide-content {
+      width: 100%;
+      padding: var(--margin);
     }
 """
 
@@ -425,12 +449,22 @@ def generate_from_outline(outline, theme_name=None, output_dir=None):
 
     manifest = []
     slide_num = 0
+    used_slugs: set[str] = set()
 
     for act in outline.get("acts", []):
         act_name = act.get("name", "")
         for slide in act.get("slides", []):
             slide_num += 1
-            filename = f"slide-{slide_num:02d}.html"
+            slug = _slugify(slide.get("title", "untitled"))
+            # Deduplicate: append -2, -3, etc. if slug already used
+            base_slug = slug
+            counter = 2
+            while slug in used_slugs:
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            used_slugs.add(slug)
+
+            filename = f"{slide_num:02d}-{slug}.html"
             filepath = output_path / filename
 
             html = render_slide(slide, css_vars)
@@ -438,6 +472,8 @@ def generate_from_outline(outline, theme_name=None, output_dir=None):
 
             manifest.append({
                 "file": filename,
+                "order": slide_num,
+                "slug": slug,
                 "type": slide.get("type", "content"),
                 "title": slide.get("title", ""),
                 "act": act_name,

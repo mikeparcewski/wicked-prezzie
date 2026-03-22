@@ -1,0 +1,171 @@
+{
+  "skill_name": "Slide Validate",
+  "description": "Quality assurance for slide decks \u2014 layout validation, content lint, deck audit, and consistency checks. Use when the user says \"is it good?\", \"audit my deck\", \"check for problems\", \"lint content\", \"check consistency\", or \"any issues?\". Also use proactively after any conversion run. Catches overflow, empty slides, bullet overload, title issues, and cross-slide inconsistencies.",
+  "results": [
+    {
+      "query": "I just generated deck.pptx from the HTML slides. Can you check if there are any layout problems? Some text might be running off the edges",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "run validation on output/presentation.pptx and tell me the quality score",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "is this pptx any good? I want to know if elements are overflowing before I send it to my boss",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "audit my deck \u2014 give me the full quality breakdown across all categories",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "lint the content of my slides \u2014 check for bullet overload and title issues",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "check consistency across the deck \u2014 are the heading sizes uniform? any off-palette colors?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "compare sales-q3.pptx and sales-q4.pptx for brand alignment and typography consistency",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "are there any problems with the slides? anything that needs fixing before presenting?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "re-audit after I fixed the issues \u2014 show me the score delta",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "check my quotes \u2014 do they all have proper attribution with name and role?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "how many of my slides have speaker notes? flag the ones that are missing them",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "I want to see what the PPTX looks like as images. Can you render it to PNGs?",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "create a contact sheet montage of all slides so I can get a quick overview",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "compare my HTML originals with the PPTX output side by side",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "convert these HTML slides to PowerPoint \u2014 just the conversion, no QA",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "run the full end-to-end pipeline: standardize, convert, validate, render, compare",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "the heading font is too small, can you make it 44pt instead of 36pt?",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "set the quality threshold to 90 for this project",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "standardize these AI-generated HTML files before I convert them",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "create a new presentation about machine learning trends from scratch",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 20,
+    "passed": 9,
+    "failed": 11
+  }
+}

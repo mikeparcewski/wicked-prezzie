@@ -169,10 +169,11 @@ deck-directory/
   styles.css          — shared theme (CSS variables, base styles)
   notes-data.js       — all speaker notes for all slides
   nav.js              — keyboard navigation, notes panel toggle
-  slide-01.html
-  slide-02.html
+  01-title-slide.html
+  02-hook-statement.html
   ...
-  slide-NN.html
+  NN-slug-from-title.html
+  slides.json             — manifest with order, slug, type, title, act
   index.html          — grid navigator (4-column, act dividers)
 ```
 

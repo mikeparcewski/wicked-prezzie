@@ -56,7 +56,7 @@ import json
 raw_layout = json.load(open("slide-000/raw-layout.json"))
 classified_layout = json.load(open("slide-000/classified-layout.json"))
 findings = triage_slide(raw_layout, classified_layout, slide_index=0,
-                        source_file="slide-01.html")
+                        source_file="01-ai-powered-analytics.html")
 ```
 
 Each findings JSON records:
@@ -130,8 +130,8 @@ For each slide (1 through N):
 ```bash
 # Screenshot HTML source
 python skills/chrome-extract/scripts/chrome_extract.py \
-  --screenshot slides/slide-01.html \
-  --output ~/.something-wicked/wicked-prezzie/output/html/slide-01.png
+  --screenshot slides/01-ai-powered-analytics.html \
+  --output ~/.something-wicked/wicked-prezzie/output/html/01-ai-powered-analytics.png
 
 # Render PPTX (all slides)
 python skills/slide-render/scripts/slide_render.py deck.pptx \
