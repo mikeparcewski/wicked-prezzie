@@ -8,9 +8,9 @@ The core problem: HTML slides use CSS layout (flexbox, grid, absolute positionin
 
 **Step 1 -- Chrome headless extraction.** `chrome-extract` launches headless Chrome, renders the HTML slide at the configured viewport size, and walks the DOM. For every visible element, it reads the computed bounding box (`getBoundingClientRect`), computed colors, font properties, text content, and CSS classes. The output is a flat JSON array of elements with pixel-precise geometry. SVG elements get special handling: all non-SVG content is hidden, then the SVG is screenshot and cropped in isolation.
 
-**Step 2 -- Triage.** `slide-triage` scores each element with a confidence value (0.0-1.0) and checks it against 10 known-pattern signatures defined in `known-patterns.md`. Patterns include SVG crop bleed (PATTERN-001), accent bar positioning (PATTERN-002), rotation (PATTERN-003), card text overflow (PATTERN-004), badge collision (PATTERN-005), and others. Each pattern has a detection predicate and a geometry correction rule. Triage also detects collision risks between overlapping elements. The output is a findings JSON with per-element confidence scores and `flagReason` annotations.
+**Step 2 -- Triage.** `triage` scores each element with a confidence value (0.0-1.0) and checks it against 10 known-pattern signatures defined in `known-patterns.md`. Patterns include SVG crop bleed (PATTERN-001), accent bar positioning (PATTERN-002), rotation (PATTERN-003), card text overflow (PATTERN-004), badge collision (PATTERN-005), and others. Each pattern has a detection predicate and a geometry correction rule. Triage also detects collision risks between overlapping elements. The output is a findings JSON with per-element confidence scores and `flagReason` annotations.
 
-**Step 3 -- Prep.** `slide-prep` reads the triage findings and auto-resolves high-confidence elements (>= 0.85) by computing geometry transforms. Each resolved element gets a `resolvedRect` field with exact PPTX coordinates (in EMUs). Low-confidence elements are flagged for model inspection -- Claude reviews them and decides the correct placement. The output is a fully-resolved manifest: every element has a final position, no ambiguity remains.
+**Step 3 -- Prep.** `prep` reads the triage findings and auto-resolves high-confidence elements (>= 0.85) by computing geometry transforms. Each resolved element gets a `resolvedRect` field with exact PPTX coordinates (in EMUs). Low-confidence elements are flagged for model inspection -- Claude reviews them and decides the correct placement. The output is a fully-resolved manifest: every element has a final position, no ambiguity remains.
 
 **Step 4 -- Build.** `pptx_builder.build_slide_from_manifest()` reads the manifest and mechanically creates python-pptx shapes. It does zero classification -- the manifest is the contract. Text shapes get font properties mapped from CSS. Background rectangles get fill colors. Images get placed at exact coordinates. The builder is intentionally dumb: all intelligence lives in triage and prep.
 
@@ -18,9 +18,9 @@ The core problem: HTML slides use CSS layout (flexbox, grid, absolute positionin
 
 The key insight: let the browser do layout. Chrome resolves all cascading styles, flexbox, grid, and absolute positioning. We read the computed result rather than re-implementing CSS layout in Python.
 
-## How slide-learn indexing works
+## How learn indexing works
 
-`slide-learn` converts source documents (PDF, PPTX, DOCX, HTML, images) into a grep-able, git-committable chunk store that other skills query when building slides.
+`learn` converts source documents (PDF, PPTX, DOCX, HTML, images) into a grep-able, git-committable chunk store that other skills query when building slides.
 
 **Pass 1 -- Per-document extraction (parallelizable, stateless).** For each source file:
 
@@ -42,9 +42,9 @@ Pass 1 is incremental: SHA-256 hashes per source file are stored in `index/.cach
 
 **Search pattern**: Start with `_insights/` for high-level overview. Use `_tags/` for faceted lookup. Read specific chunk files for detailed content. Check `.cache/` hashes to determine if re-processing is needed.
 
-## How deck-pipeline orchestration works
+## How workflow orchestration works
 
-`deck-pipeline` is a hub-and-spoke orchestrator. It owns the phase state machine; phase-specific skills own execution. There is no orchestrator script -- Claude drives the loop directly from `deck-pipeline/SKILL.md`.
+`workflow` is a hub-and-spoke orchestrator. It owns the phase state machine; phase-specific skills own execution. There is no orchestrator script -- Claude drives the loop directly from `workflow/SKILL.md`.
 
 **Eight phases with gate conditions:**
 
@@ -52,12 +52,12 @@ Pass 1 is incremental: SHA-256 hashes per source file are stored in `index/.cach
 |-------|-------|----------------|
 | 1. Source Inventory | (inline) | `facts-manifest.json` exists + user confirms completeness |
 | 2. Personas | (inline) | `persona-map.md` written with full evaluation committee |
-| 3. Brainstorm | deck-brainstorm | `synthesized-architecture.md` approved by user |
+| 3. Brainstorm | brainstorm | `synthesized-architecture.md` approved by user |
 | 4. Architecture | (review teams) | Three-team review returns CONDITIONAL APPROVE on all lenses |
-| 5. Build | slide-generate + slide-pipeline | All slides built + visual verification passed |
-| 6. Validate | slide-validate | Council punch list complete, zero blocking items |
+| 5. Build | generate + convert | All slides built + visual verification passed |
+| 6. Validate | validate | Council punch list complete, zero blocking items |
 | 7. Polish | (inline) | Flow review + balance audit within target ratios |
-| 8. Export | slide-pipeline | Visual verification of export artifacts passed |
+| 8. Export | convert | Visual verification of export artifacts passed |
 
 **Constraint injection is mandatory.** Before dispatching any agent, the orchestrator reads `constraints.json` and injects all applicable constraints into the agent prompt under a `## Constraints (MANDATORY)` section. An agent prompt without this section is malformed and must not be dispatched. Ten default constraints ship with the skill to encode known failure modes. Constraints persist on disk in `{deck_dir}/state/constraints.json` -- they survive session boundaries.
 
@@ -67,7 +67,7 @@ Pass 1 is incremental: SHA-256 hashes per source file are stored in `index/.cach
 
 ## How the brainstorm methodology works
 
-`deck-brainstorm` runs structured ideation using three parallel dreamer-skeptic teams. Each team pairs a visionary (dreamer) with a demanding challenger (skeptic). The tension between aspiration and rigor produces content that survives real evaluation committees.
+`brainstorm` runs structured ideation using three parallel dreamer-skeptic teams. Each team pairs a visionary (dreamer) with a demanding challenger (skeptic). The tension between aspiration and rigor produces content that survives real evaluation committees.
 
 **Three teams, three angles:**
 
@@ -83,9 +83,9 @@ Pass 1 is incremental: SHA-256 hashes per source file are stored in `index/.cach
 
 **Hard gate:** No slide building until the synthesized architecture is approved. Building before brainstorming is complete is the single largest source of rework.
 
-## How deck-feedback analysis works
+## How feedback analysis works
 
-`deck-feedback` closes the review loop by parsing inline comments from Word documents and producing structured feedback analysis.
+`feedback` closes the review loop by parsing inline comments from Word documents and producing structured feedback analysis.
 
 **Step 1 -- Parse.** `parse_word_comments.py` opens the .docx as a zip archive and reads `word/comments.xml` (comment metadata: author, date, text) and `word/document.xml` (comment range anchors mapped to referenced text passages and document sections via heading detection). The output is structured JSON with every comment mapped to its author, the text it references, and the section it falls in.
 
@@ -114,7 +114,7 @@ sys.path.insert(0, str(_root / "chrome-extract" / "scripts"))
 from chrome_extract import extract_layout
 ```
 
-**Configuration** uses a two-tier resolution order: user-level defaults in `~/.something-wicked/wicked-prezzie/config.json`, then project-level overrides in `skills/slide-config/config.json`. Project wins. User-level keys: `default_font`, `default_fidelity`, `unsplash_api_key`. Project-level keys: `quality_threshold`, `viewport`, `hide_selectors`, `active_theme`, `slide_width_inches`, `slide_height_inches`, `index_dirs`.
+**Configuration** uses a two-tier resolution order: user-level defaults in `~/.something-wicked/wicked-prezzie/config.json`, then project-level overrides in `skills/config/config.json`. Project wins. User-level keys: `default_font`, `default_fidelity`, `unsplash_api_key`. Project-level keys: `quality_threshold`, `viewport`, `hide_selectors`, `active_theme`, `slide_width_inches`, `slide_height_inches`, `index_dirs`.
 
 ## Storage layout
 
@@ -135,9 +135,9 @@ from chrome_extract import extract_layout
     renders/                                 # PPTX-to-PNG renders
     compare/                                 # HTML vs PPTX comparison images
 
-skills/slide-config/config.json              # Project-level overrides
+skills/config/config.json                    # Project-level overrides
 
-index/                                       # Generated by slide-learn (alongside source files)
+index/                                       # Generated by learn (alongside source files)
   _manifest.json                             # Freshness record
   _tags/                                     # Faceted tag lookup
   _relationships/                            # Entity cross-references

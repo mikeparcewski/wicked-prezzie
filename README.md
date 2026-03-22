@@ -12,6 +12,8 @@ Brainstorm the narrative. Index your source docs. Structure with Pyramid Princip
 
 ### Jump in where you are
 
+Use `wicked-prezzie:start` for everything — it auto-detects what you need.
+
 | You have... | Say... |
 |---|---|
 | A topic or brief | `"Build me a deck about our platform strategy"` |
@@ -175,47 +177,49 @@ Export as PPTX, HTML (Reveal.js), or both. Versioned automatically.
 
 | Skill | What it does | Say... |
 |---|---|---|
-| **deck-brainstorm** | Dreamer-skeptic brainstorm — generates and pressure-tests deck architecture | "brainstorm deck ideas" / "run a brainstorm" |
-| **deck-pipeline** | Full 8-phase orchestrator from source material to finished export | "build a full deck about X" |
-| **deck-checkpoint** | Synthesize a session into a durable checkpoint with decisions + next steps | "checkpoint this" / "where were we" |
-| **deck-feedback** | Parse Word comment annotations; synthesize reviewer alignment and divergence | "analyze feedback" / "parse comments" |
+| **wicked-prezzie:start** | Universal entry point — auto-detects intent and routes accordingly | "build me a deck" / "convert these slides" |
+| **wicked-prezzie:brainstorm** | Dreamer-skeptic brainstorm — generates and pressure-tests deck architecture | "brainstorm deck ideas" / "run a brainstorm" |
+| **wicked-prezzie:workflow** | Full 8-phase orchestrator from source material to finished export | "build a full deck about X" |
+| **wicked-prezzie:checkpoint** | Synthesize a session into a durable checkpoint with decisions + next steps | "checkpoint this" / "where were we" |
+| **wicked-prezzie:feedback** | Parse Word comment annotations; synthesize reviewer alignment and divergence | "analyze feedback" / "parse comments" |
+| **wicked-prezzie:exec-summary** | Generate executive summary document from deck content | "write an exec summary" |
 
 ### Content generation
 
 | Skill | What it does | Say... |
 |---|---|---|
-| **slide-learn** | Index source docs (PDF, PPTX, DOCX, HTML, images) into searchable chunks | "index this document" / "learn from this" |
-| **slide-outline** | Plan presentation structure using the Pyramid Principle | "outline a deck" / "make a presentation about X" |
-| **slide-generate** | Generate themed HTML slides from an outline with optional images | "generate the slides" / "build from the outline" |
-| **slide-config** | View and set project settings (viewport, fonts, quality thresholds) | "change settings" / "configure viewport" |
+| **wicked-prezzie:learn** | Index source docs (PDF, PPTX, DOCX, HTML, images) into searchable chunks | "index this document" / "learn from this" |
+| **wicked-prezzie:outline** | Plan presentation structure using the Pyramid Principle | "outline a deck" / "make a presentation about X" |
+| **wicked-prezzie:generate** | Generate themed HTML slides from an outline with optional images | "generate the slides" / "build from the outline" |
+| **wicked-prezzie:config** | View and set project settings (viewport, fonts, quality thresholds) | "change settings" / "configure viewport" |
 
 ### Design and theme
 
 | Skill | What it does | Say... |
 |---|---|---|
-| **slide-theme** | Set colors, fonts, spacing; extract brand from assets; share via profiles | "set colors" / "apply a theme" / "dark theme" |
-| **slide-design** | Design principles and quality rubric (reference only — no actions) | "design rules" / "quality rubric" |
+| **wicked-prezzie:theme** | Set colors, fonts, spacing; extract brand from assets; share via profiles | "set colors" / "apply a theme" / "dark theme" |
+| **wicked-prezzie:design-ref** | Design principles and quality rubric (reference only — no actions) | "design rules" / "quality rubric" |
 
 ### Conversion to PowerPoint
 
 | Skill | What it does | Say... |
 |---|---|---|
-| **slide-pipeline** | End-to-end HTML → PPTX with iterative visual verification (default path) | "convert these slides" / "make a PowerPoint" |
-| **slide-html-to-pptx** | Quick HTML → PPTX without the full QA loop | "just convert" / "skip validation" |
-| **slide-html-standardize** | Normalize AI-generated HTML before conversion (viewports, animations, wrappers) | "standardize these slides" |
+| **wicked-prezzie:convert** | End-to-end HTML → PPTX with iterative visual verification (default path) | "convert these slides" / "make a PowerPoint" |
+| **wicked-prezzie:quick-convert** | Quick HTML → PPTX without the full QA loop | "just convert" / "skip validation" |
+| **wicked-prezzie:standardize** | Normalize AI-generated HTML before conversion (viewports, animations, wrappers) | "standardize these slides" |
 | **chrome-extract** | Chrome headless extraction of computed layout, colors, and fonts | *(runs automatically during conversion)* |
-| **slide-triage** | Confidence scoring and known-pattern detection per element | *(runs automatically during conversion)* |
-| **slide-prep** | Auto-resolve triage findings into a fully-resolved build manifest | *(runs automatically during conversion)* |
-| **slide-pptx-builder** | Map the manifest to native PPTX shapes with alpha blending and clamping | *(runs automatically during conversion)* |
+| **wicked-prezzie:triage** | Confidence scoring and known-pattern detection per element | *(runs automatically during conversion)* |
+| **wicked-prezzie:prep** | Auto-resolve triage findings into a fully-resolved build manifest | *(runs automatically during conversion)* |
+| **wicked-prezzie:pptx-builder** | Map the manifest to native PPTX shapes with alpha blending and clamping | *(runs automatically during conversion)* |
 
 ### Quality and iteration
 
 | Skill | What it does | Say... |
 |---|---|---|
-| **slide-validate** | 5-category deck audit — structure, content, layout, consistency, lint | "audit my deck" / "validate the deck" |
-| **slide-render** | Render PPTX to PNG for visual review via LibreOffice headless | "show me the slides" / "preview the PPTX" |
-| **slide-compare** | Side-by-side visual diff of HTML source vs PPTX output | "does it look right" / "check fidelity" |
-| **slide-treatment-log** | Track per-slide fix history; promote fixes to permanent patterns | *(runs automatically during iteration)* |
+| **wicked-prezzie:validate** | 5-category deck audit — structure, content, layout, consistency, lint | "audit my deck" / "validate the deck" |
+| **wicked-prezzie:render** | Render PPTX to PNG for visual review via LibreOffice headless | "show me the slides" / "preview the PPTX" |
+| **wicked-prezzie:compare** | Side-by-side visual diff of HTML source vs PPTX output | "does it look right" / "check fidelity" |
+| **wicked-prezzie:treatment-log** | Track per-slide fix history; promote fixes to permanent patterns | *(runs automatically during iteration)* |
 
 ---
 

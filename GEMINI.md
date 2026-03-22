@@ -62,7 +62,7 @@ Gemini reads the same SKILL.md files and follows the same workflows. The only di
 ## Limitations
 
 - **Subagent support is experimental** — Gemini CLI has [subagent support](https://geminicli.com/docs/core/subagents/) but it is experimental and may need to be enabled in settings. Multi-agent workflows (parallel brainstorm teams, parallel extraction) will fall back to sequential execution if subagents are unavailable.
-- **No vision in CLI** — Gemini CLI may not support reading binary files (PDF, PPTX, images) with vision. For slide-learn indexing, text-based extraction works; vision descriptions of charts/diagrams may need manual input.
+- **No vision in CLI** — Gemini CLI may not support reading binary files (PDF, PPTX, images) with vision. For learn indexing, text-based extraction works; vision descriptions of charts/diagrams may need manual input.
 - **Skill triggering** — Gemini uses `activate_skill` instead of `Skill`. Triggering accuracy depends on Gemini's skill matching implementation.
 
 ## Subagent support (experimental)
