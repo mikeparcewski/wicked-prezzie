@@ -65,6 +65,24 @@ python ${CLAUDE_SKILL_DIR}/scripts/html_standardize.py --dir ./slides/ --width 1
 
 The script prints the path of each normalized file to stdout. Exit code 0 indicates success; nonzero indicates at least one file failed.
 
+## Source Detection
+
+Before normalizing, the standardizer fingerprints the HTML to identify its source:
+
+| Source | Signals | Confidence |
+|---|---|---|
+| `wicked-prezzie` | `.speaker-notes` toggle, `--vertical-align` CSS var | high |
+| `chatgpt` | Segoe UI + gradients, Arial + no `.slide` wrapper | medium/low |
+| `claude` | Tailwind utility classes (`flex`, `rounded`, `shadow`, `bg-`) | medium/low |
+| `gemini` | Roboto + Material Design colors, Google Sans | medium |
+| `reveal` | `class="reveal"` or `class="slides"` | high |
+| `unknown` | No matching fingerprints | low |
+
+Detection also identifies the notes format: `speaker-notes-div`, `data-notes`,
+`notes-data-js`, or `none`.
+
+The result is injected as `<!-- SOURCE: chatgpt (confidence=medium, notes=data-notes, signals=segoe-ui+gradient) -->` in the body and printed to stdout during batch processing.
+
 ## Key Normalizations Performed
 
 ### Document Structure

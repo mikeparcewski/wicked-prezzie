@@ -41,6 +41,117 @@ EXTERNAL_HOSTS = (
 )
 
 
+def detect_source(soup):
+    """Detect the likely source of the HTML slide.
+
+    Returns a dict with:
+        source: 'chatgpt' | 'claude' | 'gemini' | 'wicked-prezzie' | 'reveal' | 'unknown'
+        confidence: 'high' | 'medium' | 'low'
+        signals: list of matched fingerprints
+        notes_format: 'speaker-notes-div' | 'data-notes' | 'notes-data-js' | 'none'
+    """
+    raw = str(soup).lower()
+    signals = []
+    source = 'unknown'
+    confidence = 'low'
+
+    # --- Fingerprint: wicked-prezzie (our own output) ---
+    if soup.find(class_='speaker-notes') and 'speaker notes (press n' in raw:
+        signals.append('speaker-notes-toggle')
+        source = 'wicked-prezzie'
+        confidence = 'high'
+    elif '--vertical-align' in raw or '--content-justify' in raw:
+        signals.append('wicked-prezzie-css-vars')
+        source = 'wicked-prezzie'
+        confidence = 'high'
+
+    # --- Fingerprint: ChatGPT ---
+    # ChatGPT slides often use: Segoe UI font, specific gradient patterns,
+    # inline styles with very specific color values, no .slide wrapper
+    if source == 'unknown':
+        if 'segoe ui' in raw and ('linear-gradient' in raw or 'radial-gradient' in raw):
+            signals.append('segoe-ui+gradient')
+            source = 'chatgpt'
+            confidence = 'medium'
+        elif 'font-family: arial' in raw and not soup.find(class_='slide'):
+            signals.append('arial+no-slide-wrapper')
+            source = 'chatgpt'
+            confidence = 'low'
+
+    # --- Fingerprint: Claude ---
+    # Claude artifacts use: specific class patterns, Tailwind-style utilities
+    if source == 'unknown':
+        if 'bg-gradient-to' in raw or ('tailwind' in raw):
+            signals.append('tailwind-classes')
+            source = 'claude'
+            confidence = 'medium'
+        elif re.search(r'class="[^"]*(?:flex|grid|rounded|shadow)[^"]*"', raw):
+            # Tailwind utility patterns without explicit tailwind mention
+            utility_count = len(re.findall(
+                r'(?:flex|grid|rounded-|shadow-|bg-|text-|p-\d|m-\d|gap-)', raw))
+            if utility_count >= 8:
+                signals.append(f'tailwind-utilities({utility_count})')
+                source = 'claude'
+                confidence = 'low'
+
+    # --- Fingerprint: Gemini ---
+    # Gemini slides: Material Design patterns, specific font choices
+    if source == 'unknown':
+        if 'roboto' in raw and ('material' in raw or '#1a73e8' in raw):
+            signals.append('roboto+material')
+            source = 'gemini'
+            confidence = 'medium'
+        elif 'google sans' in raw:
+            signals.append('google-sans')
+            source = 'gemini'
+            confidence = 'medium'
+
+    # --- Fingerprint: Reveal.js ---
+    if source == 'unknown':
+        if 'reveal' in raw and ('class="slides"' in raw or 'class="reveal"' in raw):
+            signals.append('reveal-js')
+            source = 'reveal'
+            confidence = 'high'
+
+    # --- Detect notes format ---
+    notes_format = 'none'
+    if soup.find(class_='speaker-notes'):
+        notes_format = 'speaker-notes-div'
+    elif soup.find(attrs={'data-notes': True}):
+        notes_format = 'data-notes'
+    else:
+        for script in soup.find_all('script'):
+            src = script.get('src', '')
+            if 'notes-data' in src:
+                notes_format = 'notes-data-js'
+                break
+            if script.string and 'SLIDE_NOTES' in (script.string or ''):
+                notes_format = 'notes-data-js'
+                break
+
+    return {
+        'source': source,
+        'confidence': confidence,
+        'signals': signals,
+        'notes_format': notes_format,
+    }
+
+
+def annotate_source(soup, detection):
+    """Insert a <!-- SOURCE: ... --> comment as the first child of <body>."""
+    body = soup.find('body')
+    if not body:
+        return
+    from bs4 import Comment
+    comment = Comment(
+        f' SOURCE: {detection["source"]} '
+        f'(confidence={detection["confidence"]}, '
+        f'notes={detection["notes_format"]}, '
+        f'signals={",".join(detection["signals"]) or "none"}) '
+    )
+    body.insert(0, comment)
+
+
 def normalize_structure(soup):
     """Ensure <html><head><body> structure. Remove duplicate bodies.
     Ensure charset meta tag exists."""
@@ -388,6 +499,9 @@ def standardize_html(html_path, output_path=None, viewport_w=1280, viewport_h=72
     raw = html_path.read_text(encoding='utf-8', errors='replace')
     soup = BeautifulSoup(raw, 'lxml')
 
+    # Detect source before any modifications
+    detection = detect_source(soup)
+
     # Apply normalizations in order
     normalize_structure(soup)
     ensure_slide_wrapper(soup, w=viewport_w, h=viewport_h)
@@ -397,6 +511,7 @@ def standardize_html(html_path, output_path=None, viewport_w=1280, viewport_h=72
     strip_navigation(soup)
     normalize_speaker_notes(soup)
     annotate_complexity(soup)
+    annotate_source(soup, detection)
 
     # Determine output path
     if output_path is None:
@@ -406,6 +521,12 @@ def standardize_html(html_path, output_path=None, viewport_w=1280, viewport_h=72
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(str(soup), encoding='utf-8')
+
+    # Print detection for pipeline visibility
+    src = detection['source']
+    conf = detection['confidence']
+    nf = detection['notes_format']
+    print(f"  [{html_path.name}] source={src} ({conf}), notes={nf}")
 
     return str(output_path)
 
