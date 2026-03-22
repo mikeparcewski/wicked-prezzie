@@ -42,10 +42,18 @@ structure causes downstream failures in chrome-extract and slide-pptx-builder.
         <a href="slide-NN+1.html" class="nav-next">Next →</a>
     </nav>
 
-    <!-- Speaker notes (never use fetch() — fails on file://) -->
-    <script src="notes-data.js"></script>
-    <!-- Navigation logic -->
-    <script src="nav.js"></script>
+    <!-- Speaker notes (hidden div, toggle with N key) -->
+    <div class="speaker-notes" style="display:none">
+        Delivery instructions for the presenter. Key talking points here.
+    </div>
+    <script>
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'n' || e.key === 'N') {
+        var notes = document.querySelector('.speaker-notes');
+        if (notes) notes.style.display = notes.style.display !== 'none' ? 'none' : 'block';
+      }
+    });
+    </script>
 
 </body>
 </html>
@@ -86,28 +94,26 @@ body {
 }
 ```
 
-## notes-data.js Format
+## Speaker Notes Format
 
-Speaker notes are stored in `notes-data.js` as a global variable, never
-fetched at runtime. Using `fetch()` breaks on `file://` protocol.
+Speaker notes are embedded directly in each HTML file as a hidden div:
 
-```javascript
-window.SLIDE_NOTES = {
-  "1": {
-    "notes": "Delivery instructions for the presenter. Make eye contact before speaking.",
-    "rfp": [
-      "Section: [Name] -- '[exact RFP quote]'"
-    ],
-    "talking_points": [
-      "Substantive point with objection handler. If challenged on X: 'Response...'"
-    ]
-  },
-  "2": { ... }
-};
+```html
+<div class="speaker-notes" style="display:none">
+    Delivery instructions for the presenter. Make eye contact before speaking.
+    Key talking points and objection handlers go here.
+</div>
 ```
 
-The `nav.js` reads `window.SLIDE_NOTES` and renders a notes panel toggled by
-pressing N. Never embed notes in the slide body.
+Notes are toggled visible by pressing **N** when viewing the slide in a browser.
+The `.speaker-notes` div is:
+- Hidden by default (`display:none`) so it doesn't affect slide layout
+- Placed as a sibling of `.slide`, not inside it
+- Excluded from Chrome extraction (added to default hide_selectors)
+- Read by `extract_notes()` and passed to PPTX builder as PowerPoint speaker notes
+
+Never use `fetch()`, `notes-data.js`, or external files for notes — they break
+on `file://` protocol. Everything must work when opening the HTML file directly.
 
 ## Component Variations
 
@@ -156,7 +162,8 @@ pressing N. Never embed notes in the slide body.
 |---|---|---|
 | Chrome renders white page | Missing `<link rel="stylesheet">` or wrong path | Verify styles.css path relative to slide file |
 | Layout not centering | Missing `justify-content:center` on `.slide-content` | Add flex centering rules |
-| Notes not loading | `fetch()` used for notes | Use `window.SLIDE_NOTES` in `notes-data.js` |
+| Notes missing in PPTX | Notes in `data-notes` attr or external JS | Use `<div class="speaker-notes">` hidden div |
+| Notes not toggling | Missing N key handler script | Add inline `<script>` with keydown listener |
 | Nav broken after file copy | Relative paths to CSS/JS broken | Use absolute paths or keep files co-located |
 | External fonts blank | Google Fonts URL | Use font stack only: Helvetica Neue, Arial |
 | Animation frozen mid-state | CSS `transition` or `animation` present | Remove all animation properties |
@@ -167,8 +174,6 @@ pressing N. Never embed notes in the slide body.
 ```
 deck-directory/
   styles.css          — shared theme (CSS variables, base styles)
-  notes-data.js       — all speaker notes for all slides
-  nav.js              — keyboard navigation, notes panel toggle
   01-title-slide.html
   02-hook-statement.html
   ...

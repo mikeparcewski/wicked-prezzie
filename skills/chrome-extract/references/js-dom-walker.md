@@ -71,11 +71,21 @@ Scale factors normalize coordinates to the slide's natural dimensions
 Maximum recursion depth: 15 levels. This prevents infinite loops in
 deeply nested DOM structures while covering all practical slide layouts.
 
+## Speaker Notes Extraction
+
+The walker reads speaker notes from `.speaker-notes` div (hidden sibling of
+`.slide`) and includes them as `speakerNotes` in the extraction result.
+Falls back to `data-notes` attribute on `.slide` for legacy HTML.
+
+Notes are NOT walked as elements — they are extracted once at the top level
+and passed through to the PPTX builder as PowerPoint speaker notes.
+
 ## Skipped Elements
 
 The walker skips: `script`, `style`, `nav`, `svg` (handled separately),
 elements inside `svg`, elements with `display: none`, `visibility: hidden`,
-or `opacity: 0`.
+or `opacity: 0`. The `.speaker-notes` div is also excluded (it's a sibling of
+`.slide`, not a child, so the walker never reaches it).
 
 ## Output Format
 

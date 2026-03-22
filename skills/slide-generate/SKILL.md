@@ -182,15 +182,19 @@ Slide generation follows slide-design principles automatically:
 
 ## Speaker Notes
 
-When the outline includes `notes` for a slide, they are embedded as a
-`data-notes` attribute on the `.slide` div:
+When the outline includes `notes` for a slide, they are embedded as a hidden
+`<div class="speaker-notes">` sibling to the `.slide` div:
 
 ```html
-<div class="slide content" data-notes="Frame the problem before presenting the solution">
+<div class="slide content">
+    ...
+</div>
+<div class="speaker-notes" style="display:none">Frame the problem before presenting the solution</div>
 ```
 
-The slide-html-to-pptx pipeline reads `data-notes` and adds them as PowerPoint
-speaker notes.
+Press **N** when viewing the HTML to toggle the notes panel. The pipeline reads
+`.speaker-notes` and adds them as PowerPoint speaker notes. Notes are extracted
+before triage/prep so they survive into the final PPTX.
 
 ## Naming Convention
 

@@ -285,6 +285,10 @@ JS_EXTRACT = r'''
         slideWidth: SLIDE_W, slideHeight: SLIDE_H,
         slideClasses: Array.from(slide.classList),
         slideBg: ss.backgroundColor,
+        speakerNotes: (function() {
+            var n = document.querySelector('.speaker-notes');
+            return n ? n.textContent.trim() : (slide.getAttribute('data-notes') || '');
+        })(),
         elements: elements, svgElements: svgs
     });
 })();

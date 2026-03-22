@@ -42,15 +42,31 @@ from bs4 import BeautifulSoup
 
 
 def extract_notes(html_path):
-    """Extract text from HTML for speaker notes."""
+    """Extract speaker notes from HTML.
+
+    Reads from .speaker-notes div first (new format), falls back to
+    data-notes attribute (legacy), then to visible text as last resort.
+    """
     try:
         with open(html_path, 'r', encoding='utf-8') as f:
             soup = BeautifulSoup(f.read(), 'lxml')
+
+        # Primary: .speaker-notes hidden div
+        notes_div = soup.find(class_='speaker-notes')
+        if notes_div:
+            return notes_div.get_text(strip=True)[:3000]
+
+        # Legacy: data-notes attribute on .slide
+        slide_el = soup.find(class_='slide')
+        if slide_el and slide_el.get('data-notes'):
+            return slide_el['data-notes'][:3000]
+
+        # Last resort: scrape visible text
         for tag in soup.find_all(['script', 'style', 'nav']):
             tag.decompose()
-        sl = soup.find(class_='slide') or soup.body
+        sl = slide_el or soup.body
         return sl.get_text(separator='\n', strip=True)[:3000] if sl else ''
-    except:
+    except Exception:
         return ''
 
 
@@ -116,6 +132,13 @@ def _extract_single_slide(args):
                 json.dump(layout, f)
             result['classified_layout_path'] = classified_layout_path
 
+        # Extract speaker notes early — needed before manifest is built.
+        # Priority: .speaker-notes div (via extract_notes) > speakerNotes from
+        # Chrome extraction > data-notes attribute > visible text fallback.
+        result['notes'] = extract_notes(html_path)
+        if not result['notes'] and raw_layout:
+            result['notes'] = raw_layout.get('speakerNotes', '')
+
         # Run triage + auto-prep (model-driven triage pipeline)
         if _TRIAGE_AVAILABLE and raw_layout and layout:
             try:
@@ -152,9 +175,6 @@ def _extract_single_slide(args):
                         viewport_w, viewport_h, hide_selectors=hide_selectors)
         if os.path.exists(ss_path):
             result['screenshot_path'] = ss_path
-
-        # Extract speaker notes
-        result['notes'] = extract_notes(html_path)
 
     except Exception as e:
         result['error'] = str(e)
@@ -205,7 +225,7 @@ def build_deck(slides, input_dir, output_path, hide_selectors=None,
     prs.slide_height = Inches(sh)
 
     total = len(slides)
-    hide = hide_selectors or ['.slide-nav', '.slide-number']
+    hide = hide_selectors or ['.slide-nav', '.slide-number', '.speaker-notes']
     # Cap default workers to avoid Chrome resource contention
     cpu = os.cpu_count() or 4
     max_workers = workers or min(total, cpu // 2 or 1, 6)

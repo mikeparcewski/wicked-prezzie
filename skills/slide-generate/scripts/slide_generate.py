@@ -240,9 +240,57 @@ def _html_escape(text):
             .replace('"', "&quot;"))
 
 
+def _notes_toggle_js():
+    """Inline JS to toggle speaker notes with N key when viewing HTML."""
+    return """
+    <script>
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'n' || e.key === 'N') {
+        var notes = document.querySelector('.speaker-notes');
+        if (notes) {
+          var visible = notes.style.display !== 'none';
+          notes.style.display = visible ? 'none' : 'block';
+        }
+      }
+    });
+    </script>"""
+
+
+def _notes_css():
+    """CSS for the speaker notes panel when toggled visible."""
+    return """
+    .speaker-notes {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      max-height: 30vh;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.92);
+      color: #e0e0e0;
+      font-family: system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 16px 24px;
+      border-top: 2px solid rgba(255, 255, 255, 0.15);
+      z-index: 9999;
+    }
+    .speaker-notes::before {
+      content: 'Speaker Notes (press N to hide)';
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #888;
+      margin-bottom: 8px;
+    }
+"""
+
+
 def _wrap_html(body_content, css_vars, slide_class, notes=""):
-    """Wrap slide body in full HTML document."""
-    notes_attr = f' data-notes="{_html_escape(notes)}"' if notes else ""
+    """Wrap slide body in full HTML document with embedded speaker notes."""
+    notes_div = ""
+    if notes:
+        notes_div = f'\n    <div class="speaker-notes">{_html_escape(notes)}</div>'
     return f"""<!DOCTYPE html>
 <html>
 <head>
@@ -252,12 +300,14 @@ def _wrap_html(body_content, css_vars, slide_class, notes=""):
 {_css_root_block(css_vars)}
 {_base_css()}
 {_type_css()}
+{_notes_css()}
     </style>
 </head>
 <body>
-    <div class="slide {slide_class}"{notes_attr}>
+    <div class="slide {slide_class}">
 {body_content}
-    </div>
+    </div>{notes_div}
+{_notes_toggle_js()}
 </body>
 </html>
 """
