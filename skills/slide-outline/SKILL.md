@@ -37,8 +37,8 @@ Every slide outline follows the Pyramid Principle adapted for presentations:
 1. **Lead with the conclusion** — The title slide states the main takeaway.
    Don't build up to it; state it, then prove it.
 
-2. **Group by argument** — Slides are organized into acts (sections), each
-   making one supporting argument for the main conclusion.
+2. **Group by argument** — Slides are organized into sections, each making
+   one supporting argument for the main conclusion.
 
 3. **One message per slide** — Each slide's title is an assertion (not a topic
    label). "Revenue grew 40% YoY" not "Revenue Update".
@@ -64,9 +64,10 @@ The outline is stored as JSON consumed by slide-generate:
   "target_audience": "Executive leadership",
   "key_message": "Our AI platform reduced decision latency by 60%",
   "auto_dividers": true,
-  "acts": [
+  "sections": [
     {
       "name": "Setup",
+      "summary": "Why decision speed matters now",
       "color_hint": "primary",
       "slides": [
         {
@@ -90,6 +91,7 @@ The outline is stored as JSON consumed by slide-generate:
     },
     {
       "name": "Evidence",
+      "summary": "Our AI platform delivers measurable speed gains",
       "color_hint": "secondary",
       "slides": [
         {
@@ -107,6 +109,7 @@ The outline is stored as JSON consumed by slide-generate:
     },
     {
       "name": "Close",
+      "summary": "The ask and expected return",
       "color_hint": "accent",
       "slides": [
         {
@@ -124,6 +127,19 @@ The outline is stored as JSON consumed by slide-generate:
   ]
 }
 ```
+
+### Section Fields
+
+| Field | Required | Description |
+|---|---|---|
+| `name` | yes | Section name — used in divider slides and manifest |
+| `summary` | no | One-line summary — shown as subtitle on auto-generated dividers |
+| `color_hint` | no | Theme color key for section accent (`primary`, `secondary`, `accent`) |
+| `slides` | yes | Array of slide objects |
+
+**Naming**: Use `"sections"` (preferred) or `"acts"` (legacy alias). Both work
+identically. Use whatever fits the deck's structure — acts for narrative arcs,
+sections for topic groupings, chapters for long-form, phases for timelines.
 
 ## Slide Types
 

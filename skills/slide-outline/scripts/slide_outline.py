@@ -77,15 +77,15 @@ def validate_outline(outline):
     # Top-level fields
     if "title" not in outline:
         errors.append("Missing 'title' field")
-    if "acts" not in outline:
-        errors.append("Missing 'acts' field")
+    if "sections" not in outline and "acts" not in outline:
+        errors.append("Missing 'sections' (or 'acts') field")
         return errors, warnings
     if "key_message" not in outline:
         warnings.append("No 'key_message' — consider adding one for narrative focus")
     if "theme" not in outline:
         warnings.append("No 'theme' specified — will use default")
 
-    acts = outline.get("acts", [])
+    acts = outline.get("sections") or outline.get("acts", [])
     if not acts:
         errors.append("No acts defined")
         return errors, warnings
@@ -163,7 +163,7 @@ def summarize_outline(outline):
     print()
 
     total = 0
-    for act in outline.get("acts", []):
+    for act in (outline.get("sections") or outline.get("acts", [])):
         slides = act.get("slides", [])
         print(f"  [{act.get('name', 'Unnamed')}] ({len(slides)} slides)")
         for i, slide in enumerate(slides):
@@ -187,9 +187,10 @@ def scaffold_outline(topic, audience=None, key_message=None, theme=None):
         "theme": theme or "midnight-purple",
         "target_audience": audience or "",
         "key_message": key_message or "",
-        "acts": [
+        "sections": [
             {
                 "name": "Setup",
+                "summary": "",
                 "color_hint": "primary",
                 "slides": [
                     {

@@ -208,6 +208,11 @@ def _type_css():
       font-weight: 700; text-align: center; padding-top: 280px;
       font-family: var(--font-heading);
     }
+    .section-slide .section-summary {
+      color: var(--text-secondary); font-size: var(--subheading-size);
+      font-weight: 400; text-align: center; margin-top: 16px;
+      font-family: var(--font-body);
+    }
     .section-slide .section-accent {
       width: 80px; height: 4px; background: var(--accent); margin: 24px auto 0;
     }
@@ -327,7 +332,10 @@ def render_title(slide, css_vars):
 
 def render_section(slide, css_vars):
     name = _html_escape(slide.get("title", ""))
+    subtitle = _html_escape(slide.get("subtitle", ""))
     body = f'        <h2 class="section-name">{name}</h2>'
+    if subtitle:
+        body += f'\n        <p class="section-summary">{subtitle}</p>'
     body += '\n        <div class="section-accent"></div>'
     return _wrap_html(body, css_vars, "section-slide", slide.get("notes", ""))
 
@@ -501,19 +509,21 @@ def generate_from_outline(outline, theme_name=None, output_dir=None):
     slide_num = 0
     used_slugs: set[str] = set()
 
-    acts = outline.get("acts", [])
+    # Support both "sections" (preferred) and "acts" (legacy alias)
+    sections = outline.get("sections") or outline.get("acts", [])
     auto_dividers = outline.get("auto_dividers", True)
 
-    for act_idx, act in enumerate(acts):
-        act_name = act.get("name", "")
+    for sec_idx, section in enumerate(sections):
+        sec_name = section.get("name", "")
+        sec_summary = section.get("summary", "")
 
-        # Auto-insert section divider between acts (skip before first act)
-        if auto_dividers and act_idx > 0 and act_name:
-            # Check if the act already starts with a section/divider slide
-            first_slide_type = (act.get("slides") or [{}])[0].get("type", "")
+        # Auto-insert section divider between sections (skip before first)
+        if auto_dividers and sec_idx > 0 and sec_name:
+            # Check if the section already starts with a section/divider slide
+            first_slide_type = (section.get("slides") or [{}])[0].get("type", "")
             if first_slide_type not in ("section", "title"):
                 slide_num += 1
-                divider_slug = _slugify(act_name)
+                divider_slug = _slugify(sec_name)
                 base_slug = divider_slug
                 counter = 2
                 while divider_slug in used_slugs:
@@ -521,7 +531,9 @@ def generate_from_outline(outline, theme_name=None, output_dir=None):
                     counter += 1
                 used_slugs.add(divider_slug)
 
-                divider_slide = {"type": "section", "title": act_name}
+                divider_slide = {"type": "section", "title": sec_name}
+                if sec_summary:
+                    divider_slide["subtitle"] = sec_summary
                 divider_html = render_slide(divider_slide, css_vars)
                 divider_filename = f"{slide_num:02d}-{divider_slug}.html"
                 divider_filepath = output_path / divider_filename
@@ -532,13 +544,13 @@ def generate_from_outline(outline, theme_name=None, output_dir=None):
                     "order": slide_num,
                     "slug": divider_slug,
                     "type": "section",
-                    "title": act_name,
-                    "act": act_name,
+                    "title": sec_name,
+                    "section": sec_name,
                     "auto_generated": True,
                 })
-                print(f"  Generated {divider_filename} (section divider: {act_name})")
+                print(f"  Generated {divider_filename} (section divider: {sec_name})")
 
-        for slide in act.get("slides", []):
+        for slide in section.get("slides", []):
             slide_num += 1
             slug = _slugify(slide.get("title", "untitled"))
             # Deduplicate: append -2, -3, etc. if slug already used
@@ -561,7 +573,7 @@ def generate_from_outline(outline, theme_name=None, output_dir=None):
                 "slug": slug,
                 "type": slide.get("type", "content"),
                 "title": slide.get("title", ""),
-                "act": act_name,
+                "section": sec_name,
             })
             print(f"  Generated {filename} ({slide.get('type', 'content')}: {slide.get('title', '')[:50]})")
 
