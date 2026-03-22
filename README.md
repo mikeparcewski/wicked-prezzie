@@ -2,25 +2,37 @@
 
 HTML slides to editable PowerPoint. Native shapes and formatted text, not screenshots.
 
-A Claude Code / Gemini CLI plugin that builds presentations the way you actually work — start with an idea, refine it, generate slides, refine again, and export a polished deck. Jump in at any stage, go back when something's off, and iterate until it's right.
+A Claude Code / Gemini CLI plugin that builds presentations the way you actually work — start with an idea, refine it, generate slides, refine with your team, and export a polished deck. Jump in at any stage, go back when something's off, and iterate until it's right.
 
 ## Quick start
 
 ### Claude Code
 
+Add the marketplace, then install the plugin:
+
+```
+/plugin marketplace add mikeparcewski/wicked-prezzie
+/plugin install wicked-prezzie
+```
+
+Or for local development:
+
 ```bash
 git clone https://github.com/mikeparcewski/wicked-prezzie.git
-cd wicked-prezzie
-claude
+claude --plugin-dir ./wicked-prezzie
 ```
 
 ### Gemini CLI
+
+Clone the repo and run Gemini inside it — it auto-discovers the extension via `gemini-extension.json`:
 
 ```bash
 git clone https://github.com/mikeparcewski/wicked-prezzie.git
 cd wicked-prezzie
 gemini
 ```
+
+See [GEMINI.md](GEMINI.md) for tool name mappings.
 
 ### Prerequisites
 
@@ -38,15 +50,17 @@ Missing dependencies are auto-detected on first run.
 
 ## How you use it
 
-The workflow follows a natural progression. You can start anywhere, skip steps you don't need, and go back to any earlier stage when things change.
+```
+Idea → Refine → Generate → Refine with your team → Final Output
+          ↑                        |
+          └────────────────────────┘
+```
 
-```
-Idea → Refine → Generate → Refine → Final Output
-```
+You can start anywhere, skip steps you don't need, and loop back whenever something changes. The whole point is iteration — with yourself, with your content, and with your team.
 
 ### 1. Start with an idea
 
-You have a topic, a brief, a pile of documents, or just a rough notion of what you need to present. Tell the plugin what you're working with.
+You have a topic, a brief, a pile of documents, or just a rough notion of what you need to present.
 
 ```
 "I need a board deck about our platform strategy. 15 minutes.
@@ -63,7 +77,7 @@ You have a topic, a brief, a pile of documents, or just a rough notion of what y
  different angles before we commit to a narrative."
 ```
 
-What happens behind the scenes: source documents get indexed into a searchable knowledge base. Brainstorm teams generate competing perspectives. The Pyramid Principle structures your argument — lead with the conclusion, group by evidence, build a narrative arc.
+Behind the scenes: source documents get indexed into a searchable knowledge base. Brainstorm teams generate competing perspectives. The Pyramid Principle structures your argument — lead with the conclusion, group by evidence, build a narrative arc.
 
 ### 2. Refine the plan
 
@@ -95,7 +109,7 @@ Turn the refined outline into actual slides. Pick a theme, add images, choose yo
 "Make it feel dark and techy with purple accents"
 ```
 
-The plugin generates themed HTML slides with proper typography, spacing, and contrast. Eight slide types (title, content, stats, comparison, quote, section divider, CTA, blank), three built-in themes, or extract one from your existing brand assets.
+Eight slide types (title, content, stats, comparison, quote, section divider, CTA, blank), three built-in themes, or extract one from your existing brand assets.
 
 Already have HTML slides from ChatGPT, Claude, Gemini, or reveal.js? Skip straight here:
 
@@ -103,65 +117,49 @@ Already have HTML slides from ChatGPT, Claude, Gemini, or reveal.js? Skip straig
 "Convert the slides in ./my-deck/ to PowerPoint"
 ```
 
-### 4. Refine the output
+### 4. Refine — on your own and with your team
 
-This is where you iterate. Check quality, fix issues, re-generate specific slides, compare versions.
+This is where the real iteration happens, and it works at two levels.
+
+**Refine it yourself** — check quality, fix issues, re-generate specific slides.
 
 ```
 "Audit the deck"
 "The card grid on slide 4 is overlapping — fix it"
 "Re-convert just slides 3 and 7"
-"Compare the HTML originals against the PPTX"
 "The CTA slide needs a stronger closing — rework it"
 ```
 
-The plugin runs a 5-category quality audit (structure, content, layout, consistency, lint), renders the PPTX to PNG for visual comparison, and iterates on problem slides until they match. You can also go back — change the outline, regenerate a section, swap the theme.
+The plugin runs a 5-category quality audit, renders the PPTX to PNG for visual comparison, and iterates on problem slides until they pass.
 
-### 5. Get team feedback
-
-Export the deck as a Word document for team review. Everyone adds inline comments using normal Word functionality. Then parse the feedback.
+**Refine it with your team** — export the narrative as a Word document for group review. Everyone adds inline comments using normal Word functionality. Then bring the feedback back in.
 
 ```
 "Analyze the feedback in ./exec-summary-reviewed.docx"
 ```
 
-The plugin extracts every comment, maps it to the document section, and produces a feedback report:
+The plugin parses every comment, maps it to the document section, and tells you:
+
 - **Where reviewers agree** — aligned concerns are your highest-priority changes
-- **Where reviewers diverge** — these need a conversation, not just an edit
-- **What it means for the narrative** — hotspots, blind spots, structural signals
+- **Where reviewers diverge** — these need a conversation before you can edit
+- **What it means for the narrative** — which sections are hot, which were skipped, whether the overall direction holds
 
 ```
-"Generate the feedback report as a Word doc to share with the team"
-"Address the aligned concerns first, then regenerate those slides"
+"Generate the feedback report as a Word doc to share back"
+"Address the aligned concerns, then regenerate those slides"
 ```
 
-Then loop back to step 2 or 3 with the feedback incorporated.
+This is the group refinement loop: generate → share for review → analyze feedback → refine → share again. Each round tightens the narrative based on real input from your stakeholders.
 
-### 6. Final output
+You can also loop back further — change the outline, swap the theme, re-run the brainstorm — at any point.
+
+### 5. Final output
 
 Export as PPTX, HTML (Reveal.js), or both. Versioned automatically.
 
 ```
 "Export as both PPTX and HTML"
 "Render the final version to PNG so I can preview"
-```
-
----
-
-## The key idea: go back anytime
-
-This isn't a one-way pipeline. At any point you can:
-
-- **Go back to the outline** when the narrative isn't landing
-- **Swap the theme** after seeing the generated slides
-- **Regenerate specific slides** without rebuilding the whole deck
-- **Re-run the brainstorm** if the direction feels off
-- **Incorporate feedback** and regenerate only what changed
-
-```
-"Actually, rethink the structure — lead with the customer story instead"
-"Change the theme to warm-dark and regenerate"
-"Just redo slides 5-8 with the updated messaging"
 ```
 
 ---
@@ -194,8 +192,8 @@ Three built-in. Create your own. Extract from existing PPTX, PDF, or brand guide
 | **Refine (plan)** | slide-outline, deck-pipeline | Pyramid Principle structure, 8-phase orchestration with constraint persistence |
 | **Generate** | slide-theme, slide-generate, slide-html-standardize | Themed HTML slides, brand extraction, normalize AI-generated HTML |
 | **Convert** | chrome-extract, slide-triage, slide-prep, slide-pptx-builder, slide-html-to-pptx | Chrome headless extraction → confidence scoring → manifest → native PPTX |
-| **Refine (output)** | slide-validate, slide-render, slide-compare, slide-treatment-log | 5-category audit, PPTX→PNG rendering, visual diff, fix history |
-| **Feedback** | deck-feedback | Parse Word comments → alignment/divergence → prioritized actions |
+| **Refine (you)** | slide-validate, slide-render, slide-compare, slide-treatment-log | 5-category audit, PPTX→PNG rendering, visual diff, fix history |
+| **Refine (team)** | deck-feedback | Parse Word comments → alignment/divergence → prioritized actions |
 | **Support** | slide-pipeline, slide-design, slide-config, deck-checkpoint | Orchestration, design reference, settings, session continuity |
 
 Works with HTML from anywhere — ChatGPT, Claude, Gemini, reveal.js, or hand-coded.

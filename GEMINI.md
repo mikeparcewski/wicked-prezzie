@@ -2,13 +2,13 @@
 
 ## Installation
 
+Clone the repo and run Gemini inside it. Gemini CLI auto-discovers the extension via `gemini-extension.json` in the project root and loads this file as context.
+
 ```bash
 git clone https://github.com/mikeparcewski/wicked-prezzie.git
 cd wicked-prezzie
 gemini
 ```
-
-Gemini CLI reads GEMINI.md automatically. All skills work the same way — just use Gemini's tool names instead of Claude's.
 
 ### Prerequisites
 
@@ -17,8 +17,8 @@ pip install python-pptx beautifulsoup4 lxml Pillow
 ```
 
 - **Google Chrome** — headless layout extraction
-- **LibreOffice** — PPTX rendering (`brew install --cask libreoffice`)
-- **poppler** — PDF to PNG (`brew install poppler`)
+- **LibreOffice** — PPTX rendering (`brew install --cask libreoffice` / `apt install libreoffice`)
+- **poppler** — PDF to PNG (`brew install poppler` / `apt install poppler-utils`)
 
 ## Tool Mapping
 
@@ -48,6 +48,7 @@ The same natural-language prompts work in both Claude and Gemini:
 "Index the source documents in ./rfp-materials/"
 "Run a brainstorm for the client deck"
 "Audit my deck"
+"Analyze the team's feedback comments from the Word doc"
 ```
 
 Gemini reads the same SKILL.md files and follows the same workflows. The only difference is tool names (see mapping above).
