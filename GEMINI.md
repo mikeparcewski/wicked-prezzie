@@ -2,13 +2,19 @@
 
 ## Installation
 
-Clone the repo and run Gemini inside it. Gemini CLI auto-discovers the extension via `gemini-extension.json` in the project root and loads this file as context.
+Install the extension directly from GitHub:
 
 ```bash
-git clone https://github.com/mikeparcewski/wicked-prezzie.git
-cd wicked-prezzie
-gemini
+gemini extensions install https://github.com/mikeparcewski/wicked-prezzie
 ```
+
+Verify it's loaded:
+
+```bash
+gemini extensions list
+```
+
+Gemini CLI discovers the extension via `gemini-extension.json` and loads this file (`GEMINI.md`) as context automatically.
 
 ### Prerequisites
 

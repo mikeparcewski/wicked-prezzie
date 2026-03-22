@@ -8,7 +8,7 @@ A Claude Code / Gemini CLI plugin that builds presentations the way you actually
 
 ### Claude Code
 
-Add the marketplace, then install the plugin:
+Add the marketplace, then install:
 
 ```
 /plugin marketplace add mikeparcewski/wicked-prezzie
@@ -24,12 +24,16 @@ claude --plugin-dir ./wicked-prezzie
 
 ### Gemini CLI
 
-Clone the repo and run Gemini inside it — it auto-discovers the extension via `gemini-extension.json`:
+Install the extension directly:
 
 ```bash
-git clone https://github.com/mikeparcewski/wicked-prezzie.git
-cd wicked-prezzie
-gemini
+gemini extensions install https://github.com/mikeparcewski/wicked-prezzie
+```
+
+Verify it's loaded:
+
+```bash
+gemini extensions list
 ```
 
 See [GEMINI.md](GEMINI.md) for tool name mappings.
@@ -164,6 +168,58 @@ Export as PPTX, HTML (Reveal.js), or both. Versioned automatically.
 
 ---
 
+## What you can do
+
+21 skills grouped by what you're trying to accomplish. You don't need to remember skill names — just say what you want.
+
+### Deck strategy and planning
+
+| Skill | What it does | Say... |
+|---|---|---|
+| **deck-brainstorm** | Dreamer-skeptic brainstorm — generates and pressure-tests deck architecture | "brainstorm deck ideas" / "run a brainstorm" |
+| **deck-pipeline** | Full 8-phase orchestrator from source material to finished export | "build a full deck about X" |
+| **deck-checkpoint** | Synthesize a session into a durable checkpoint with decisions + next steps | "checkpoint this" / "where were we" |
+| **deck-feedback** | Parse Word comment annotations; synthesize reviewer alignment and divergence | "analyze feedback" / "parse comments" |
+
+### Content generation
+
+| Skill | What it does | Say... |
+|---|---|---|
+| **slide-learn** | Index source docs (PDF, PPTX, DOCX, HTML, images) into searchable chunks | "index this document" / "learn from this" |
+| **slide-outline** | Plan presentation structure using the Pyramid Principle | "outline a deck" / "make a presentation about X" |
+| **slide-generate** | Generate themed HTML slides from an outline with optional images | "generate the slides" / "build from the outline" |
+| **slide-config** | View and set project settings (viewport, fonts, quality thresholds) | "change settings" / "configure viewport" |
+
+### Design and theme
+
+| Skill | What it does | Say... |
+|---|---|---|
+| **slide-theme** | Set colors, fonts, spacing; extract brand from assets; share via profiles | "set colors" / "apply a theme" / "dark theme" |
+| **slide-design** | Design principles and quality rubric (reference only — no actions) | "design rules" / "quality rubric" |
+
+### Conversion to PowerPoint
+
+| Skill | What it does | Say... |
+|---|---|---|
+| **slide-pipeline** | End-to-end HTML → PPTX with iterative visual verification (default path) | "convert these slides" / "make a PowerPoint" |
+| **slide-html-to-pptx** | Quick HTML → PPTX without the full QA loop | "just convert" / "skip validation" |
+| **slide-html-standardize** | Normalize AI-generated HTML before conversion (viewports, animations, wrappers) | "standardize these slides" |
+| **chrome-extract** | Chrome headless extraction of computed layout, colors, and fonts | *(runs automatically during conversion)* |
+| **slide-triage** | Confidence scoring and known-pattern detection per element | *(runs automatically during conversion)* |
+| **slide-prep** | Auto-resolve triage findings into a fully-resolved build manifest | *(runs automatically during conversion)* |
+| **slide-pptx-builder** | Map the manifest to native PPTX shapes with alpha blending and clamping | *(runs automatically during conversion)* |
+
+### Quality and iteration
+
+| Skill | What it does | Say... |
+|---|---|---|
+| **slide-validate** | 5-category deck audit — structure, content, layout, consistency, lint | "audit my deck" / "validate the deck" |
+| **slide-render** | Render PPTX to PNG for visual review via LibreOffice headless | "show me the slides" / "preview the PPTX" |
+| **slide-compare** | Side-by-side visual diff of HTML source vs PPTX output | "does it look right" / "check fidelity" |
+| **slide-treatment-log** | Track per-slide fix history; promote fixes to permanent patterns | *(runs automatically during iteration)* |
+
+---
+
 ## Themes
 
 Three built-in. Create your own. Extract from existing PPTX, PDF, or brand guides. Share via `.pptprofile` files.
@@ -179,24 +235,6 @@ Three built-in. Create your own. Extract from existing PPTX, PDF, or brand guide
 "Describe a vibe — clean, minimal, executive"
 "Export my theme to share with the team"
 ```
-
----
-
-## What's under the hood
-
-21 skills handle the mechanics. You don't need to know these — just describe what you want and the plugin routes to the right tools.
-
-| Stage | Skills | What they do |
-|---|---|---|
-| **Idea** | slide-learn, deck-brainstorm | Index source docs, run structured brainstorms with dreamer-skeptic teams |
-| **Refine (plan)** | slide-outline, deck-pipeline | Pyramid Principle structure, 8-phase orchestration with constraint persistence |
-| **Generate** | slide-theme, slide-generate, slide-html-standardize | Themed HTML slides, brand extraction, normalize AI-generated HTML |
-| **Convert** | chrome-extract, slide-triage, slide-prep, slide-pptx-builder, slide-html-to-pptx | Chrome headless extraction → confidence scoring → manifest → native PPTX |
-| **Refine (you)** | slide-validate, slide-render, slide-compare, slide-treatment-log | 5-category audit, PPTX→PNG rendering, visual diff, fix history |
-| **Refine (team)** | deck-feedback | Parse Word comments → alignment/divergence → prioritized actions |
-| **Support** | slide-pipeline, slide-design, slide-config, deck-checkpoint | Orchestration, design reference, settings, session continuity |
-
-Works with HTML from anywhere — ChatGPT, Claude, Gemini, reveal.js, or hand-coded.
 
 ---
 
