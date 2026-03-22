@@ -1,14 +1,31 @@
 # wicked-prezzie
 
-HTML slides to editable PowerPoint. Native shapes and formatted text, not screenshots.
+From brief to board-ready deck, without switching tools.
 
-A Claude Code / Gemini CLI plugin that builds presentations the way you actually work — start with an idea, refine it, generate slides, refine with your team, and export a polished deck. Jump in at any stage, go back when something's off, and iterate until it's right.
+```
+Idea → Refine → Generate → Refine with your team → Ship it
+          ↑                        |
+          └────────────────────────┘
+```
 
-## Quick start
+Brainstorm the narrative. Index your source docs. Structure with Pyramid Principle. Generate themed slides. Convert to native PowerPoint. Audit quality. Parse your team's feedback from Word comments. Iterate at any stage. A Claude Code and Gemini CLI plugin for the full presentation lifecycle — 21 skills, one loop.
+
+### Jump in where you are
+
+| You have... | Say... |
+|---|---|
+| A topic or brief | `"Build me a deck about our platform strategy"` |
+| Source documents (PDF, PPTX, DOCX) | `"Index the docs in ./source-materials/ and build a deck"` |
+| HTML slides from ChatGPT, Claude, or Gemini | `"Convert the slides in ./my-deck/ to PowerPoint"` |
+| A reviewed Word doc with team comments | `"Analyze the feedback in ./exec-summary-reviewed.docx"` |
+
+> **The thing that surprises people:** drop in a Word doc your team reviewed with inline comments. Get back a ranked breakdown of where reviewers agree, where they diverge, and which slides to fix first. Then regenerate only the slides that need to change.
+
+---
+
+## Install
 
 ### Claude Code
-
-Add the marketplace, then install:
 
 ```
 /plugin marketplace add mikeparcewski/wicked-prezzie
@@ -24,16 +41,8 @@ claude --plugin-dir ./wicked-prezzie
 
 ### Gemini CLI
 
-Install the extension directly:
-
 ```bash
 gemini extensions install https://github.com/mikeparcewski/wicked-prezzie
-```
-
-Verify it's loaded:
-
-```bash
-gemini extensions list
 ```
 
 See [GEMINI.md](GEMINI.md) for tool name mappings.
@@ -52,15 +61,7 @@ Missing dependencies are auto-detected on first run.
 
 ---
 
-## How you use it
-
-```
-Idea → Refine → Generate → Refine with your team → Final Output
-          ↑                        |
-          └────────────────────────┘
-```
-
-You can start anywhere, skip steps you don't need, and loop back whenever something changes. The whole point is iteration — with yourself, with your content, and with your team.
+## The workflow
 
 ### 1. Start with an idea
 
@@ -115,7 +116,7 @@ Turn the refined outline into actual slides. Pick a theme, add images, choose yo
 
 Eight slide types (title, content, stats, comparison, quote, section divider, CTA, blank), three built-in themes, or extract one from your existing brand assets.
 
-Already have HTML slides from ChatGPT, Claude, Gemini, or reveal.js? Skip straight here:
+Already have HTML slides? Skip straight here:
 
 ```
 "Convert the slides in ./my-deck/ to PowerPoint"
@@ -153,11 +154,9 @@ The plugin parses every comment, maps it to the document section, and tells you:
 "Address the aligned concerns, then regenerate those slides"
 ```
 
-This is the group refinement loop: generate → share for review → analyze feedback → refine → share again. Each round tightens the narrative based on real input from your stakeholders.
+Each round tightens the narrative based on real input from your stakeholders. You can loop back to any earlier stage — change the outline, swap the theme, re-run the brainstorm.
 
-You can also loop back further — change the outline, swap the theme, re-run the brainstorm — at any point.
-
-### 5. Final output
+### 5. Ship it
 
 Export as PPTX, HTML (Reveal.js), or both. Versioned automatically.
 
