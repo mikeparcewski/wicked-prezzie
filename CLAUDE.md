@@ -24,6 +24,11 @@ Offline utility (not an inline pipeline step):
                     (PDFs, PPTX,    per-doc + cross-doc    _insights/ fast-path,
                      DOCX, HTML)    extraction + synthesis  _tags/, _relationships/)
 
+Feedback analysis (post-review):
+  deck-feedback     Word .docx inline comments → alignment/divergence analysis → feedback report
+                    (parse comments,    sentiment classification,    narrative implications,
+                     section mapping)    cluster detection             action items)
+
 Deck-level methodology (Claude-orchestrated, no scripts):
   deck-pipeline     Hub-and-spoke orchestrator: phase state machine, constraint injection, gate conditions
   deck-brainstorm   Dreamer-skeptic teams, 12-persona framework, synthesis rules, content principles
@@ -132,6 +137,11 @@ skills/
       persona-framework.md       (12-persona system, pass/fail criteria, pairing)
   deck-checkpoint/         — Session synthesis: decisions, artifacts, next steps (no script)
     SKILL.md
+  deck-feedback/           — Word comment parsing + feedback alignment analysis
+    SKILL.md
+    scripts/parse_word_comments.py   (extract inline comments from .docx XML)
+    scripts/analyze_feedback.py      (sentiment, clustering, alignment/divergence)
+    scripts/generate_report.py       (markdown or .docx feedback report)
 
 tests/                     — Test fixtures, evals, and trigger-evals
   test-slide-01.html       — Title slide (heading, subtitle, accent bar)
