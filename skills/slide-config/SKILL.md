@@ -1,5 +1,5 @@
 ---
-name: Slide Config
+name: slide-config
 description: >
   Settings and configuration for the slide toolkit. Use when the user wants to
   change quality threshold, viewport size, default font, fidelity tier, Unsplash

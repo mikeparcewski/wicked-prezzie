@@ -1,5 +1,5 @@
 ---
-name: Deck Pipeline
+name: deck-pipeline
 description: >
   Methodology-only orchestrator for the full deck-building workflow. Manages
   phase state, gate conditions, constraint injection, and subagent dispatch.

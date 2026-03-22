@@ -1,5 +1,5 @@
 ---
-name: Slide Design
+name: slide-design
 description: >
   Reference-only design knowledge base — design principles, quality rubric, CSS
   contract, and REVIEW flag system. Cannot take action. Use when asking about

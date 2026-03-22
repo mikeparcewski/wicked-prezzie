@@ -1,5 +1,5 @@
 ---
-name: Slide Chrome Extract
+name: chrome-extract
 description: >
   Extracts layout data from rendered HTML slides via Chrome headless — bounding
   boxes, colors, fonts, inline formatting. Use when elements are missing or

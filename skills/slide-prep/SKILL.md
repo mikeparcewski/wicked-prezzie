@@ -1,5 +1,5 @@
 ---
-name: Slide Prep
+name: slide-prep
 description: >
   Consumes triage findings and produces a fully-resolved build manifest.
   High-confidence elements are auto-resolved by applying known-pattern geometry

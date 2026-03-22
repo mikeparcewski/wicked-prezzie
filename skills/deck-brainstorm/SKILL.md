@@ -1,5 +1,5 @@
 ---
-name: Deck Brainstorm
+name: deck-brainstorm
 description: >
   Run a structured dreamer-skeptic brainstorm session across three teams to produce
   a conflict-resolved, synthesized deck architecture. Methodology-only skill — no script.

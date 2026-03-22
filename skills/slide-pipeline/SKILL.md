@@ -1,5 +1,5 @@
 ---
-name: Slide Pipeline
+name: slide-pipeline
 description: >
   DEFAULT entry point for all slide conversion. Converts HTML to PPTX, then
   iterates per-slide — rendering, visually comparing against the source, fixing

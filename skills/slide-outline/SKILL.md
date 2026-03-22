@@ -1,5 +1,5 @@
 ---
-name: Slide Outline
+name: slide-outline
 description: >
   Plans presentation structure from a topic or brief — one key message per slide,
   narrative arc, Pyramid Principle. Use when the user says "make a presentation

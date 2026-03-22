@@ -1,5 +1,5 @@
 ---
-name: Slide Generate
+name: slide-generate
 description: >
   Turns outlines into themed HTML slide files with optional image sourcing
   (Unsplash photos, icons, or text-only). Use when the user says "generate the

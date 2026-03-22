@@ -1,5 +1,5 @@
 ---
-name: Slide HTML Standardize
+name: slide-html-standardize
 description: >
   Normalizes AI-generated HTML slides before conversion — adds viewport, .slide
   wrapper, strips animations and external resources. Use whenever slides came

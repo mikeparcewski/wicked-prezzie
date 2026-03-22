@@ -1,5 +1,5 @@
 ---
-name: Slide Compare
+name: slide-compare
 description: >
   Side-by-side visual comparison of HTML source slides vs converted PPTX output.
   Use when checking conversion quality, doing a visual diff, reviewing fidelity,

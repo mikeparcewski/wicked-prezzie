@@ -1,5 +1,5 @@
 ---
-name: Slide Theme
+name: slide-theme
 description: >
   Brand and style definitions — color palettes, fonts, layout tokens, and
   portable style profiles. Use when the user wants to set colors, choose fonts,

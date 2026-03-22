@@ -1,5 +1,5 @@
 ---
-name: Slide Triage
+name: slide-triage
 description: >
   Reads raw extraction JSON + HTML screenshot for one slide. Scores element
   confidence, detects collision risks, checks known patterns, and emits a

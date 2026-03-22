@@ -1,5 +1,5 @@
 ---
-name: Slide Learn
+name: slide-learn
 description: >
   Indexes source documents (PDF, PPTX, DOCX, HTML, images) into a structured
   chunk store. Two-pass pipeline: pass 1 extracts per-document chunks with YAML

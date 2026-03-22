@@ -1,5 +1,5 @@
 ---
-name: Slide Validate
+name: slide-validate
 description: >
   Quality assurance for slide decks — layout validation, content lint, deck
   audit, and consistency checks. Use when the user says "is it good?", "audit

@@ -1,5 +1,5 @@
 ---
-name: Slide Render
+name: slide-render
 description: >
   Renders PPTX slides to PNG images via LibreOffice headless, with optional
   contact sheet montage. Use when the user says "show me the slides", "what

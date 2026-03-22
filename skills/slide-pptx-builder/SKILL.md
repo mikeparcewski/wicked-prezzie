@@ -1,5 +1,5 @@
 ---
-name: Slide PPTX Builder
+name: slide-pptx-builder
 description: >
   Builds native PPTX shapes from extracted layout data. Use when the PPTX looks
   wrong — text overlapping, wrong positions, colors too dark or bright, text

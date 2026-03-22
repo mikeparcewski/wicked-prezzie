@@ -1,5 +1,5 @@
 ---
-name: Slide Treatment Log
+name: slide-treatment-log
 description: >
   Records per-slide fix history after each render-compare attempt. Provides
   the audit trail that closes the feedback loop from render-compare failures
