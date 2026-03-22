@@ -1,11 +1,15 @@
 ---
 name: slide-triage
-description: >
+description: |
   Reads raw extraction JSON + HTML screenshot for one slide. Scores element
   confidence, detects collision risks, checks known patterns, and emits a
   findings JSON. Pure analysis — does not modify elements or produce PPTX.
   Run immediately after chrome_extract.extract_layout() as part of the
   pipeline extraction phase.
+
+  Use when: "triage results", "confidence scores", "collision detected",
+  "debug triage", "why was this flagged", "pattern detection"
+user-invocable: false
 ---
 
 # Slide Triage

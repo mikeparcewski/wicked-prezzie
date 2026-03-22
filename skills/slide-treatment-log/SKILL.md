@@ -1,10 +1,14 @@
 ---
 name: slide-treatment-log
-description: >
+description: |
   Records per-slide fix history after each render-compare attempt. Provides
   the audit trail that closes the feedback loop from render-compare failures
   back to known-patterns.md. Identifies fix candidates for promotion to
   known-patterns.md to prevent the same issue on future decks.
+
+  Use when: "fix history", "treatment log", "what was tried", "promote to known patterns",
+  "why did this fix work", "audit trail"
+user-invocable: false
 ---
 
 # Slide Treatment Log

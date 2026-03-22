@@ -1,11 +1,12 @@
 ---
 name: slide-generate
-description: >
+description: |
   Turns outlines into themed HTML slide files with optional image sourcing
-  (Unsplash photos, icons, or text-only). Use when the user says "generate the
-  slides", "create the HTML", "build from the outline", "add photos", "use
-  icons", or provides content and wants slide HTML files. Can work from a
-  formal outline JSON or inline content.
+  (Unsplash photos, icons, or text-only). Can work from a formal outline JSON
+  or inline content.
+
+  Use when: "generate the slides", "create the HTML", "build from the outline",
+  "add photos", "use icons", "make slides from this content", "turn this into slides"
 ---
 
 # Slide Generate

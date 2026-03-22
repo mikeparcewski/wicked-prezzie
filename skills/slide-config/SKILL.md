@@ -1,10 +1,12 @@
 ---
 name: slide-config
-description: >
-  Settings and configuration for the slide toolkit. Use when the user wants to
-  change quality threshold, viewport size, default font, fidelity tier, Unsplash
-  API key, hidden selectors, slide dimensions, or view current settings. Also
-  use when something feels "too strict" or "too loose" — thresholds live here.
+description: |
+  Settings and configuration for the slide toolkit. Thresholds, viewport,
+  fonts, fidelity tiers, and slide dimensions live here.
+
+  Use when: "change settings", "set quality threshold", "configure viewport",
+  "set default font", "fidelity tier", "too strict", "too loose", "slide dimensions",
+  "Unsplash API key", "view settings", "current config"
 ---
 
 # Slide Config

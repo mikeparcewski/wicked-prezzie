@@ -1,15 +1,13 @@
 ---
 name: deck-brainstorm
-description: >
+description: |
   Run a structured dreamer-skeptic brainstorm session across three teams to produce
   a conflict-resolved, synthesized deck architecture. Methodology-only skill — no script.
   Claude orchestrates the session directly using persona pairs and synthesis rules.
-triggers:
-  - brainstorm deck ideas
-  - dreamer-skeptic session
-  - ideation session
-  - run a brainstorm
-  - set up brainstorm teams
+
+  Use when: "brainstorm deck ideas", "dreamer-skeptic session", "ideation session",
+  "run a brainstorm", "set up brainstorm teams", "explore deck angles",
+  "what should the deck cover", "narrative arc ideas"
 phase: ideate
 pipeline_position: 3
 ---

@@ -1,11 +1,11 @@
 ---
 name: slide-compare
-description: >
+description: |
   Side-by-side visual comparison of HTML source slides vs converted PPTX output.
-  Use when checking conversion quality, doing a visual diff, reviewing fidelity,
-  or verifying the PPTX matches the original. Also use proactively after any
-  conversion — "does it look right?", "how close is it?", "check fidelity",
-  "visual diff".
+  Also use proactively after any conversion.
+
+  Use when: "does it look right", "how close is it", "check fidelity", "visual diff",
+  "compare HTML vs PPTX", "conversion quality", "does the PPTX match"
 ---
 
 # Slide Visual Comparison

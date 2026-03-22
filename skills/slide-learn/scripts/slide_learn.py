@@ -39,6 +39,19 @@ IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tiff", "
 
 SCHEMA_VERSION = 1
 
+# Files and directories to skip during indexing
+EXCLUDED_NAMES = {
+    "CLAUDE.md", "AGENTS.md", "README.md", "CHANGELOG.md", "LICENSE",
+    "LICENSE.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md",
+    ".gitignore", ".env", "package.json", "package-lock.json",
+    "requirements.txt", "pyproject.toml", "Makefile",
+}
+EXCLUDED_DIRS = {
+    "index", ".cache", ".git", ".claude", ".claude-plugin",
+    "node_modules", "__pycache__", ".venv", "venv",
+    "skills", "tests", "scripts",
+}
+
 
 def learn(source_dir: str, output_dir: str = None, single_doc: str = None) -> dict:
     """Main entry point for the slide-learn pipeline.
@@ -776,10 +789,15 @@ def _synthesize_insights(chunks: list[dict], output_dir: Path) -> None:
 # ---------------------------------------------------------------------------
 
 def _collect_documents(source_dir: Path) -> list[Path]:
-    """Return all indexable documents under source_dir (non-recursive)."""
+    """Return all indexable documents under source_dir (non-recursive).
+
+    Skips files in EXCLUDED_NAMES and entries inside EXCLUDED_DIRS.
+    """
     docs = []
     for entry in sorted(source_dir.iterdir()):
-        if entry.is_file() and _detect_type(entry) is not None:
+        if entry.is_dir() and entry.name in EXCLUDED_DIRS:
+            continue
+        if entry.is_file() and entry.name not in EXCLUDED_NAMES and _detect_type(entry) is not None:
             docs.append(entry)
     return docs
 

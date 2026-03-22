@@ -1,20 +1,15 @@
 ---
 name: slide-learn
-description: >
+description: |
   Indexes source documents (PDF, PPTX, DOCX, HTML, images) into a structured
   chunk store. Two-pass pipeline: pass 1 extracts per-document chunks with YAML
-  frontmatter; pass 2 synthesizes cross-document tags, relationships, and
-  insights. The index is consumed by slide-outline, slide-generate, and
-  slide-pipeline to ground slide content in source material.
-triggers:
-  - "index this document"
-  - "learn from this deck"
-  - "extract from this PDF"
-  - "build an index of these files"
-  - "index these files"
-  - "learn from these documents"
-  - "add to the index"
-  - "update the index"
+  frontmatter; pass 2 synthesizes cross-document tags, relationships, and insights.
+  The index is consumed by slide-outline, slide-generate, and slide-pipeline to
+  ground slide content in source material.
+
+  Use when: "index this document", "learn from this deck", "extract from this PDF",
+  "build an index of these files", "learn from these documents", "add to the index",
+  "update the index", "read these source files"
 ---
 
 # Slide Learn
@@ -131,6 +126,17 @@ index/
     chunk-002.md
     ...
 ```
+
+## Exclusions
+
+The indexer automatically skips project infrastructure files and directories:
+
+- **Files**: `CLAUDE.md`, `AGENTS.md`, `README.md`, `CHANGELOG.md`, `LICENSE`, `.env`,
+  `package.json`, `requirements.txt`, `pyproject.toml`, `Makefile`
+- **Directories**: `index/`, `.cache/`, `.git/`, `.claude/`, `.claude-plugin/`,
+  `node_modules/`, `__pycache__/`, `skills/`, `tests/`, `scripts/`
+
+These are defined in `EXCLUDED_NAMES` and `EXCLUDED_DIRS` in `slide_learn.py`.
 
 ## Configuration
 

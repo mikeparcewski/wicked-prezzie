@@ -1,11 +1,13 @@
 ---
 name: slide-theme
-description: >
+description: |
   Brand and style definitions — color palettes, fonts, layout tokens, and
-  portable style profiles. Use when the user wants to set colors, choose fonts,
-  create or apply a theme, match a brand, extract styles from existing assets,
-  describe a vibe ("clean and modern"), or manage profiles. Supports learning
-  styles from PPTX/PDF/images and team sharing via profiles.
+  portable style profiles. Supports learning styles from PPTX/PDF/images and
+  team sharing via profiles.
+
+  Use when: "set colors", "choose fonts", "create a theme", "apply a theme",
+  "match a brand", "extract styles", "clean and modern", "dark theme",
+  "corporate look", "manage profiles", "describe a vibe"
 ---
 
 # Slide Theme

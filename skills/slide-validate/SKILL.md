@@ -1,12 +1,13 @@
 ---
 name: slide-validate
-description: >
+description: |
   Quality assurance for slide decks — layout validation, content lint, deck
-  audit, and consistency checks. Use when the user says "is it good?", "audit
-  my deck", "check for problems", "lint content", "check consistency", or
-  "any issues?". Also use proactively after any conversion run. Catches
-  overflow, empty slides, bullet overload, title issues, and cross-slide
+  audit, and consistency checks. Also use proactively after any conversion run.
+  Catches overflow, empty slides, bullet overload, title issues, and cross-slide
   inconsistencies.
+
+  Use when: "is it good", "audit my deck", "check for problems", "lint content",
+  "check consistency", "any issues", "validate the deck", "quality check"
 ---
 
 # Slide Validate

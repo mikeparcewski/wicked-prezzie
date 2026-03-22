@@ -1,12 +1,12 @@
 ---
 name: chrome-extract
-description: >
+description: |
   Extracts layout data from rendered HTML slides via Chrome headless — bounding
-  boxes, colors, fonts, inline formatting. Use when elements are missing or
-  mispositioned in the PPTX, when screenshots of HTML slides are needed, when
-  debugging extraction issues, or when the conversion looks wrong and you need
-  to check whether the problem is in extraction vs PPTX building. Start here
-  before checking slide-pptx-builder.
+  boxes, colors, fonts, inline formatting. Start here before checking
+  slide-pptx-builder when the conversion looks wrong.
+
+  Use when: "elements missing", "wrong position", "extraction issue", "screenshot HTML",
+  "debug extraction", "check extraction vs builder", "bounding boxes wrong"
 ---
 
 # Chrome Layout Extraction

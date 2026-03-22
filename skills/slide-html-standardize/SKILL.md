@@ -1,11 +1,12 @@
 ---
 name: slide-html-standardize
-description: >
+description: |
   Normalizes AI-generated HTML slides before conversion — adds viewport, .slide
-  wrapper, strips animations and external resources. Use whenever slides came
-  from ChatGPT, Claude, Gemini, or any AI. Also use when Chrome extraction fails
-  or returns empty results. Always the correct first step for AI-generated HTML
-  that hasn't been preprocessed.
+  wrapper, strips animations and external resources. Always the correct first step
+  for AI-generated HTML that hasn't been preprocessed.
+
+  Use when: "normalize HTML", "standardize slides", "AI-generated HTML", "ChatGPT slides",
+  "Claude slides", "Gemini slides", "extraction fails", "extraction returns empty"
 ---
 
 # Slide HTML Standardize

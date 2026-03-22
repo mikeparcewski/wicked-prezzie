@@ -1,16 +1,13 @@
 ---
 name: deck-pipeline
-description: >
+description: |
   Methodology-only orchestrator for the full deck-building workflow. Manages
   phase state, gate conditions, constraint injection, and subagent dispatch.
   No script — Claude drives the loop directly from this SKILL.md.
   NOT for converting existing HTML slides to PPTX — that is slide-pipeline.
-triggers:
-  - "build a full deck"
-  - "run the deck workflow"
-  - "orchestrate slides"
-  - "start the deck pipeline"
-  - "/deck-pipeline"
+
+  Use when: "build a full deck", "build me a deck about X", "create a presentation from scratch",
+  "run the deck workflow", "start the deck pipeline", "make a deck from these documents"
 ---
 
 # deck-pipeline — Orchestrator

@@ -1,12 +1,14 @@
 ---
 name: slide-pipeline
-description: >
+description: |
   DEFAULT entry point for all slide conversion. Converts HTML to PPTX, then
   iterates per-slide — rendering, visually comparing against the source, fixing
-  issues, and re-converting each slide until it matches or converges. Use for
-  "convert these slides", "make a PowerPoint", "turn these into a deck", or any
-  conversion request. Handles AI-generated HTML (ChatGPT, Claude, Gemini)
-  automatically. Always prefer this over slide-html-to-pptx.
+  issues, and re-converting each slide until it matches or converges. Handles
+  AI-generated HTML (ChatGPT, Claude, Gemini) automatically. Always prefer this
+  over slide-html-to-pptx.
+
+  Use when: "convert these slides", "make a PowerPoint", "turn these into a deck",
+  "HTML to PPTX", "convert to PowerPoint", "export as PPTX", "make me a PowerPoint"
 ---
 
 # Slide Pipeline

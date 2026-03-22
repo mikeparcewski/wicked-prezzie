@@ -1,11 +1,12 @@
 ---
 name: slide-design
-description: >
+description: |
   Reference-only design knowledge base — design principles, quality rubric, CSS
-  contract, and REVIEW flag system. Cannot take action. Use when asking about
-  design rules, the quality rubric, CSS zone naming, or REVIEW flags. Do NOT use
-  for "make it look better" — route those to slide-generate, slide-validate, or
-  slide-pptx-builder instead.
+  contract, and REVIEW flag system. Cannot take action. Do NOT use for "make it
+  look better" — route those to slide-generate, slide-validate, or slide-pptx-builder.
+
+  Use when: "design rules", "quality rubric", "CSS zone naming", "REVIEW flags",
+  "what are the design principles", "how does the CSS contract work"
 ---
 
 # Slide Design Skill

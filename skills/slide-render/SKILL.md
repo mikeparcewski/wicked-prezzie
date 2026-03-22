@@ -1,10 +1,11 @@
 ---
 name: slide-render
-description: >
+description: |
   Renders PPTX slides to PNG images via LibreOffice headless, with optional
-  contact sheet montage. Use when the user says "show me the slides", "what
-  does it look like", wants to preview the PPTX, create thumbnails, or export
-  slides as images. Also used by the validation and comparison workflows.
+  contact sheet montage. Also used by the validation and comparison workflows.
+
+  Use when: "show me the slides", "what does it look like", "preview the PPTX",
+  "create thumbnails", "export slides as images", "render to PNG", "screenshot slides"
 ---
 
 # Slide Render

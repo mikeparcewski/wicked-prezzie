@@ -1,11 +1,13 @@
 ---
 name: slide-pptx-builder
-description: >
-  Builds native PPTX shapes from extracted layout data. Use when the PPTX looks
-  wrong — text overlapping, wrong positions, colors too dark or bright, text
-  overflowing cards, shapes invisible, SVG charts missing. If Chrome extraction
+description: |
+  Builds native PPTX shapes from extracted layout data. If Chrome extraction
   looks correct but the PPTX is still off, the problem is here. Owns color
   translation, font sizing, and coordinate mapping.
+
+  Use when: "PPTX looks wrong", "text overlapping", "wrong positions", "colors too dark",
+  "colors too bright", "text overflowing cards", "shapes invisible", "SVG charts missing",
+  "fix the builder", "coordinate mapping issue"
 ---
 
 # PPTX Slide Builder

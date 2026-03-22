@@ -1,11 +1,12 @@
 ---
 name: slide-outline
-description: >
+description: |
   Plans presentation structure from a topic or brief — one key message per slide,
-  narrative arc, Pyramid Principle. Use when the user says "make a presentation
-  about X", "outline a deck", "plan the slides", "what slides do I need", or has
-  a wall of text or bullet points to organize into a coherent deck. First step
-  in content creation before slide-generate.
+  narrative arc, Pyramid Principle. First step in content creation before slide-generate.
+
+  Use when: "make a presentation about X", "outline a deck", "plan the slides",
+  "what slides do I need", "organize these bullet points", "structure this content",
+  "presentation outline", "how many slides do I need"
 ---
 
 # Slide Outline

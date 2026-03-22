@@ -1,11 +1,12 @@
 ---
 name: slide-html-to-pptx
-description: >
+description: |
   Single-stage HTML-to-PPTX conversion with native shapes and formatted text.
-  Use only when the user wants just conversion without QA — "just convert",
-  "skip validation", "re-convert slide 5 only". For general "make me a
-  PowerPoint" requests, prefer slide-pipeline which includes validation and
-  per-slide refinement.
+  For general "make me a PowerPoint" requests, prefer slide-pipeline which
+  includes validation and per-slide refinement.
+
+  Use when: "just convert", "skip validation", "re-convert slide 5 only",
+  "quick conversion", "convert without QA", "single pass convert"
 ---
 
 # HTML to PowerPoint Conversion

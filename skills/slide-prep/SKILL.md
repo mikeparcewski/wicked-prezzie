@@ -1,11 +1,15 @@
 ---
 name: slide-prep
-description: >
+description: |
   Consumes triage findings and produces a fully-resolved build manifest.
   High-confidence elements are auto-resolved by applying known-pattern geometry
   transforms. Flagged elements (confidence < 0.85) are model-resolved by
   reading the HTML screenshot. The manifest is the complete, unambiguous
   instruction set for the PPTX builder — no classification logic at build time.
+
+  Use when: "manifest issue", "prep failed", "geometry wrong", "auto-resolve problem",
+  "flagged element", "build manifest", "debug prep stage"
+user-invocable: false
 ---
 
 # Slide Prep
