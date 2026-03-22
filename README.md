@@ -2,7 +2,7 @@
 
 HTML slides to editable PowerPoint. Native shapes and formatted text, not screenshots.
 
-A Claude Code / Gemini CLI plugin that handles the full presentation lifecycle — index source documents, plan content with structured brainstorming, generate themed slides, convert HTML to native PPTX, validate output, and iterate until it matches.
+A Claude Code / Gemini CLI plugin that handles the full presentation lifecycle — index source documents, plan content with structured brainstorming, generate themed slides, convert HTML to native PPTX, validate output, iterate until it matches, and analyze team feedback from Word review comments.
 
 ## Quick start
 
@@ -38,7 +38,7 @@ pip install python-pptx beautifulsoup4 lxml Pillow
 
 Missing dependencies are auto-detected on first run.
 
-16 skills cover the full pipeline. Just talk to it:
+21 skills cover the full pipeline. Just talk to it:
 
 ```
 "Make me a presentation about our Q1 results"
@@ -47,6 +47,7 @@ Missing dependencies are auto-detected on first run.
 "Check my deck for layout issues"
 "Index the RFP documents in ./source-materials/"
 "Run a brainstorm for the client deck — use dreamer-skeptic teams"
+"Analyze the team's feedback comments from the Word doc"
 ```
 
 ## What it does
@@ -61,7 +62,9 @@ Missing dependencies are auto-detected on first run.
 
 **Learn** — Index source documents (PDFs, PPTX, DOCX, images) into searchable markdown with YAML frontmatter. Two-pass architecture: per-document extraction with vision, then cross-document synthesis of themes, relationships, and key facts.
 
-**Orchestrate** — Full deck-building methodology with dreamer-skeptic brainstorming, 12-persona validation, constraint persistence, and phased gate reviews. Hub-and-spoke architecture keeps context lean across long sessions.
+**Orchestrate** — Full deck-building methodology with dreamer-skeptic brainstorming, generative persona validation, constraint persistence, and phased gate reviews. Hub-and-spoke architecture with section-based grouping keeps context lean across long sessions.
+
+**Analyze feedback** — Parse inline comments from Word documents reviewed by your team. Detect where reviewers align, where they diverge, and what it means for the narrative. Generate prioritized action items as markdown or a Word report to share back.
 
 Works with HTML from anywhere — ChatGPT, Claude, Gemini, reveal.js, or hand-coded.
 
@@ -102,22 +105,27 @@ Three built-in. Create your own. Extract from existing PPTX, PDF, or brand guide
 
 ```
 skills/
-  slide-outline/           Topic → structured outline
-  slide-generate/          Outline → themed HTML slides
-  slide-theme/             Brand palettes, fonts, profiles
-  slide-html-standardize/  Normalize AI-generated HTML
-  chrome-extract/          Chrome headless → layout JSON
-  slide-pptx-builder/      Layout JSON → native PPTX
+  slide-outline/           Topic → structured outline (Pyramid Principle)
+  slide-generate/          Outline → themed HTML slides (8 types, images)
+  slide-theme/             Brand palettes, fonts, profiles, vibe matching
+  slide-html-standardize/  Normalize AI-generated HTML + complexity routing
+  chrome-extract/          Chrome headless → layout JSON + screenshots
+  slide-triage/            Confidence scoring + known-pattern detection
+  slide-prep/              Auto-resolve findings → build manifests
+  slide-pptx-builder/      Layout JSON → native PPTX shapes + text
   slide-html-to-pptx/      Parallel batch conversion
-  slide-validate/          Quality scoring, audit, lint
-  slide-render/            PPTX → PNG rendering
+  slide-validate/          5-category deck audit, content lint, consistency
+  slide-render/            PPTX → PNG rendering (LibreOffice headless)
   slide-compare/           HTML vs PPTX visual diff
-  slide-pipeline/          End-to-end orchestrator
-  slide-design/            Design principles (reference)
+  slide-pipeline/          End-to-end conversion orchestrator
+  slide-treatment-log/     Per-slide fix history + pattern promotion
+  slide-design/            Design principles + quality rubric (reference)
   slide-config/            Project + user settings
-  slide-learn/             Source document indexing
-  deck-pipeline/           Full deck orchestrator (methodology)
-  deck-brainstorm/         Brainstorm + persona framework
+  slide-learn/             Source document indexing (two-pass, vision)
+  deck-pipeline/           Full deck orchestrator (8-phase methodology)
+  deck-brainstorm/         Dreamer-skeptic teams + generative personas
+  deck-checkpoint/         Session synthesis: decisions, artifacts, next steps
+  deck-feedback/           Word comment parsing → alignment/divergence report
 ```
 
 ## Documentation

@@ -288,6 +288,44 @@ User settings live in `~/.something-wicked/wicked-prezzie/config.json` and apply
 
 ---
 
+## Feedback and iteration with your team
+
+### "The team reviewed the exec summary — what did they say?"
+
+After distributing a Word document for team review (using standard inline comments), parse all comments and generate a structured feedback report.
+
+```
+1. "Analyze the feedback in ./exec-summary-reviewed.docx"
+2. "Where do the reviewers agree?"
+3. "Show me the divergence points — where do people disagree?"
+4. "Generate the feedback report as a Word doc to share with the team"
+```
+
+**Skills used**: deck-feedback (parse → analyze → report)
+
+The report shows:
+- **Alignment** — where multiple reviewers raised the same concern (high-priority changes)
+- **Divergence** — where reviewers disagree on the same passage (needs a conversation, not just an edit)
+- **Narrative implications** — attention hotspots, silent sections, overall direction
+- **Prioritized action items** — ranked by severity and number of reviewers
+
+### "Close the feedback loop"
+
+Combine feedback analysis with deck iteration for a complete review cycle.
+
+```
+1. "Build the exec summary deck from these documents"    → deck-pipeline
+2. "Export the key narrative as a Word doc for review"    → generate_report (docx)
+3. "The team has reviewed it — analyze their comments"   → deck-feedback
+4. "Address the aligned concerns first"                   → targeted edits
+5. "Regenerate the slides that changed"                   → slide-generate + pipeline
+6. "Send out the updated version for final review"
+```
+
+**Skills used**: deck-pipeline → deck-feedback → slide-generate → slide-pipeline
+
+---
+
 ## Combining paths
 
 Most real work combines multiple paths. A typical end-to-end session:

@@ -19,7 +19,9 @@ graph TD
         F --> G[slide-html-standardize]
         G -->|Fix viewports, strip animations| H[chrome-extract]
         H -->|One Chrome instance per slide| I[Layout JSON + cached screenshots]
-        I --> J[slide-pptx-builder]
+        I --> TRIAGE[slide-triage]
+        TRIAGE -->|Confidence scores + pattern detection| PREP[slide-prep]
+        PREP -->|Fully-resolved manifest| J[slide-pptx-builder]
         J -->|Native shapes + richtext| K[deck.pptx]
         I --> REVEAL[Reveal.js bundler]
         REVEAL --> HTML[deck.html]
@@ -46,6 +48,14 @@ graph TD
     style Creation fill:#1a1a2e,stroke:#f59e0b,color:#fff
     style Migration fill:#1a1a2e,stroke:#0891b2,color:#fff
     style Quality fill:#1a1a2e,stroke:#10b981,color:#fff
+    subgraph Feedback["💬 Feedback"]
+        K -.->|Export to Word| WORD[Executive Summary .docx]
+        WORD -.->|Team reviews with inline comments| FB[deck-feedback]
+        FB -->|Alignment + divergence report| ACTIONS[Prioritized Action Items]
+        ACTIONS -.->|Revise narrative| E
+    end
+
+    style Feedback fill:#1a1a2e,stroke:#e879f9,color:#fff
     style Versioning fill:#1a1a2e,stroke:#6b6b80,color:#fff
 ```
 
@@ -68,9 +78,11 @@ graph TD
 
 | Skill | Purpose |
 |---|---|
-| **slide-html-standardize** | Normalizes HTML for Chrome extraction — adds viewport meta, wraps in `.slide` div, strips CSS animations and external CDN dependencies. |
+| **slide-html-standardize** | Normalizes HTML for Chrome extraction — adds viewport meta, wraps in `.slide` div, strips CSS animations and external CDN dependencies. Annotates complexity (high/low) for pipeline routing. |
 | **chrome-extract** | Drives Chrome headless to render each slide and extract computed bounding boxes, colors, fonts, and inline formatting as structured JSON. Runs in parallel — one Chrome instance per slide. |
-| **slide-pptx-builder** | Maps layout JSON to native python-pptx objects — shapes, richtext boxes, embedded SVG screenshots. Handles alpha blending, card text clamping, and coordinate mapping. |
+| **slide-triage** | Scores each element with confidence (0.0–1.0) and checks against 10 known-pattern signatures (SVG bleed, accent bars, rotation, card overflow, badge collision). Detects collision risks. Outputs findings JSON. |
+| **slide-prep** | Auto-resolves high-confidence elements (>= 0.85) with geometry transforms. Flags low-confidence elements for model inspection. Produces a fully-resolved manifest with `resolvedRect` coordinates — no ambiguity at build time. |
+| **slide-pptx-builder** | Maps manifest to native python-pptx objects — shapes, richtext boxes, embedded SVG screenshots. Handles alpha blending, card text clamping, and coordinate mapping. Zero classification — the manifest is the contract. |
 | **slide-html-to-pptx** | Orchestrates parallel extraction + sequential PPTX assembly. Caches screenshots for SVG cropping and fallback slides. |
 
 ### Quality
@@ -100,7 +112,15 @@ graph TD
 | Skill | Purpose |
 |---|---|
 | **deck-pipeline** | Hub-and-spoke orchestrator for full deck-building workflows. 8-phase state machine (source inventory → personas → brainstorm → architecture → build → validate → polish → export) with constraint injection, gate conditions, and 10 default constraints derived from production session analysis. |
-| **deck-brainstorm** | Dreamer-skeptic brainstorm methodology with 3-team structure (narrative/operational/commercial). 12-persona framework with pass/fail criteria. 8 reusable content principles (mechanism-before-outcome, two-layer proof, hallway line, etc.). Synthesis rules with conflict resolution. |
+| **deck-brainstorm** | Dreamer-skeptic brainstorm methodology with 3-team structure (narrative/operational/commercial). Generative persona framework with pass/fail criteria. 8 reusable content principles (mechanism-before-outcome, two-layer proof, hallway line, etc.). Synthesis rules with conflict resolution. |
+| **deck-checkpoint** | Session synthesis — captures decisions, artifacts produced, and next steps. Preserves continuity across sessions. |
+
+### Feedback
+
+| Skill | Purpose |
+|---|---|
+| **deck-feedback** | Parses inline comments from Word (.docx) documents reviewed by team members. Classifies sentiment (endorsement, concern, suggestion), clusters comments by passage, detects alignment (multiple reviewers agree) vs divergence (reviewers disagree), and generates prioritized action items. Output as markdown, JSON, or Word report. |
+| **slide-treatment-log** | Records per-slide fix history after each render-compare attempt. Provides the audit trail that closes the feedback loop from visual comparison failures back to known-patterns.md. Identifies fix candidates for promotion to permanent patterns. |
 
 ## Storage
 

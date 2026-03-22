@@ -77,11 +77,26 @@ Pass 1 is incremental: SHA-256 hashes per source file are stored in `index/.cach
 
 **Synthesis reconciles conflicts.** After all three teams complete, their outputs are merged into a single architecture. Conflict resolution rules: proof requirements (Team 2) override aspirational claims (Team 1). Narrative structure (Team 1) takes precedence on act boundaries unless a break serves commercial culmination (Team 3). The threading map ensures each key concept appears on at least 5 slides with no gap larger than 3 consecutive slides.
 
-**12-persona framework** provides pass/fail criteria for every slide. Personas are paired as dreamer-skeptic duos based on their evaluation tendencies.
+**Generative persona framework** provides pass/fail criteria for every slide. Rather than hardcoded personas, the framework generates context-appropriate personas based on the deck's audience, industry, and objectives. Personas are paired as dreamer-skeptic duos based on their evaluation tendencies.
 
 **8 content principles** guide quality: mechanism-before-outcome, two-layer proof, drumbeat threading, hallway line, protagonist arc, proof not pitch, client specificity, sensitive language awareness.
 
 **Hard gate:** No slide building until the synthesized architecture is approved. Building before brainstorming is complete is the single largest source of rework.
+
+## How deck-feedback analysis works
+
+`deck-feedback` closes the review loop by parsing inline comments from Word documents and producing structured feedback analysis.
+
+**Step 1 -- Parse.** `parse_word_comments.py` opens the .docx as a zip archive and reads `word/comments.xml` (comment metadata: author, date, text) and `word/document.xml` (comment range anchors mapped to referenced text passages and document sections via heading detection). The output is structured JSON with every comment mapped to its author, the text it references, and the section it falls in.
+
+**Step 2 -- Analyze.** `analyze_feedback.py` processes the parsed comments through four layers:
+
+1. *Sentiment classification* — each comment is tagged as endorsement, concern, suggestion, or observation using keyword-based scoring with tie-breaking rules (concern+suggestion defaults to concern, since a suggestion to fix something is still flagging an issue).
+2. *Cluster detection* — comments referencing the same or overlapping text passages are grouped using word-level Jaccard similarity (> 0.5 threshold).
+3. *Alignment detection* — multi-reviewer clusters are classified: aligned concern (all concerned), aligned endorsement (all positive), divergent (some endorse, some object), or mixed.
+4. *Narrative implications* — synthesized from the patterns: attention hotspots (most-commented sections), silent sections (no feedback — consensus or disengagement?), consensus for change (aligned concerns = clear signal), requires discussion (divergence can't be resolved by editing alone), and overall direction (more concerns than endorsements across sections = structural rethinking needed).
+
+**Step 3 -- Report.** `generate_report.py` renders the analysis as markdown (for in-conversation review), JSON (for programmatic consumption), or a formatted Word document (for sharing back with the review team). Action items are prioritized by severity and reviewer count — aligned concerns from multiple reviewers rank highest.
 
 ## Skill architecture
 
