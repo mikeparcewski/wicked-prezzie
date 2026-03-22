@@ -9,7 +9,7 @@
     {
       "name": "wicked-prezzie",
       "description": "HTML slides to native editable PowerPoint — source document indexing, deck-building methodology with dreamer-skeptic brainstorming, model-driven triage pipeline, and constraint persistence. 20 skills from outline to export.",
-      "version": "4.6.0",
+      "version": "4.7.0",
       "source": "./",
       "author": {
         "name": "Mike Parcewski",

@@ -87,6 +87,17 @@ Remove all CSS animation and transition properties from inline `style` attribute
 
 Remove `<link>` tags whose `href` points to external CDNs including `fonts.googleapis.com`, `fonts.gstatic.com`, `cdnjs.cloudflare.com`, `unpkg.com`, `cdn.jsdelivr.net`, and any other `http://` or `https://` origin that differs from a relative path. Remove `<script>` tags whose `src` attribute references an external URL. Preserve all inline `<style>` blocks and inline `<script>` blocks (those without a `src` attribute). This makes the HTML fully self-contained so headless rendering does not depend on network access.
 
+### Speaker Notes Normalization
+
+Convert all note formats to the canonical `.speaker-notes` hidden div pattern:
+
+- **`data-notes` attribute** on `.slide` → extracted into `<div class="speaker-notes" style="display:none">` as a sibling of `.slide`
+- **`notes-data.js`** script references → removed (notes must be inline per slide)
+- **`.speaker-notes` inside `.slide`** → moved outside as a body-level sibling (prevents extraction as slide content)
+- **N-key toggle** script and notes panel CSS injected if notes exist and the toggle is missing
+
+This ensures notes work when viewing HTML in a browser (press N to toggle) and survive extraction into PPTX speaker notes.
+
 ### Style Attribute Cleanup
 
 After stripping animation properties, collapse any resulting double-semicolons or trailing semicolons in `style` attributes. Remove `style` attributes that become empty after cleanup.
@@ -103,3 +114,5 @@ After stripping animation properties, collapse any resulting double-semicolons o
 | Script errors in Chrome headless log | External JS dependency unavailable. | Run standardize to strip external scripts. |
 | Normalized file larger than original | Inserted wrapper div and meta tags add bytes. | This is expected; the increase is negligible (under 500 bytes typically). |
 | Batch mode skips some files | Files may not have `.html` extension. | Rename files or process them individually by path. |
+| Notes missing in PPTX | Notes in `data-notes` attr or `notes-data.js` | Run standardize — converts to `.speaker-notes` div |
+| Notes visible on slide | `.speaker-notes` inside `.slide` div | Run standardize — moves notes outside as sibling |

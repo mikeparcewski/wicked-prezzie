@@ -233,6 +233,101 @@ COMPLEXITY_SIGNALS = re.compile(
 )
 
 
+def normalize_speaker_notes(soup):
+    """Convert legacy note formats to .speaker-notes hidden div.
+
+    Handles:
+    - data-notes attribute on .slide → .speaker-notes div
+    - notes-data.js script references → removed (notes must be inline)
+    - Existing .speaker-notes inside .slide → moved outside as sibling
+    - Adds N-key toggle script if notes exist and script is missing
+    """
+    body = soup.find('body')
+    if not body:
+        return
+
+    slide_el = soup.find(class_='slide')
+    notes_div = soup.find(class_='speaker-notes')
+    notes_text = None
+
+    # Source 1: data-notes attribute on .slide
+    if slide_el and slide_el.get('data-notes'):
+        notes_text = slide_el['data-notes']
+        del slide_el['data-notes']
+
+    # Source 2: existing .speaker-notes div (may be inside .slide — needs to move)
+    if notes_div:
+        # If inside .slide, extract it
+        if slide_el and notes_div in slide_el.descendants:
+            notes_div.extract()
+            body.append(notes_div)
+        # Ensure it has display:none
+        existing_style = notes_div.get('style', '')
+        if 'display' not in existing_style:
+            notes_div['style'] = 'display:none'
+    elif notes_text:
+        # Create .speaker-notes div from data-notes
+        notes_div = soup.new_tag('div', attrs={
+            'class': 'speaker-notes',
+            'style': 'display:none',
+        })
+        notes_div.string = notes_text
+        body.append(notes_div)
+
+    # Remove notes-data.js and nav.js script references
+    for script in soup.find_all('script'):
+        src = script.get('src', '')
+        if src and ('notes-data' in src or 'nav.js' in src):
+            script.decompose()
+
+    # Add N-key toggle if notes exist and toggle script is missing
+    has_notes = soup.find(class_='speaker-notes')
+    if has_notes:
+        # Check if toggle script already exists
+        has_toggle = False
+        for script in soup.find_all('script'):
+            if script.string and 'speaker-notes' in script.string:
+                has_toggle = True
+                break
+
+        if not has_toggle:
+            toggle_script = soup.new_tag('script')
+            toggle_script.string = (
+                "document.addEventListener('keydown', function(e) {"
+                "  if (e.key === 'n' || e.key === 'N') {"
+                "    var notes = document.querySelector('.speaker-notes');"
+                "    if (notes) notes.style.display = notes.style.display !== 'none' ? 'none' : 'block';"
+                "  }"
+                "});"
+            )
+            body.append(toggle_script)
+
+    # Add notes panel CSS if not already present
+    if has_notes:
+        head = soup.find('head')
+        has_notes_css = False
+        for style in soup.find_all('style'):
+            if style.string and '.speaker-notes' in style.string:
+                has_notes_css = True
+                break
+        if not has_notes_css and head:
+            notes_style = soup.new_tag('style')
+            notes_style.string = (
+                '.speaker-notes{'
+                'display:none;position:fixed;bottom:0;left:0;right:0;'
+                'max-height:30vh;overflow-y:auto;'
+                'background:rgba(0,0,0,0.92);color:#e0e0e0;'
+                'font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;'
+                'padding:16px 24px;border-top:2px solid rgba(255,255,255,0.15);'
+                'z-index:9999}'
+                ".speaker-notes::before{"
+                "content:'Speaker Notes (press N to hide)';"
+                "display:block;font-size:11px;text-transform:uppercase;"
+                "letter-spacing:0.05em;color:#888;margin-bottom:8px}"
+            )
+            head.append(notes_style)
+
+
 def annotate_complexity(soup):
     """Scan slide content and add a complexity annotation for pipeline routing (#28).
 
@@ -300,6 +395,7 @@ def standardize_html(html_path, output_path=None, viewport_w=1280, viewport_h=72
     strip_animations(soup)
     strip_external_resources(soup)
     strip_navigation(soup)
+    normalize_speaker_notes(soup)
     annotate_complexity(soup)
 
     # Determine output path
