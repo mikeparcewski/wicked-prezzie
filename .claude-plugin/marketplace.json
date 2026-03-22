@@ -1,6 +1,6 @@
 {
   "name": "wicked-prezzie",
-  "description": "HTML slides to native editable PowerPoint — plan, generate, convert, validate, and refine. Source document indexing, deck-building methodology, and constraint persistence. 19 skills covering the full presentation lifecycle.",
+  "description": "HTML slides to native editable PowerPoint — plan, generate, convert, validate, and refine. Source document indexing, deck-building methodology, and constraint persistence. 20 skills covering the full presentation lifecycle.",
   "owner": {
     "name": "Mike Parcewski",
     "url": "https://github.com/mikeparcewski"
@@ -8,8 +8,8 @@
   "plugins": [
     {
       "name": "wicked-prezzie",
-      "description": "HTML slides to native editable PowerPoint — source document indexing, deck-building methodology with dreamer-skeptic brainstorming, model-driven triage pipeline, and constraint persistence. 19 skills from outline to export.",
-      "version": "4.3.0",
+      "description": "HTML slides to native editable PowerPoint — source document indexing, deck-building methodology with dreamer-skeptic brainstorming, model-driven triage pipeline, and constraint persistence. 20 skills from outline to export.",
+      "version": "4.4.0",
       "source": "./",
       "author": {
         "name": "Mike Parcewski",

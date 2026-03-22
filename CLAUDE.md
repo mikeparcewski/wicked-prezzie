@@ -130,6 +130,8 @@ skills/
       brainstorm-teams.md        (3-team structure, roles, interaction protocol)
       content-principles.md      (8 content skills: mechanism-before-outcome, etc.)
       persona-framework.md       (12-persona system, pass/fail criteria, pairing)
+  deck-checkpoint/         — Session synthesis: decisions, artifacts, next steps (no script)
+    SKILL.md
 
 tests/                     — Test fixtures, evals, and trigger-evals
   test-slide-01.html       — Title slide (heading, subtitle, accent bar)
