@@ -247,7 +247,7 @@ Three built-in. Create your own. Extract from existing PPTX, PDF, or brand guide
 ## Documentation
 
 - **[Pipeline architecture](PIPELINE.md)** — Stage-by-stage technical breakdown with Mermaid diagram
-- **[Use cases & examples](USE-CASES.md)** — Practical paths from simplest to most involved
+- **[Examples](EXAMPLES.md)** — Deeper scenarios: source-grounded decks, migration, theming, quality, feedback loops
 - **[How it works](ARCHITECTURE.md)** — Technical deep-dive: extraction, building, triage, indexing
 - **[Gemini CLI](GEMINI.md)** — Tool name mapping for Gemini users
 
