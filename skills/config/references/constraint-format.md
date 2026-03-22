@@ -8,7 +8,7 @@ preventing recurring bugs from being re-learned.
 | File | Purpose | Scope |
 |---|---|---|
 | `{deck-dir}/constraints.json` | Runtime constraints for this deck | Per-project |
-| `skills/slide-config/config.json` | Settings (quality threshold, viewport, etc.) | Per-project |
+| `skills/config/config.json` | Settings (quality threshold, viewport, etc.) | Per-project |
 | `~/.something-wicked/wicked-prezzie/config.json` | User defaults | User-level |
 
 `constraints.json` and `config.json` serve different purposes:
@@ -141,7 +141,7 @@ config skill scans when listing available decks or themes.
 }
 ```
 
-This is a project-level key stored in `skills/slide-config/config.json`.
+This is a project-level key stored in `skills/config/config.json`.
 
 **Usage**: When the user asks "what decks do I have?" or "show me all themes",
 the config skill reads `index_dirs` and scans each directory for deck
@@ -158,7 +158,7 @@ built-in defaults
     ↓
 ~/.something-wicked/wicked-prezzie/config.json  (user-level)
     ↓
-skills/slide-config/config.json  (project-level)
+skills/config/config.json  (project-level)
     ↓
 result
 ```

@@ -16,14 +16,14 @@ description: |
 Slide Generate transforms structured outlines into individual HTML slide files
 ready for the wicked-pptx conversion pipeline. Each slide is a self-contained
 HTML file with inline CSS, proper viewport, and `.slide` wrapper — compatible
-with slide-html-standardize and chrome-extract without modification.
+with standardize and chrome-extract without modification.
 
 The skill applies the active theme's colors, fonts, and spacing to produce
 visually consistent slides across the entire deck.
 
 ## When to Use
 
-- After slide-outline has produced an outline JSON
+- After outline has produced an outline JSON
 - When the user provides content and wants HTML slides generated
 - When rebuilding slides after a theme change
 - When adding slides to an existing deck
@@ -31,9 +31,9 @@ visually consistent slides across the entire deck.
 ## Architecture
 
 ```
-outline.json + theme → slide-generate → 01-title.html, 02-hook.html, ... + slides.json
+outline.json + theme → generate → 01-title.html, 02-hook.html, ... + slides.json
                                            ↓
-                                    slide-html-standardize → chrome-extract → slide-pptx-builder
+                                    standardize → chrome-extract → pptx-builder
 ```
 
 ## Usage
@@ -162,14 +162,14 @@ Every generated slide follows this structure:
 4. **Semantic elements** — Use `h1`, `h2`, `h3`, `p` for text content.
    chrome-extract performs richtext extraction on these elements.
 
-5. **No animations** — slide-html-standardize strips them anyway. Don't add them.
+5. **No animations** — standardize strips them anyway. Don't add them.
 
 6. **Theme as resolved values** — CSS custom properties are resolved to actual
    hex values in the output HTML for maximum compatibility with headless Chrome.
 
 ## Design Principles Applied
 
-Slide generation follows slide-design principles automatically:
+Slide generation follows design-ref principles automatically:
 
 - **Color weight**: Background dominates (60-70%), primary/secondary for headings
   and accents (20-30%), accent sparingly (5-10%)
@@ -198,7 +198,7 @@ before triage/prep so they survive into the final PPTX.
 
 ## Section Dividers
 
-By default, slide-generate auto-inserts a **section divider slide** between
+By default, generate auto-inserts a **section divider slide** between
 acts (starting from the second act). This creates visual breaks that signal
 topic transitions in the deck.
 
@@ -241,7 +241,7 @@ A manifest file `slides.json` is generated alongside the HTML files:
 ]
 ```
 
-This manifest is consumed by slide-html-to-pptx for slide ordering and metadata.
+This manifest is consumed by quick-convert for slide ordering and metadata.
 To reorder: change `order` values in `slides.json`. To remove a slide: delete
 its entry. To add a slide: create the HTML file and add a manifest entry.
 

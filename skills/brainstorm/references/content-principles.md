@@ -1,6 +1,6 @@
 # Content Principles — 8 Reusable Patterns
 
-Reference for `deck-brainstorm` skill. Eight content patterns that apply to any
+Reference for `brainstorm` skill. Eight content patterns that apply to any
 presentation. Each pattern includes when to use it, what it produces, and key
 rules. Apply during brainstorm sessions and as review criteria.
 

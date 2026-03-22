@@ -4,7 +4,7 @@ description: |
   Indexes source documents (PDF, PPTX, DOCX, HTML, images) into a structured
   chunk store. Two-pass pipeline: pass 1 extracts per-document chunks with YAML
   frontmatter; pass 2 synthesizes cross-document tags, relationships, and insights.
-  The index is consumed by slide-outline, slide-generate, and slide-pipeline to
+  The index is consumed by outline, generate, and convert to
   ground slide content in source material.
 
   Use when: "index this document", "learn from this deck", "extract from this PDF",
@@ -16,14 +16,14 @@ description: |
 
 Converts source documents into a queryable chunk store that other skills can
 search when building slides. The output lives under an `index/` directory
-(configurable via `index_dirs` in slide-config) and is plain files — grep-able,
+(configurable via `index_dirs` in config) and is plain files — grep-able,
 git-committable, human-readable.
 
 ## When to Use
 
-- Before running slide-pipeline on a topic backed by internal documents.
+- Before running convert on a topic backed by internal documents.
 - When a user says "learn from this deck", "index this PDF", or similar.
-- When `slide-outline` needs source-grounded facts rather than model-only recall.
+- When `outline` needs source-grounded facts rather than model-only recall.
 - When re-indexing after source documents are updated.
 
 ## Two-Pass Indexing
@@ -140,11 +140,11 @@ These are defined in `EXCLUDED_NAMES` and `EXCLUDED_DIRS` in `slide_learn.py`.
 
 ## Configuration
 
-`index_dirs` is an array key in slide-config (project-level). If set, the
+`index_dirs` is an array key in config (project-level). If set, the
 pipeline will automatically read `_insights/` before building outlines.
 
 ```bash
-python skills/slide-config/scripts/slide_config.py set index_dirs /path/to/docs
+python skills/config/scripts/slide_config.py set index_dirs /path/to/docs
 ```
 
 Multiple directories are comma-separated. The first entry is the default target
@@ -154,10 +154,10 @@ for new indexing runs.
 
 See `integration.md` for the full consumption protocol. Short summary:
 
-- **slide-outline**: queries `_insights/key-facts.md` and `_tags/` to ground
+- **outline**: queries `_insights/key-facts.md` and `_tags/` to ground
   outline bullets in source material. Adds `source_chunks` to outline JSON.
-- **slide-generate**: enriches slide content with indexed facts and figures.
-- **slide-pipeline**: checks `index_dirs` at start; reads `_insights/` if set.
+- **generate**: enriches slide content with indexed facts and figures.
+- **convert**: checks `index_dirs` at start; reads `_insights/` if set.
 
 ## Reference Files
 
@@ -167,4 +167,4 @@ See `integration.md` for the full consumption protocol. Short summary:
 | [references/chunk-strategy.md](references/chunk-strategy.md) | Deciding how to split a document into chunks |
 | [references/vision-templates.md](references/vision-templates.md) | Writing standardized descriptions for charts, diagrams, images |
 | [references/search-patterns.md](references/search-patterns.md) | Querying the index to find relevant chunks |
-| [references/integration.md](references/integration.md) | Wiring the index into slide-outline, slide-generate, or slide-pipeline |
+| [references/integration.md](references/integration.md) | Wiring the index into outline, generate, or convert |

@@ -1,6 +1,6 @@
 # Brainstorm Teams — Structure and Synthesis Protocol
 
-Reference for `deck-brainstorm` skill. Documents the three-team structure,
+Reference for `brainstorm` skill. Documents the three-team structure,
 persona pairing, interaction protocol, and synthesis rules.
 
 Teams and personas are **generated per deck** from the audience and topic.

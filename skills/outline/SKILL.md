@@ -2,7 +2,7 @@
 name: outline
 description: |
   Plans presentation structure from a topic or brief — one key message per slide,
-  narrative arc, Pyramid Principle. First step in content creation before slide-generate.
+  narrative arc, Pyramid Principle. First step in content creation before generate.
 
   Use when: "make a presentation about X", "outline a deck", "plan the slides",
   "what slides do I need", "organize these bullet points", "structure this content",
@@ -18,7 +18,7 @@ takes a topic, brief, or unstructured content and produces a structured outline
 following the Pyramid Principle: each slide has one key message, supporting
 evidence, and a clear role in the narrative arc.
 
-The outline is the blueprint that slide-generate uses to produce HTML slides.
+The outline is the blueprint that generate uses to produce HTML slides.
 Without it, slide generation is ad-hoc and the resulting deck lacks narrative
 coherence.
 
@@ -27,7 +27,7 @@ coherence.
 - User provides a topic and wants a presentation planned
 - User has bullet points or a document to turn into slides
 - User wants to restructure an existing deck's flow
-- Before calling slide-generate (outline first, then generate)
+- Before calling generate (outline first, then generate)
 - User asks "how many slides do I need?" or "what's the right structure?"
 
 ## The Pyramid Principle
@@ -53,7 +53,7 @@ Every slide outline follows the Pyramid Principle adapted for presentations:
 
 ## Outline JSON Format
 
-The outline is stored as JSON consumed by slide-generate:
+The outline is stored as JSON consumed by generate:
 
 ```json
 {
@@ -188,7 +188,7 @@ The `--validate` flag checks:
 - Total slide count is between 3 and 20
 - The deck has at least a Setup and Close act
 - No slide body exceeds 75 words
-- The `theme` field references a valid theme in slide-theme
+- The `theme` field references a valid theme in theme
 - Speaker notes exist for every slide
 
 ## Slide Count Guidelines
@@ -216,7 +216,7 @@ When a user asks for a presentation, follow this workflow:
 1. **Clarify scope** — Ask about audience, time limit, and key message if not provided.
 2. **Generate outline** — Use the Pyramid Principle to structure the content.
 3. **Review with user** — Present the outline for feedback before generating slides.
-4. **Save outline** — Write the JSON file for slide-generate to consume.
+4. **Save outline** — Write the JSON file for generate to consume.
 
 The outline is the contract between the user's intent and the generated slides.
 Getting it right here prevents expensive rework later.

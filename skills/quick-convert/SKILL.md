@@ -2,7 +2,7 @@
 name: quick-convert
 description: |
   Single-stage HTML-to-PPTX conversion with native shapes and formatted text.
-  For general "make me a PowerPoint" requests, prefer slide-pipeline which
+  For general "make me a PowerPoint" requests, prefer convert which
   includes validation and per-slide refinement.
 
   Use when: "just convert", "skip validation", "re-convert slide 5 only",
@@ -102,4 +102,4 @@ Verify before running:
 | All slides show `[fallback]` | Chrome not found | Set `CHROME_PATH` env var |
 | Text overlaps in PPTX | Inline spans extracted as separate boxes | Verify richtext extraction is active (h1-h3, p tags) |
 | Colors look wrong | Alpha blending against wrong background | Check `slideBg` in layout JSON |
-| SVG charts missing | SVG too small or too few lines | Lower the 30px / 3-line thresholds in `slide-pptx-builder/scripts/pptx_builder.py` |
+| SVG charts missing | SVG too small or too few lines | Lower the 30px / 3-line thresholds in `pptx-builder/scripts/pptx_builder.py` |

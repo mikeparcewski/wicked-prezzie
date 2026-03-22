@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-slide-prep — Auto-resolve triage findings into a build manifest.
+prep — Auto-resolve triage findings into a build manifest.
 
 Consumes the findings JSON from slide_triage and a classified layout,
 applies known-pattern geometry transforms for high-confidence elements,

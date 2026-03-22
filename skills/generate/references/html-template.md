@@ -1,7 +1,7 @@
 # Canonical HTML Slide Template
 
 This is the reference template for every generated slide. Deviating from this
-structure causes downstream failures in chrome-extract and slide-pptx-builder.
+structure causes downstream failures in chrome-extract and pptx-builder.
 
 ## Full Template
 

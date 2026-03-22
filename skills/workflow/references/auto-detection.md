@@ -10,7 +10,7 @@ based on the user's input and source documents.
 ```
 User input (brief + documents)
   │
-  ├─ Check slide-learn indexes (if available)
+  ├─ Check learn indexes (if available)
   │    └─ Scan YAML frontmatter: tags, themes, entities
   │
   ├─ Scan raw documents (fallback if no indexes)
@@ -25,10 +25,10 @@ Signal aggregation → Confidence score → Recommendation
 
 ### Source Priority
 
-1. **slide-learn indexes** — Preferred. Already structured with YAML frontmatter
+1. **learn indexes** — Preferred. Already structured with YAML frontmatter
    containing tags, document type, key entities, and themes. Fastest to scan and
    most reliable for signal detection. Check the index directory configured in
-   `slide-config` (project-level `index_dirs` setting).
+   `config` (project-level `index_dirs` setting).
 
 2. **Raw document scanning** — Fallback when indexes do not exist. Read the first
    2-3 pages of each document to extract signals. Do not read entire large

@@ -228,6 +228,6 @@ with open(log_path, 'w') as f:
 
 | File | Read when... |
 |---|---|
-| [../slide-triage/references/known-patterns.md](../slide-triage/references/known-patterns.md) | Pattern entry format for promotion |
-| [../slide-pptx-builder/references/pptx-recipes.md](../slide-pptx-builder/references/pptx-recipes.md) | Recipe fix types |
-| [../slide-pptx-builder/scripts/edl_apply.py](../slide-pptx-builder/scripts/edl_apply.py) | EDL applicator for `fixApplied.type = "edl"` |
+| [../triage/references/known-patterns.md](../triage/references/known-patterns.md) | Pattern entry format for promotion |
+| [../pptx-builder/references/pptx-recipes.md](../pptx-builder/references/pptx-recipes.md) | Recipe fix types |
+| [../pptx-builder/scripts/edl_apply.py](../pptx-builder/scripts/edl_apply.py) | EDL applicator for `fixApplied.type = "edl"` |

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-slide-theme — Manage visual themes for wicked-pptx slide decks.
+theme — Manage visual themes for wicked-pptx slide decks.
 
 Usage:
-    python slide-theme/scripts/slide_theme.py list
-    python slide-theme/scripts/slide_theme.py show midnight-purple
-    python slide-theme/scripts/slide_theme.py create my-brand
-    python slide-theme/scripts/slide_theme.py activate midnight-purple
-    python slide-theme/scripts/slide_theme.py active
-    python slide-theme/scripts/slide_theme.py css midnight-purple
-    python slide-theme/scripts/slide_theme.py validate midnight-purple
+    python theme/scripts/slide_theme.py list
+    python theme/scripts/slide_theme.py show midnight-purple
+    python theme/scripts/slide_theme.py create my-brand
+    python theme/scripts/slide_theme.py activate midnight-purple
+    python theme/scripts/slide_theme.py active
+    python theme/scripts/slide_theme.py css midnight-purple
+    python theme/scripts/slide_theme.py validate midnight-purple
 """
 
 import argparse, json, math, os, sys
@@ -18,7 +18,7 @@ from pathlib import Path
 USER_DATA_DIR = Path.home() / ".something-wicked" / "wicked-prezzie"
 THEMES_DIR = USER_DATA_DIR / "themes"
 BUILTIN_THEMES_DIR = Path(__file__).parent.parent / "themes"
-CONFIG_PATH = Path(__file__).parent.parent.parent / "slide-config" / "config.json"
+CONFIG_PATH = Path(__file__).parent.parent.parent / "config" / "config.json"
 
 # --- Built-in themes ---
 
@@ -253,7 +253,7 @@ def list_themes():
 
 
 def get_active_theme_name():
-    """Get the active theme name from slide-config."""
+    """Get the active theme name from config."""
     if CONFIG_PATH.exists():
         try:
             with open(CONFIG_PATH) as f:
@@ -265,7 +265,7 @@ def get_active_theme_name():
 
 
 def set_active_theme(name):
-    """Set the active theme in slide-config."""
+    """Set the active theme in config."""
     config = {}
     if CONFIG_PATH.exists():
         try:
@@ -318,7 +318,7 @@ def theme_to_css(theme):
 
 
 def validate_theme(theme):
-    """Validate theme against slide-design principles. Returns (issues, warnings)."""
+    """Validate theme against design-ref principles. Returns (issues, warnings)."""
     issues = []
     warnings = []
     c = theme["colors"]

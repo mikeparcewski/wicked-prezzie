@@ -16,11 +16,11 @@ description: |
 
 Every slide deck needs a consistent visual identity — colors, fonts, spacing, and
 layout patterns. Without a defined theme, each deck reinvents its palette and
-every slide-generate call produces visually inconsistent output.
+every generate call produces visually inconsistent output.
 
 The Slide Theme skill defines reusable theme files that capture brand identity as
-structured data. Themes are consumed by slide-generate to produce HTML with
-consistent styling, and by slide-outline to inform color-coded section planning.
+structured data. Themes are consumed by generate to produce HTML with
+consistent styling, and by outline to inform color-coded section planning.
 
 ## When to Use
 
@@ -107,7 +107,7 @@ python ${CLAUDE_SKILL_DIR}/scripts/slide_theme.py show midnight-purple
 # Create a new theme interactively (outputs JSON to edit)
 python ${CLAUDE_SKILL_DIR}/scripts/slide_theme.py create my-brand
 
-# Set the active theme (writes to slide-config)
+# Set the active theme (writes to config)
 python ${CLAUDE_SKILL_DIR}/scripts/slide_theme.py activate midnight-purple
 
 # Show the currently active theme
@@ -137,7 +137,7 @@ Warmer feel than midnight-purple.
 ## CSS Variable Export
 
 The `css` command outputs a complete `<style>` block with CSS custom properties
-that slide-generate templates consume:
+that generate templates consume:
 
 ```css
 :root {
@@ -165,7 +165,7 @@ that slide-generate templates consume:
 
 ## Theme Validation
 
-The `validate` command checks a theme against slide-design principles:
+The `validate` command checks a theme against design-ref principles:
 
 - **Contrast ratios**: text_primary vs background meets WCAG AA (4.5:1 body, 3:1 large)
 - **Palette size**: colors section has <= 5 chromatic colors (excluding grayscale)
@@ -175,16 +175,16 @@ The `validate` command checks a theme against slide-design principles:
 
 ## How Other Skills Use Themes
 
-### slide-generate
+### generate
 Reads the active theme and injects CSS variables into generated HTML. The
 theme's colors, fonts, and spacing are applied to every slide template.
 
-### slide-outline
+### outline
 References the theme's color palette when assigning section colors in the
 outline structure. Ensures the outline's visual plan matches the final output.
 
-### slide-config
-The active theme name is stored as `active_theme` in `skills/slide-config/config.json`
+### config
+The active theme name is stored as `active_theme` in `skills/config/config.json`
 (project-level — different projects can use different themes).
 If no theme is activated, `midnight-purple` is used as the default.
 

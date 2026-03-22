@@ -9,8 +9,8 @@ authored once as HTML slides; rendered to any requested format.
 ## Architecture
 
 ```
-HTML slides (from slide-generate or user-provided)
-       ↓ slide-html-standardize
+HTML slides (from generate or user-provided)
+       ↓ standardize
 Normalized HTML
       /                \
 [Chrome extract        [Reveal.js bundle]
@@ -44,7 +44,7 @@ Generates both files from the same HTML source in a single run. Both versioned t
 
 **Per run:** Specify format: "convert to pptx", "create html presentation", or "both formats."
 
-**Config default:** Set `output_format` in project config (`skills/slide-config/config.json`). Options: `pptx`,
+**Config default:** Set `output_format` in project config (`skills/config/config.json`). Options: `pptx`,
 `html`, `both`. Defaults to `pptx`.
 
 ---

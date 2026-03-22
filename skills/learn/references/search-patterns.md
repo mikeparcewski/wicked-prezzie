@@ -1,6 +1,6 @@
 # Search Patterns
 
-The 10 most common agent query patterns for the slide-learn index. Start with
+The 10 most common agent query patterns for the learn index. Start with
 `_insights/` (synthesized), narrow to `_tags/` (aggregated), then read
 individual chunks only when you need the full source text.
 

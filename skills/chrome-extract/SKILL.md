@@ -3,7 +3,7 @@ name: chrome-extract
 description: |
   Extracts layout data from rendered HTML slides via Chrome headless — bounding
   boxes, colors, fonts, inline formatting. Start here before checking
-  slide-pptx-builder when the conversion looks wrong.
+  pptx-builder when the conversion looks wrong.
 
   Use when: "elements missing", "wrong position", "extraction issue", "screenshot HTML",
   "debug extraction", "check extraction vs builder", "bounding boxes wrong"
@@ -77,7 +77,7 @@ Crop a region from a screenshot. Used for SVG chart extraction.
 
 ## Script Location
 
-`scripts/chrome_extract.py` — imported by `slide-html-to-pptx`.
+`scripts/chrome_extract.py` — imported by `quick-convert`.
 
 ## Environment
 

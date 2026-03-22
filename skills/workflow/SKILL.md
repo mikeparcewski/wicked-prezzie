@@ -4,21 +4,21 @@ description: |
   Methodology-only orchestrator for the full deck-building workflow. Manages
   phase state, gate conditions, constraint injection, and subagent dispatch.
   No script — Claude drives the loop directly from this SKILL.md.
-  NOT for converting existing HTML slides to PPTX — that is slide-pipeline.
+  NOT for converting existing HTML slides to PPTX — that is convert.
 
   Use when: "build a full deck", "build me a deck about X", "create a presentation from scratch",
   "run the deck workflow", "start the deck pipeline", "make a deck from these documents"
 ---
 
-# deck-pipeline — Orchestrator
+# workflow — Orchestrator
 
 This skill owns the phase state machine for the full deck-building workflow. It
 does not write slides, run brainstorms, or build exports — it dispatches
 phase-specific agents to do that work and manages transitions between phases.
 
-**Relationship to slide-pipeline**: `deck-pipeline` is the content workflow
-(topic to approved deck). `slide-pipeline` is the conversion workflow (HTML to
-PPTX). deck-pipeline runs first; slide-pipeline runs after build is complete.
+**Relationship to convert**: `workflow` is the content workflow
+(topic to approved deck). `convert` is the conversion workflow (HTML to
+PPTX). workflow runs first; convert runs after build is complete.
 
 ## Reference Files
 
@@ -36,7 +36,7 @@ One orchestrator (this skill) owns phase transitions. Phase-specific skills
 load on demand. This keeps the orchestrator context lean (~180 lines) regardless
 of which phase is active. Each phase gets its own context budget.
 
-The user invokes `/deck-pipeline`. The orchestrator reads `deck-state.json`,
+The user invokes `/workflow`. The orchestrator reads `deck-state.json`,
 determines the current phase, and loads the relevant phase skill. It enforces
 gate conditions before advancing.
 
@@ -203,9 +203,9 @@ skill → continue. Do not re-read full conversation history.
 ## Invocation Patterns
 
 ```
-/deck-pipeline                    # Start or resume at current phase
-/deck-pipeline status             # Show current phase, blockers, progress
-/deck-pipeline skip-to build      # Jump to phase (warns about skipped gates)
+/workflow                    # Start or resume at current phase
+/workflow status             # Show current phase, blockers, progress
+/workflow skip-to build      # Jump to phase (warns about skipped gates)
 ```
 
 Direct phase invocation is also supported (phase skills are sibling skills).

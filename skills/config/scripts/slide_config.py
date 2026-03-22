@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-slide-config — Manage wicked-pptx project configuration.
+config — Manage wicked-pptx project configuration.
 
 Usage:
-    python slide-config/scripts/slide_config.py show
-    python slide-config/scripts/slide_config.py set quality_threshold 90
-    python slide-config/scripts/slide_config.py reset
+    python config/scripts/slide_config.py show
+    python config/scripts/slide_config.py set quality_threshold 90
+    python config/scripts/slide_config.py reset
 """
 
 import argparse, json, os, sys

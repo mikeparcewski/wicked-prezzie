@@ -39,7 +39,7 @@ Always available. Seeded to `~/.something-wicked/wicked-prezzie/themes/` on firs
 - "show profile [name]" → display full theme JSON
 - "export profile [name]" → produce a `.pptprofile` file for sharing
 - "import profile [file]" → register an imported profile as a theme
-- "set active theme [name]" → set the active theme via slide-config (project-level)
+- "set active theme [name]" → set the active theme via config (project-level)
 - "assemble a profile" → interactive component assembly flow
 
 ---

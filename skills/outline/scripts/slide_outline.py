@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-slide-outline — Structure topics into presentation outlines.
+outline — Structure topics into presentation outlines.
 
 Usage:
-    python slide-outline/scripts/slide_outline.py --topic "Q1 Results" --output outline.json
-    python slide-outline/scripts/slide_outline.py --validate outline.json
-    python slide-outline/scripts/slide_outline.py --summary outline.json
+    python outline/scripts/slide_outline.py --topic "Q1 Results" --output outline.json
+    python outline/scripts/slide_outline.py --validate outline.json
+    python outline/scripts/slide_outline.py --summary outline.json
 """
 
 import argparse, json, re, sys

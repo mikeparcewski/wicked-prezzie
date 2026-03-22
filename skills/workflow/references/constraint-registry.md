@@ -1,4 +1,4 @@
-# Constraint Registry — deck-pipeline
+# Constraint Registry — workflow
 
 Cross-phase constraint format, 10 default constraints, and the Learn Constraint
 protocol. Constraints are the mechanism by which session lessons survive across

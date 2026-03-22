@@ -1,6 +1,6 @@
 # CSS Constraints for Clean Chrome-Extract Output
 
-This is the definitive CSS contract between slide-generate and chrome-extract.
+This is the definitive CSS contract between generate and chrome-extract.
 Every generated slide must conform to these rules. Violations cause layout
 failures downstream that require 22+ CSS edits to clean up.
 

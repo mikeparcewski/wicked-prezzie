@@ -5,7 +5,7 @@ documents. Use these templates when writing the `figures` frontmatter field
 and the chunk body content for images, charts, and diagrams.
 
 Consistent templates make descriptions grep-able and parseable by downstream
-skills (slide-outline, slide-generate).
+skills (outline, generate).
 
 ---
 

@@ -12,7 +12,7 @@ phase: ideate
 pipeline_position: 3
 ---
 
-# deck-brainstorm
+# brainstorm
 
 Structured ideation methodology for proposal and presentation decks. Runs three parallel
 dreamer-skeptic teams, then synthesizes their outputs into a single approved architecture
@@ -151,23 +151,23 @@ source of rework. "No slide should exist before its purpose in the narrative is 
 
 ---
 
-## Integration with deck-pipeline
+## Integration with workflow
 
 Brainstorm is Phase 3 in the hub-and-spoke pipeline:
 
 ```
-Phase 1: Source Inventory    — read all sources, build facts manifest (orchestrator inline + slide-learn)
+Phase 1: Source Inventory    — read all sources, build facts manifest (orchestrator inline + learn)
 Phase 2: Personas            — build persona map with pass/fail criteria (orchestrator inline)
-Phase 3: Brainstorm          — dreamer-skeptic ideation → synthesized architecture (deck-brainstorm)
+Phase 3: Brainstorm          — dreamer-skeptic ideation → synthesized architecture (brainstorm)
 Phase 4: Architecture Review — three-team review, validation, council punch list (orchestrator inline)
-Phase 5: Build               — produce slides per approved plan (slide-generate + slide-pipeline)
-Phase 6: Validate            — 4-lens validation + council punch list (slide-validate)
+Phase 5: Build               — produce slides per approved plan (generate + convert)
+Phase 6: Validate            — 4-lens validation + council punch list (validate)
 Phase 7: Polish              — flow cohesion + balance audit (orchestrator inline)
-Phase 8: Export              — PDF, bundled HTML, PPTX (slide-pipeline + slide-render)
+Phase 8: Export              — PDF, bundled HTML, PPTX (convert + render)
 ```
 
 Phases without dedicated skills (1, 2, 4, 7) are orchestrated inline by Claude using
-the methodology documented in deck-pipeline's references. The synthesized architecture
+the methodology documented in workflow's references. The synthesized architecture
 produced in Phase 3 becomes the production plan for Phase 5. Phase 4 review teams
 check the architecture against persona pass/fail criteria before any slides are built.
 

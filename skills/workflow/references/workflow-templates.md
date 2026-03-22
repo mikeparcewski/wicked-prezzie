@@ -2,7 +2,7 @@
 
 Workflow templates define the phase sequence, gate artifacts, and feature flags
 for different types of deck-building projects. The `start` skill selects a
-template; `deck-pipeline` executes it.
+template; `workflow` executes it.
 
 ---
 
@@ -48,7 +48,7 @@ name: general
 description: Standard deck-building workflow for general presentations
 phases:
   - name: source-inventory
-    skill: deck-pipeline
+    skill: workflow
     gate_artifact: facts-manifest.json
     gate_condition: >-
       facts-manifest.json exists with at least 1 source document entry
@@ -56,7 +56,7 @@ phases:
     requires_approval: false
 
   - name: personas
-    skill: deck-pipeline
+    skill: workflow
     gate_artifact: persona-map.md
     gate_condition: >-
       persona-map.md exists AND covers all named stakeholders from
@@ -64,7 +64,7 @@ phases:
     requires_approval: false
 
   - name: brainstorm
-    skill: deck-brainstorm
+    skill: brainstorm
     gate_artifact: synthesized-architecture.md
     gate_condition: >-
       synthesized-architecture.md exists AND user has reviewed
@@ -72,7 +72,7 @@ phases:
     requires_approval: true
 
   - name: architecture
-    skill: deck-pipeline
+    skill: workflow
     gate_artifact: slide-plan.md
     gate_condition: >-
       All three review documents exist (narrative, commercial, technical)
@@ -80,7 +80,7 @@ phases:
     requires_approval: false
 
   - name: build
-    skill: deck-pipeline
+    skill: workflow
     gate_artifact: slides/
     gate_condition: >-
       All slides in slide-plan.md are built AND visual verification
@@ -88,14 +88,14 @@ phases:
     requires_approval: false
 
   - name: validate
-    skill: deck-pipeline
+    skill: workflow
     gate_artifact: council-punch-list.md
     gate_condition: >-
       council-punch-list.md exists AND contains zero blocking items
     requires_approval: false
 
   - name: polish
-    skill: deck-pipeline
+    skill: workflow
     gate_artifact: flow-review.md
     gate_condition: >-
       flow-review.md exists AND all non-blocking punch list items
@@ -103,7 +103,7 @@ phases:
     requires_approval: false
 
   - name: export
-    skill: deck-pipeline
+    skill: workflow
     gate_artifact: null
     gate_condition: >-
       Export artifacts exist AND visual verification passed
@@ -139,7 +139,7 @@ name: rfp-exec
 description: Proposal workflow with executive summary approval gate
 phases:
   - name: source-inventory
-    skill: deck-pipeline
+    skill: workflow
     gate_artifact: facts-manifest.json
     gate_condition: >-
       facts-manifest.json exists with at least 1 source document entry
@@ -147,7 +147,7 @@ phases:
     requires_approval: false
 
   - name: personas
-    skill: deck-pipeline
+    skill: workflow
     gate_artifact: persona-map.md
     gate_condition: >-
       persona-map.md exists AND covers all named stakeholders from
@@ -155,7 +155,7 @@ phases:
     requires_approval: false
 
   - name: brainstorm
-    skill: deck-brainstorm
+    skill: brainstorm
     gate_artifact: synthesized-architecture.md
     gate_condition: >-
       synthesized-architecture.md exists AND user has reviewed
@@ -171,7 +171,7 @@ phases:
     requires_approval: true
 
   - name: architecture
-    skill: deck-pipeline
+    skill: workflow
     gate_artifact: slide-plan.md
     gate_condition: >-
       All three review documents exist (narrative, commercial, technical)
@@ -180,7 +180,7 @@ phases:
     requires_approval: false
 
   - name: build
-    skill: deck-pipeline
+    skill: workflow
     gate_artifact: slides/
     gate_condition: >-
       All slides in slide-plan.md are built AND visual verification
@@ -188,14 +188,14 @@ phases:
     requires_approval: false
 
   - name: validate
-    skill: deck-pipeline
+    skill: workflow
     gate_artifact: council-punch-list.md
     gate_condition: >-
       council-punch-list.md exists AND contains zero blocking items
     requires_approval: false
 
   - name: polish
-    skill: deck-pipeline
+    skill: workflow
     gate_artifact: flow-review.md
     gate_condition: >-
       flow-review.md exists AND all non-blocking punch list items
@@ -203,7 +203,7 @@ phases:
     requires_approval: false
 
   - name: export
-    skill: deck-pipeline
+    skill: workflow
     gate_artifact: null
     gate_condition: >-
       Export artifacts exist AND visual verification passed

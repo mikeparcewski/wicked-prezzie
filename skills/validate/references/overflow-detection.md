@@ -28,7 +28,7 @@ The grey background is applied to the slide background element in the PPTX XML. 
 
 ### Step 3: Render to PNG
 
-Pass the padded PPTX to LibreOffice (via the slide-render skill's `render_pptx_to_pngs` function) to produce one PNG per slide. LibreOffice performs the definitive text reflow and layout calculations, so the rendered output reflects the actual appearance of the deck. The PNGs are written to a temporary directory.
+Pass the padded PPTX to LibreOffice (via the render skill's `render_pptx_to_pngs` function) to produce one PNG per slide. LibreOffice performs the definitive text reflow and layout calculations, so the rendered output reflects the actual appearance of the deck. The PNGs are written to a temporary directory.
 
 Since LibreOffice is the target renderer, the visual check is an exact representation of what the recipient will see — unlike Chrome's CSS metrics which differ significantly.
 
@@ -51,9 +51,9 @@ Each overflowing edge produces a separate error in the issue list for the affect
 Enable visual overflow detection with the `--render` flag. It requires:
 
 - **LibreOffice** installed. macOS: `brew install --cask libreoffice`. Linux: `apt install libreoffice`.
-- **The slide-render skill** present at `slide-render/scripts/slide_render.py` relative to the project root. This provides the `render_pptx_to_pngs` function that wraps LibreOffice.
+- **The render skill** present at `render/scripts/slide_render.py` relative to the project root. This provides the `render_pptx_to_pngs` function that wraps LibreOffice.
 - **Pillow** (`pip install Pillow`) for image loading and pixel inspection.
 
 Visual detection adds several seconds per slide (LibreOffice startup, rendering, pixel scanning), so it is not suitable for tight iteration loops during development. Use static validation for rapid feedback. Reserve visual validation for final QA passes, CI pipelines, or when static validation passes but the rendered output looks wrong.
 
-If LibreOffice or the slide-render skill is not available, the detector emits an info-level message and skips the visual check rather than failing. The static checks still run and produce a report. This allows the same script to be used in environments with and without LibreOffice installed.
+If LibreOffice or the render skill is not available, the detector emits an info-level message and skips the visual check rather than failing. The static checks still run and produce a report. This allows the same script to be used in environments with and without LibreOffice installed.

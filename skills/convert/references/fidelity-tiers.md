@@ -29,7 +29,7 @@ handed off as-is. When polish matters more than speed.
 **Render loop:**
 ```
 Pass 1: Generate all slides (standardize → extract → build)
-Pass 2: Run slide-validate (static + visual) on each slide
+Pass 2: Run validate (static + visual) on each slide
         → Flag any slides that fail
 Pass 3: Regenerate flagged slides with corrective adjustments
 Pass 4: Re-validate. If still failing: apply conservative fallback, flag as REVIEW.
@@ -147,4 +147,4 @@ Stat font-size / label font-size must be ≥ 1.5:
 
 ### Conservative Fallback
 If a slide has FAIL status after pass 3, apply conservative fallback layout
-(see css-contract.md in slide-design) and mark `status: REVIEW`.
+(see css-contract.md in design-ref) and mark `status: REVIEW`.

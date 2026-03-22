@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-slide-generate — Generate themed HTML slides from structured outlines.
+generate — Generate themed HTML slides from structured outlines.
 
 Usage:
-    python slide-generate/scripts/slide_generate.py --outline outline.json --output-dir ./slides/
-    python slide-generate/scripts/slide_generate.py --type title --title "Hello" --output test.html
-    python slide-generate/scripts/slide_generate.py --list-templates
+    python generate/scripts/slide_generate.py --outline outline.json --output-dir ./slides/
+    python generate/scripts/slide_generate.py --type title --title "Hello" --output test.html
+    python generate/scripts/slide_generate.py --list-templates
 """
 
 import argparse, json, os, re, sys

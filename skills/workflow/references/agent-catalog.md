@@ -1,6 +1,6 @@
-# Agent Catalog — deck-pipeline
+# Agent Catalog — workflow
 
-All agent definitions for the deck-pipeline workflow. Each entry includes role,
+All agent definitions for the workflow workflow. Each entry includes role,
 dispatch phase, parallelism rules, output contract, and key constraints. The
 orchestrator uses these as prompt templates — it reads the relevant entry, injects
 project context and constraints, and dispatches via the Agent tool.
@@ -432,7 +432,7 @@ Run path audit before rendering. Coordinate visual-reviewer after export.
 **Output**: Export files in the deck directory:
 - `{deck-name}.pdf` — Chrome headless PDF
 - `{deck-name}-bundle.html` — single-file bundled HTML with inlined assets
-- `{deck-name}.pptx` (optional, via slide-pipeline skill)
+- `{deck-name}.pptx` (optional, via convert skill)
 
 **Key constraints**:
 - `no-tmp-for-html` — all temp files within deck directory, never /tmp/

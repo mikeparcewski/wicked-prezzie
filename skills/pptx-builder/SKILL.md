@@ -63,7 +63,7 @@ compensating for CSS-to-Calibri font metric differences.
 
 ## Script Location
 
-`scripts/pptx_builder.py` — imported by `slide-html-to-pptx` skill.
+`scripts/pptx_builder.py` — imported by `quick-convert` skill.
 `scripts/color_utils.py` — bundled CSS color parsing, alpha blending, entity decoding.
 
 ## Coordinate System
@@ -108,6 +108,6 @@ For detailed implementation specifics, consult:
 
 ### Related Skills
 
-- **slide-design** — Design principles and quality rubric for evaluating output
+- **design-ref** — Design principles and quality rubric for evaluating output
 - **`scripts/color_utils.py`** — Bundled CSS color parsing and alpha blending logic
 - **`scripts/edl_apply.py`** — Declarative edit applicator for slide-specific fixes

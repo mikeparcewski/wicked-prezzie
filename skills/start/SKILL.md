@@ -40,8 +40,8 @@ exactly one of these input types:
 |------------|---------|--------------|
 | **Topic or brief** | Plain text description, a few sentences or paragraphs, no files | Workflow selection (Step 2) |
 | **Source documents** | PDFs, DOCX, PPTX, spreadsheets — raw material not yet indexed | `wicked-prezzie:learn` first, then workflow selection |
-| **HTML slides** | `.html` files with slide content, already generated | `wicked-prezzie:convert` (slide-pipeline) |
-| **Reviewed Word doc** | `.docx` with inline comments from reviewers | `wicked-prezzie:feedback` (deck-feedback) |
+| **HTML slides** | `.html` files with slide content, already generated | `wicked-prezzie:convert` (convert) |
+| **Reviewed Word doc** | `.docx` with inline comments from reviewers | `wicked-prezzie:feedback` (feedback) |
 
 If the user provides **source documents alongside a topic**, recommend running
 `wicked-prezzie:learn` first to index the documents, then returning here to
@@ -60,7 +60,7 @@ template auto-detection to recommend the best workflow.
 ### Detection Procedure
 
 1. Scan available text: the user's brief, any indexed source documents (check
-   `slide-learn` indexes if they exist), or the raw documents if indexes are not
+   `learn` indexes if they exist), or the raw documents if indexes are not
    yet built.
 
 2. Score each template by counting signal matches:
@@ -141,15 +141,15 @@ Want to proceed with rfp-exec, or switch to the general template?
 
 After the user confirms (or overrides) the template choice:
 
-- **general** → Start `deck-pipeline` with the standard 8-phase flow (source
+- **general** → Start `workflow` with the standard 8-phase flow (source
   inventory, personas, brainstorm, architecture, build, validate, polish, export)
 
-- **rfp-exec** → Start `deck-pipeline` with the rfp-exec template, which inserts
+- **rfp-exec** → Start `workflow` with the rfp-exec template, which inserts
   the `exec-summary` phase between brainstorm and architecture. The phase
   sequence becomes: source inventory, personas, brainstorm, **exec-summary**,
   architecture, build, validate, polish, export.
 
-Pass the template name to deck-pipeline so it can load the correct phase
+Pass the template name to workflow so it can load the correct phase
 sequence. Record the template choice in `deck-state.json` under `template`.
 
 ---
@@ -187,7 +187,7 @@ When the user has source documents that have not been indexed:
 
 When running auto-detection:
 
-1. **slide-learn indexes** (if they exist) — fastest, already structured with
+1. **learn indexes** (if they exist) — fastest, already structured with
    YAML frontmatter containing tags, themes, and key entities
 2. **Raw document scanning** (fallback) — read the first 2-3 pages of each
    document to extract signals. Do not read entire large documents for detection
@@ -204,4 +204,4 @@ directory), this skill detects it and offers to resume:
 "I found an existing deck project at `{deck_dir}` (currently in Phase {N}:
 {phase_name}). Resume where you left off, or start a new project?"
 
-If resuming, route directly to `deck-pipeline` which handles phase resumption.
+If resuming, route directly to `workflow` which handles phase resumption.

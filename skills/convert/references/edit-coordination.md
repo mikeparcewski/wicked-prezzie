@@ -113,8 +113,8 @@ When the audit identifies issues and the user requests an inline fix:
 4. Clear css_lock
 5. Check render_guard → clear to proceed
 6. Set render_guard for re-conversion
-7. Run slide-html-to-pptx
-8. Run slide-validate
+7. Run quick-convert
+8. Run validate
 9. Clear render_guard
 10. Report corrected slide status
 ```

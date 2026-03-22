@@ -12,7 +12,7 @@ description: |
 
 Compare original HTML slides against the converted PPTX output by rendering
 both to PNG and visually inspecting them. No script — use chrome-extract and
-slide-render directly.
+render directly.
 
 ## When to Use
 
@@ -33,14 +33,14 @@ python skills/chrome-extract/scripts/chrome_extract.py \
 ### 2. Render the PPTX
 
 ```bash
-python skills/slide-render/scripts/slide_render.py deck.pptx \
+python skills/render/scripts/slide_render.py deck.pptx \
   -o ~/.something-wicked/wicked-prezzie/output/renders/
 ```
 
 ### 3. Read both images
 
 Use the Read tool to view the HTML screenshot and the corresponding PPTX render.
-Compare visually using the grading criteria in slide-pipeline.
+Compare visually using the grading criteria in convert.
 
 ## What to Look For
 

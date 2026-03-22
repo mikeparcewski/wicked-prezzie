@@ -14,7 +14,7 @@ One hint at a time. Don't repeat the same hint in a session.
 ### Hint Catalog
 
 **No style theme**
-Condition: no active theme set in slide-config
+Condition: no active theme set in config
 Moment: before generation starts
 > *"No active theme set — using midnight-purple default. Run 'learn my brand' on your existing
 > decks to match your brand, or pick a built-in theme."*

@@ -9,7 +9,7 @@ Extracts a reusable style fingerprint from existing assets. Saves as a named the
 ## Invocation
 
 Say "learn my brand from ./assets", "extract styles from brand.pdf and logo.png", or
-"learn and save as my-brand." Produces a theme JSON compatible with `slide-theme`.
+"learn and save as my-brand." Produces a theme JSON compatible with `theme`.
 
 ---
 
@@ -55,7 +55,7 @@ Example conflict: PPTX theme says navy primary, PDF brand guide shows purple pri
 
 ## Output: Theme JSON
 
-Extracted data maps directly to the slide-theme schema:
+Extracted data maps directly to the theme schema:
 
 ```json
 {

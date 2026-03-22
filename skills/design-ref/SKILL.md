@@ -3,7 +3,7 @@ name: design-ref
 description: |
   Reference-only design knowledge base — design principles, quality rubric, CSS
   contract, and REVIEW flag system. Cannot take action. Do NOT use for "make it
-  look better" — route those to slide-generate, slide-validate, or slide-pptx-builder.
+  look better" — route those to generate, validate, or pptx-builder.
 
   Use when: "design rules", "quality rubric", "CSS zone naming", "REVIEW flags",
   "what are the design principles", "how does the CSS contract work"
@@ -52,7 +52,7 @@ The quality rubric is a machine-readable scoring system for slide validation. Re
 
 Use the rubric to build automated validation, to manually score slides during review, or to explain to users why a particular slide does or does not meet quality standards.
 
-## How slide-validate Uses the Rubric
+## How validate Uses the Rubric
 
 When validating slides, follow this procedure:
 
@@ -79,7 +79,7 @@ Do not treat design validation as a post-hoc step only. Apply the design princip
 
 The design principles and rubric are calibrated for the wicked-pptx pipeline. The standard canvas is 1280x720 pixels (widescreen 16:9). Margin and size values in the principles reference assume this canvas size. When working with different dimensions, scale proportionally.
 
-The alpha-blending guidance in the color strategy section directly complements the `color_utils.py` module bundled in slide-pptx-builder. The card text clamping rules in the layout section align with the card width constraints enforced by `pptx_builder.py`. Refer to both the design principles and the codebase when resolving visual quality issues.
+The alpha-blending guidance in the color strategy section directly complements the `color_utils.py` module bundled in pptx-builder. The card text clamping rules in the layout section align with the card width constraints enforced by `pptx_builder.py`. Refer to both the design principles and the codebase when resolving visual quality issues.
 
 ## Reference Files
 

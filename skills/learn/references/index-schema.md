@@ -1,6 +1,6 @@
 # Index Schema
 
-YAML frontmatter schema for chunk files produced by `slide-learn`. Every chunk
+YAML frontmatter schema for chunk files produced by `learn`. Every chunk
 file (`index/{source-name}/chunk-NNN.md`) begins with a `---` delimited block
 containing the fields below.
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-slide-html-to-pptx skill — Convert HTML slide decks to editable PowerPoint.
+quick-convert skill — Convert HTML slide decks to editable PowerPoint.
 
 Parallel extraction: each slide is standardized, extracted, and screenshotted
 concurrently via ProcessPoolExecutor. Results are assembled into one PPTX
@@ -398,7 +398,7 @@ def main():
     parser.add_argument('--hide', help='CSS selectors to hide (comma-separated)')
     parser.add_argument('--viewport', default='1280x720', help='Viewport WxH (default 1280x720)')
     parser.add_argument('--standardize', action='store_true',
-                        help='Run slide-html-standardize on slides before conversion')
+                        help='Run standardize on slides before conversion')
     parser.add_argument('--workers', '-w', type=int, default=None,
                         help='Max parallel workers (default: min(slide_count, cpu_count))')
     args = parser.parse_args()

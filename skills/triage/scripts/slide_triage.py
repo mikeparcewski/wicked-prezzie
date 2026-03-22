@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-slide-triage — Analyse a classified slide layout and emit findings JSON.
+triage — Analyse a classified slide layout and emit findings JSON.
 
 Reads element confidence from classify_elements() output, checks against
 known-pattern signatures, detects collision risks, and returns a findings dict.
 
 This is the mechanical (deterministic) part of triage. Model inspection of
-flagged elements happens in slide-prep.
+flagged elements happens in prep.
 """
 
 import sys, re

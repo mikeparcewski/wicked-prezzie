@@ -1,4 +1,4 @@
-# Phase Definitions — deck-pipeline
+# Phase Definitions — workflow
 
 8-phase state machine for the full deck-building workflow. Each phase has a
 defined purpose, gate condition, key artifacts, context budget, and agent set.
@@ -134,7 +134,7 @@ auto-advanced.
   — Parallelism: 1
 
 **Refs loaded during this phase**:
-- `brainstorm-teams.md` (from deck-brainstorm skill) — three-team structure +
+- `brainstorm-teams.md` (from brainstorm skill) — three-team structure +
   synthesis rules
 - `content-principles.md` — mechanism-before-outcome, two-layer proof, etc.
 
@@ -291,7 +291,7 @@ Path audit, visual verification, final sign-off.
 **Key artifacts**:
 - `{deck-name}.pdf` — Chrome headless PDF
 - `{deck-name}-bundle.html` — single-file bundled HTML
-- `{deck-name}.pptx` (optional) — via slide-pipeline skill
+- `{deck-name}.pptx` (optional) — via convert skill
 
 **Gate condition**: Export artifacts exist AND visual verification of the PDF or
 bundled HTML has passed (screenshots read with vision, not just file size check).

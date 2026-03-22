@@ -1,6 +1,6 @@
 # Slide Quality Rubric
 
-This rubric provides a machine-readable scoring system for evaluating presentation slide quality. Each slide is scored independently. The total possible score is 100 points. A slide must score at or above the quality threshold to pass (default: 85, configurable via slide-config).
+This rubric provides a machine-readable scoring system for evaluating presentation slide quality. Each slide is scored independently. The total possible score is 100 points. A slide must score at or above the quality threshold to pass (default: 85, configurable via config).
 
 ---
 
@@ -16,7 +16,7 @@ This rubric provides a machine-readable scoring system for evaluating presentati
 | Content density | 10 | <= 7 top-level elements per slide |
 | Visual overflow | 10 | No content extends beyond slide edges |
 
-**Pass threshold:** 85 / 100 (configurable via `slide-config`)
+**Pass threshold:** 85 / 100 (configurable via `config`)
 
 ---
 

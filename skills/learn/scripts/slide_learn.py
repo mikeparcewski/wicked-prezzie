@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-slide-learn — Source document indexing for wicked-prezzie.
+learn — Source document indexing for wicked-prezzie.
 
 Two-pass pipeline:
   Pass 1: Per-document extraction → chunks with YAML frontmatter
@@ -11,9 +11,9 @@ via vision; this script writes indexes and manages file structure. No PyPDF2,
 pdfplumber, or python-docx dependency.
 
 Usage:
-    python slide-learn/scripts/slide_learn.py --source-dir /path/to/docs
-    python slide-learn/scripts/slide_learn.py --doc /path/to/file.pdf
-    python slide-learn/scripts/slide_learn.py --source-dir . --output-dir ./index
+    python learn/scripts/slide_learn.py --source-dir /path/to/docs
+    python learn/scripts/slide_learn.py --doc /path/to/file.pdf
+    python learn/scripts/slide_learn.py --source-dir . --output-dir ./index
 """
 
 import argparse
@@ -54,7 +54,7 @@ EXCLUDED_DIRS = {
 
 
 def learn(source_dir: str, output_dir: str = None, single_doc: str = None) -> dict:
-    """Main entry point for the slide-learn pipeline.
+    """Main entry point for the learn pipeline.
 
     Args:
         source_dir: Directory containing source documents. Used as the base
@@ -458,7 +458,7 @@ def _run_pass2(output_dir: Path) -> bool:
         return True
     except Exception as exc:  # noqa: BLE001
         # Non-fatal: log and continue; pass 1 output is still usable
-        print(f"[slide-learn] Pass 2 synthesis warning: {exc}", file=sys.stderr)
+        print(f"[learn] Pass 2 synthesis warning: {exc}", file=sys.stderr)
         return False
 
 
@@ -846,7 +846,7 @@ def _update_cache(path: Path, output_dir: Path) -> None:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="slide-learn: index source documents for wicked-prezzie"
+        description="learn: index source documents for wicked-prezzie"
     )
     parser.add_argument(
         "--source-dir",
@@ -873,7 +873,7 @@ def main():
         single_doc=args.doc,
     )
 
-    print(f"[slide-learn] Done.")
+    print(f"[learn] Done.")
     print(f"  Documents processed : {result['documents_processed']}")
     print(f"  Chunks created      : {result['chunks_created']}")
     print(f"  Pass 2 synthesis    : {'complete' if result['pass2_complete'] else 'skipped/failed'}")

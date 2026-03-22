@@ -3,7 +3,7 @@
 Full quality scoring for a completed deck. Runs in three modes: full, targeted, or comparison.
 Produces a weighted score, quality band, and prioritized remediation list.
 
-This extends slide-validate's existing bounds/overflow checks with content-level and
+This extends validate's existing bounds/overflow checks with content-level and
 structural quality analysis.
 
 ---
@@ -100,7 +100,7 @@ Cap deductions at −100 (floor at 0).
 
 ## Category: Layout (20%)
 
-Runs slide-validate's existing checks (bounds, overflow, empty slides) and maps findings.
+Runs validate's existing checks (bounds, overflow, empty slides) and maps findings.
 
 | Finding type | Points deducted per instance |
 |---|---|
@@ -109,7 +109,7 @@ Runs slide-validate's existing checks (bounds, overflow, empty slides) and maps 
 | Empty slide | −15 |
 | Text overflow (estimate) | −3 |
 
-This category directly leverages slide-validate's static and visual validation modes.
+This category directly leverages validate's static and visual validation modes.
 
 ---
 

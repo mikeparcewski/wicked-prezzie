@@ -1,6 +1,6 @@
 # Integration
 
-How other skills in the wicked-prezzie pipeline consume the slide-learn index.
+How other skills in the wicked-prezzie pipeline consume the learn index.
 
 The index is an optional enrichment layer. Skills work without it — but when
 `index_dirs` is configured, they query `_insights/` and `_tags/` to ground
@@ -10,14 +10,14 @@ slide content in source material rather than model-only recall.
 
 ## Configuration
 
-Set `index_dirs` in slide-config to point at one or more index directories:
+Set `index_dirs` in config to point at one or more index directories:
 
 ```bash
 # Single directory
-python skills/slide-config/scripts/slide_config.py set index_dirs /path/to/docs/index
+python skills/config/scripts/slide_config.py set index_dirs /path/to/docs/index
 
 # Multiple directories (comma-separated)
-python skills/slide-config/scripts/slide_config.py set index_dirs \
+python skills/config/scripts/slide_config.py set index_dirs \
   /path/to/docs/index,/path/to/research/index
 ```
 
@@ -30,7 +30,7 @@ model-only mode with no source grounding.
 
 ---
 
-## slide-pipeline
+## convert
 
 **When**: At the start of any pipeline run.
 
@@ -40,7 +40,7 @@ model-only mode with no source grounding.
 - `_insights/key-facts.md` — passes top facts to the outline step as
   `source_context`.
 - `_insights/narrative-themes.md` — selects the dominant theme to pass as the
-  `narrative_hint` parameter to `slide-outline`.
+  `narrative_hint` parameter to `outline`.
 
 **Behavior**:
 
@@ -49,7 +49,7 @@ if index_dirs is set:
     read _manifest.json → warn if stale
     read _insights/key-facts.md → extract top 10 facts
     read _insights/narrative-themes.md → pick dominant theme
-    pass {source_context, narrative_hint} to slide-outline
+    pass {source_context, narrative_hint} to outline
 else:
     proceed with model-only mode
 ```
@@ -59,23 +59,23 @@ part of its orchestration logic.
 
 ---
 
-## deck-pipeline
+## workflow
 
 **When**: When building a full deck from a brief, before generating the outline.
 
 **What it reads**:
 - `_insights/key-facts.md` — the `facts-manifest` for populating stat slides.
 
-**Behavior**: deck-pipeline reads `key-facts.md` and treats each bullet as an
+**Behavior**: workflow reads `key-facts.md` and treats each bullet as an
 input fact for the relevant slide. Facts are attributed to their source chunk
 via the `_(source: {chunk_id})_` suffix.
 
-**Audit trail**: The deck-pipeline writes `source_chunks` into the outline JSON
-(see slide-outline section below).
+**Audit trail**: The workflow writes `source_chunks` into the outline JSON
+(see outline section below).
 
 ---
 
-## slide-outline
+## outline
 
 **When**: Before generating the outline structure.
 
@@ -94,7 +94,7 @@ for each slide in outline:
         extract supporting facts for the slide body
 ```
 
-**Outline JSON output** — when source material is found, slide-outline adds
+**Outline JSON output** — when source material is found, outline adds
 a `source_chunks` array to each slide entry:
 
 ```json
@@ -111,11 +111,11 @@ a `source_chunks` array to each slide entry:
 ```
 
 The `source_chunks` field is the audit trail. It persists through
-slide-generate so the final PPTX knows which source documents backed each slide.
+generate so the final PPTX knows which source documents backed each slide.
 
 ---
 
-## slide-generate
+## generate
 
 **When**: When enriching a slide with source-grounded content.
 
@@ -134,7 +134,7 @@ for each slide with source_chunks:
     use narrative_theme to set the slide's speaker note tone
 ```
 
-**No hallucinated numbers** — slide-generate must use values from chunk
+**No hallucinated numbers** — generate must use values from chunk
 `entities.metrics` for any numeric callout. If a number is not in the index,
 it must either be omitted or marked `[ESTIMATE]` in speaker notes.
 
@@ -146,12 +146,12 @@ The `source_chunks` field propagates through the pipeline as an immutable
 record of which index chunks backed each slide.
 
 ```
-slide-outline → adds source_chunks[] to outline JSON
-slide-generate → reads source chunks, preserves source_chunks[] in slide HTML comments
-slide-pipeline → logs source_chunks in the run summary
+outline → adds source_chunks[] to outline JSON
+generate → reads source chunks, preserves source_chunks[] in slide HTML comments
+convert → logs source_chunks in the run summary
 ```
 
-HTML comment format (written by slide-generate into the slide div):
+HTML comment format (written by generate into the slide div):
 
 ```html
 <!-- source_chunks: q3-financial-review.pdf/chunk-002, strategy-2026.pptx/chunk-007 -->
@@ -183,9 +183,9 @@ import json
 from pathlib import Path
 
 def load_index_config() -> list[str]:
-    """Return configured index directories from slide-config."""
+    """Return configured index directories from config."""
     _root = Path(__file__).parent.parent.parent  # skills/
-    sys.path.insert(0, str(_root / "slide-config" / "scripts"))
+    sys.path.insert(0, str(_root / "config" / "scripts"))
     from slide_config import load_config
     config = load_config()
     dirs = config.get("index_dirs", [])
@@ -217,17 +217,17 @@ def read_narrative_themes(index_dir: str) -> list[str]:
 ## Dependency Map
 
 ```
-slide-learn (produces index)
+learn (produces index)
     │
-    ├─ slide-pipeline (reads _insights/, _manifest.json)
-    │       └─ passes source_context → slide-outline
+    ├─ convert (reads _insights/, _manifest.json)
+    │       └─ passes source_context → outline
     │
-    ├─ deck-pipeline (reads _insights/key-facts.md)
+    ├─ workflow (reads _insights/key-facts.md)
     │
-    ├─ slide-outline (reads _insights/, _tags/, writes source_chunks)
-    │       └─ passes source_chunks[] → slide-generate
+    ├─ outline (reads _insights/, _tags/, writes source_chunks)
+    │       └─ passes source_chunks[] → generate
     │
-    └─ slide-generate (reads chunk files via source_chunks)
+    └─ generate (reads chunk files via source_chunks)
 ```
 
 All consumption is read-only. No other skill writes to the index directory.

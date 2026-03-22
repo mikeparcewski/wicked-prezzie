@@ -1,6 +1,6 @@
 # Persona Framework — 12-Archetype Evaluation Committee
 
-Reference for `deck-brainstorm` skill. Documents the persona generation system,
+Reference for `brainstorm` skill. Documents the persona generation system,
 archetype slots, pass/fail criteria structure, dreamer-skeptic pairing, and
 tier ranking methodology.
 

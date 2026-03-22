@@ -27,7 +27,7 @@ Settings are stored at two levels:
 
 - **User-level**: `~/.something-wicked/wicked-prezzie/config.json` — shared across projects
   (default_font, default_fidelity, unsplash_api_key)
-- **Project-level**: `skills/slide-config/config.json` — per-project overrides
+- **Project-level**: `skills/config/config.json` — per-project overrides
   (quality_threshold, viewport, hide_selectors, active_theme, slide dimensions)
 
 Resolution order: defaults → user config → project config (project wins).
@@ -55,15 +55,15 @@ python ${CLAUDE_SKILL_DIR}/scripts/slide_config.py reset
 
 | Key | Default | Used By | Purpose |
 |---|---|---|---|
-| `quality_threshold` | 85 | slide-validate, slide-pipeline | Minimum score for a slide to pass |
-| `viewport` | `1280x720` | slide-html-standardize, slide-html-to-pptx, slide-pipeline | Default viewport dimensions |
-| `hide_selectors` | `[".slide-nav"]` | slide-html-to-pptx, slide-pipeline | CSS selectors to hide during extraction |
-| `default_font` | `Calibri` | slide-pptx-builder | Font for generated PPTX text (user-level) |
-| `default_fidelity` | `draft` | slide-pipeline | Default fidelity tier (user-level) |
-| `unsplash_api_key` | (none) | slide-generate | Unsplash API key for image sourcing (user-level) |
-| `slide_width_inches` | `13.333` | slide-pptx-builder | Slide width (project-level) |
-| `slide_height_inches` | `7.5` | slide-pptx-builder | Slide height (project-level) |
-| `index_dirs` | `[]` | slide-config | Additional directories scanned when listing decks or themes (project-level) |
+| `quality_threshold` | 85 | validate, convert | Minimum score for a slide to pass |
+| `viewport` | `1280x720` | standardize, quick-convert, convert | Default viewport dimensions |
+| `hide_selectors` | `[".slide-nav"]` | quick-convert, convert | CSS selectors to hide during extraction |
+| `default_font` | `Calibri` | pptx-builder | Font for generated PPTX text (user-level) |
+| `default_fidelity` | `draft` | convert | Default fidelity tier (user-level) |
+| `unsplash_api_key` | (none) | generate | Unsplash API key for image sourcing (user-level) |
+| `slide_width_inches` | `13.333` | pptx-builder | Slide width (project-level) |
+| `slide_height_inches` | `7.5` | pptx-builder | Slide height (project-level) |
+| `index_dirs` | `[]` | config | Additional directories scanned when listing decks or themes (project-level) |
 
 ## How Other Skills Read Config
 
@@ -75,7 +75,7 @@ import json
 
 USER_DATA_DIR = Path.home() / ".something-wicked" / "wicked-prezzie"
 USER_CONFIG = USER_DATA_DIR / "config.json"
-PROJECT_CONFIG = Path(__file__).parent.parent.parent / "slide-config" / "config.json"
+PROJECT_CONFIG = Path(__file__).parent.parent.parent / "config" / "config.json"
 
 def load_config():
     config = {"quality_threshold": 85, "viewport": "1280x720", ...}

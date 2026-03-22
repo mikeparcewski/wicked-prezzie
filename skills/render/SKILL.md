@@ -20,7 +20,7 @@ optional contact-sheet montages using LibreOffice headless PDF export.
 - Generate slide thumbnails at a specific DPI
 - Create a contact sheet (montage) tiling all slides into one overview image
 - Rasterize a subset of slides for targeted comparison
-- Produce PNG output for the slide-compare visual diff workflow
+- Produce PNG output for the compare visual diff workflow
 - Verify that a generated PPTX renders correctly before delivering
 
 ## Usage

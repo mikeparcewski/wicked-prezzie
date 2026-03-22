@@ -2,8 +2,8 @@
 
 Design rules that apply to individual slide content. These govern what a single
 slide should communicate and how to structure its content. For deck-level
-narrative rules (arc, threading, persona coverage), see the slide-pipeline and
-slide-outline references.
+narrative rules (arc, threading, persona coverage), see the convert and
+outline references.
 
 ## Assertion-Evidence Structure
 

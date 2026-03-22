@@ -18,7 +18,7 @@ triggers:
   - "alignment and divergence"
 ---
 
-# deck-feedback
+# feedback
 
 Parses inline comments from a Word (.docx) document and produces a structured
 feedback analysis report showing where reviewers align, where they diverge,
@@ -35,7 +35,7 @@ to document sections, and analyzes the feedback patterns.
 ### Step 1: Parse the Word Document
 
 ```bash
-python skills/deck-feedback/scripts/parse_word_comments.py <file.docx> --output feedback.json
+python skills/feedback/scripts/parse_word_comments.py <file.docx> --output feedback.json
 ```
 
 This extracts:
@@ -47,7 +47,7 @@ This extracts:
 ### Step 2: Analyze the Feedback
 
 ```bash
-python skills/deck-feedback/scripts/analyze_feedback.py feedback.json --output report.json
+python skills/feedback/scripts/analyze_feedback.py feedback.json --output report.json
 ```
 
 Analysis includes:
@@ -62,10 +62,10 @@ Analysis includes:
 
 ```bash
 # Markdown (for review in conversation)
-python skills/deck-feedback/scripts/generate_report.py report.json
+python skills/feedback/scripts/generate_report.py report.json
 
 # Word document (for sharing with the team)
-python skills/deck-feedback/scripts/generate_report.py report.json --format docx --output feedback_report.docx
+python skills/feedback/scripts/generate_report.py report.json --format docx --output feedback_report.docx
 ```
 
 ### One-Shot Pipeline
@@ -73,7 +73,7 @@ python skills/deck-feedback/scripts/generate_report.py report.json --format docx
 For quick runs, chain all three:
 
 ```bash
-cd skills/deck-feedback/scripts
+cd skills/feedback/scripts
 python parse_word_comments.py ../../../input.docx --output /tmp/fb.json && \
 python analyze_feedback.py /tmp/fb.json --output /tmp/report.json && \
 python generate_report.py /tmp/report.json --format docx --output ../../../feedback_report.docx

@@ -16,7 +16,7 @@ user-invocable: false
 
 Analysis step that scores every extracted element and identifies risks before
 the build phase. Triage runs once per slide per pipeline attempt and produces
-`findings.json` — the input contract for `slide-prep`.
+`findings.json` — the input contract for `prep`.
 
 ## When to Use
 

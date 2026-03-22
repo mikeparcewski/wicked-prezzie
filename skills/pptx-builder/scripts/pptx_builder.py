@@ -188,9 +188,9 @@ class SlideBuilder:
         """
         Build a single PPTX slide from layout data (legacy compatibility wrapper).
 
-        Converts layout_data to a build manifest via slide-prep's auto_resolve(),
+        Converts layout_data to a build manifest via prep's auto_resolve(),
         then delegates to build_slide_from_manifest(). All classification logic
-        and geometry transforms live in slide-prep (known-patterns.md).
+        and geometry transforms live in prep (known-patterns.md).
 
         Args:
             prs: python-pptx Presentation object
@@ -456,7 +456,7 @@ class SlideBuilder:
 
         Args:
             prs: python-pptx Presentation object
-            manifest: dict conforming to the build manifest schema (from slide-prep)
+            manifest: dict conforming to the build manifest schema (from prep)
             screenshot_fn: callable(svg_rect) -> png_path for SVG rendering
 
         Returns:

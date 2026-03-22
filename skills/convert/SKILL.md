@@ -5,7 +5,7 @@ description: |
   iterates per-slide — rendering, visually comparing against the source, fixing
   issues, and re-converting each slide until it matches or converges. Handles
   AI-generated HTML (ChatGPT, Claude, Gemini) automatically. Always prefer this
-  over slide-html-to-pptx.
+  over quick-convert.
 
   Use when: "convert these slides", "make a PowerPoint", "turn these into a deck",
   "HTML to PPTX", "convert to PowerPoint", "export as PPTX", "make me a PowerPoint"
@@ -98,12 +98,12 @@ unresolved = [e for e in manifest["elements"] if e.get("type") is None]
    - Update `type`, `classificationSource = "model"`, and `flagReason` with your conclusion.
    - If geometry differs, set `resolvedRect` with `source = "model"`.
 4. Write the updated manifest back to `manifest.json`.
-5. Run manifest validation checklist (see `slide-prep/SKILL.md`).
+5. Run manifest validation checklist (see `prep/SKILL.md`).
 
 ## Step 1: Build PPTX
 
 ```bash
-python skills/slide-html-to-pptx/scripts/html_to_pptx.py \
+python skills/quick-convert/scripts/html_to_pptx.py \
   --input-dir ./slides --output deck.pptx
 ```
 
@@ -134,7 +134,7 @@ python skills/chrome-extract/scripts/chrome_extract.py \
   --output ~/.something-wicked/wicked-prezzie/output/html/01-ai-powered-analytics.png
 
 # Render PPTX (all slides)
-python skills/slide-render/scripts/slide_render.py deck.pptx \
+python skills/render/scripts/slide_render.py deck.pptx \
   -o ~/.something-wicked/wicked-prezzie/output/renders/
 ```
 
@@ -227,13 +227,13 @@ json.dump(entry, open(log_path, 'w'), indent=2)
 ```
 
 If `promotionCandidate.recommend = True`, update `known-patterns.md` with the
-new pattern entry. See `slide-treatment-log/SKILL.md` for the full schema and
+new pattern entry. See `treatment-log/SKILL.md` for the full schema and
 promotion process.
 
 ## Step Final: Finalize
 
 ```bash
-python skills/slide-render/scripts/slide_render.py deck.pptx \
+python skills/render/scripts/slide_render.py deck.pptx \
   -o ~/.something-wicked/wicked-prezzie/output/renders/ \
   --montage ~/.something-wicked/wicked-prezzie/output/montage.png
 ```
@@ -265,8 +265,8 @@ Read on demand — do not load all at once.
 | [edit-coordination.md](references/edit-coordination.md) | Session locks for concurrent edits |
 | [export-safety.md](references/export-safety.md) | Version bumping, visual verification protocol, no-tmp rule, path audit, rollback, PDF and bundled HTML |
 | [constraint-persistence.md](references/constraint-persistence.md) | constraints.json schema, injection protocol, Learn Constraint protocol, severity levels, lifecycle |
-| [../slide-triage/SKILL.md](../slide-triage/SKILL.md) | Triage: findings JSON schema, pattern detection |
-| [../slide-prep/SKILL.md](../slide-prep/SKILL.md) | Prep: manifest schema, auto + model resolution |
-| [../slide-treatment-log/SKILL.md](../slide-treatment-log/SKILL.md) | Treatment log: schema, promotion process |
-| [../slide-triage/references/known-patterns.md](../slide-triage/references/known-patterns.md) | All documented patterns with signatures + treatments |
-| [../slide-pptx-builder/references/pptx-recipes.md](../slide-pptx-builder/references/pptx-recipes.md) | python-pptx fix recipes |
+| [../triage/SKILL.md](../triage/SKILL.md) | Triage: findings JSON schema, pattern detection |
+| [../prep/SKILL.md](../prep/SKILL.md) | Prep: manifest schema, auto + model resolution |
+| [../treatment-log/SKILL.md](../treatment-log/SKILL.md) | Treatment log: schema, promotion process |
+| [../triage/references/known-patterns.md](../triage/references/known-patterns.md) | All documented patterns with signatures + treatments |
+| [../pptx-builder/references/pptx-recipes.md](../pptx-builder/references/pptx-recipes.md) | python-pptx fix recipes |

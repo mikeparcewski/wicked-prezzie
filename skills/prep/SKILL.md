@@ -27,7 +27,7 @@ no element has an ambiguous type or unresolved geometry.
 ## Input / Output Contract
 
 **Inputs**:
-- `findings.json` — output from `slide-triage` (or `triage_slide()`)
+- `findings.json` — output from `triage` (or `triage_slide()`)
 - `classified_layout` — `classify_elements()` output dict
 - HTML screenshot PNG (for model inspection of flagged elements)
 
@@ -336,6 +336,6 @@ json.dump(manifest, open("slide-tmpdir/manifest.json", "w"), indent=2)
 
 | File | Read when... |
 |---|---|
-| [../slide-triage/references/known-patterns.md](../slide-triage/references/known-patterns.md) | Pattern treatment rules and geometry transforms |
-| [../slide-pptx-builder/references/coordinate-system.md](../slide-pptx-builder/references/coordinate-system.md) | EMU conversion math |
-| [../slide-pptx-builder/references/text-clamping.md](../slide-pptx-builder/references/text-clamping.md) | Card text clamping details |
+| [../triage/references/known-patterns.md](../triage/references/known-patterns.md) | Pattern treatment rules and geometry transforms |
+| [../pptx-builder/references/coordinate-system.md](../pptx-builder/references/coordinate-system.md) | EMU conversion math |
+| [../pptx-builder/references/text-clamping.md](../pptx-builder/references/text-clamping.md) | Card text clamping details |

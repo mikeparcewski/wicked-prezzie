@@ -18,7 +18,7 @@ checkpoint file that serves as the single source of truth for project state.
 
 ## When to Use
 
-- After a brainstorm or ideation session (deck-brainstorm output → checkpoint)
+- After a brainstorm or ideation session (brainstorm output → checkpoint)
 - After a riffing/iteration session where decisions were made informally
 - When resuming work and needing to reconstruct context
 - Before ending a session to preserve state
@@ -26,13 +26,13 @@ checkpoint file that serves as the single source of truth for project state.
 
 ## Checkpoint Format
 
-Write the checkpoint to `{project-dir}/deck-checkpoint.md`. This file is
+Write the checkpoint to `{project-dir}/checkpoint.md`. This file is
 overwritten each time — it represents current state, not history.
 
 ```markdown
 ---
 project: {project name or slug}
-phase: {current deck-pipeline phase, or "pre-pipeline" if informal}
+phase: {current workflow phase, or "pre-pipeline" if informal}
 updated: {ISO 8601 timestamp}
 session: {session ID if available}
 ---
@@ -86,15 +86,15 @@ session: {session ID if available}
 
 ### When Resuming
 
-1. Read `deck-checkpoint.md` if it exists.
+1. Read `checkpoint.md` if it exists.
 2. Verify artifacts still exist (files may have been moved or deleted).
 3. Present the checkpoint to the user: decisions, open questions, next steps.
 4. Ask: "Does this match where you are? Anything changed?"
 5. Proceed from next steps.
 
-## Integration with deck-pipeline
+## Integration with workflow
 
-If the project is using deck-pipeline, the checkpoint should align with
+If the project is using workflow, the checkpoint should align with
 `deck-state.json`:
 
 - `phase` in the checkpoint matches the current pipeline phase
