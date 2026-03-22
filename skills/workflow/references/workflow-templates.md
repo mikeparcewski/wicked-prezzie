@@ -225,16 +225,331 @@ feature_flags:
 
 ---
 
-## Key Differences: `general` vs `rfp-exec`
+## Template: `architecture`
 
-| Aspect | `general` | `rfp-exec` |
-|--------|-----------|------------|
-| Phase count | 8 | 9 (adds exec-summary) |
-| Exec summary | Not produced | Required, user-approved gate |
-| Persona depth | Standard (audience-appropriate) | Evaluation committee coverage required |
-| Architecture input | synthesized-architecture.md | exec-summary.md + synthesized-architecture.md |
-| Approval gates | 1 (brainstorm) | 2 (brainstorm + exec-summary) |
-| Slide plan mapping | Maps to brainstorm themes | Maps to exec summary sections |
+Workflow for technical architecture presentations — system design overviews, ADR
+walkthroughs, migration plans, and infrastructure reviews. Uses the standard
+8-phase flow but emphasizes diagram-heavy slides, component views, and precise
+technical language. Slide type emphasis favors comparison layouts (for trade-off
+analysis), stats (for performance benchmarks), and content slides (for component
+descriptions).
+
+```yaml
+name: architecture
+description: Technical architecture presentations with diagram and component emphasis
+phases:
+  - name: source-inventory
+    skill: workflow
+    gate_artifact: facts-manifest.json
+    gate_condition: >-
+      facts-manifest.json exists with at least 1 source document entry
+      AND user has confirmed source list is complete
+    requires_approval: false
+
+  - name: personas
+    skill: workflow
+    gate_artifact: persona-map.md
+    gate_condition: >-
+      persona-map.md exists AND covers all named stakeholders from
+      the facts manifest
+    requires_approval: false
+
+  - name: brainstorm
+    skill: brainstorm
+    gate_artifact: synthesized-architecture.md
+    gate_condition: >-
+      synthesized-architecture.md exists AND user has reviewed
+      and approved it
+    requires_approval: true
+
+  - name: architecture
+    skill: workflow
+    gate_artifact: slide-plan.md
+    gate_condition: >-
+      All three review documents exist (narrative, commercial, technical)
+      AND each contains CONDITIONAL APPROVE status
+    requires_approval: false
+
+  - name: build
+    skill: workflow
+    gate_artifact: slides/
+    gate_condition: >-
+      All slides in slide-plan.md are built AND visual verification
+      of representative slides passed AND zero blocking issues
+    requires_approval: false
+
+  - name: validate
+    skill: workflow
+    gate_artifact: council-punch-list.md
+    gate_condition: >-
+      council-punch-list.md exists AND contains zero blocking items
+    requires_approval: false
+
+  - name: polish
+    skill: workflow
+    gate_artifact: flow-review.md
+    gate_condition: >-
+      flow-review.md exists AND all non-blocking punch list items
+      addressed or explicitly deferred with user approval
+    requires_approval: false
+
+  - name: export
+    skill: workflow
+    gate_artifact: null
+    gate_condition: >-
+      Export artifacts exist AND visual verification passed
+    requires_approval: false
+
+required_artifacts:
+  - facts-manifest.json
+  - persona-map.md
+  - synthesized-architecture.md
+  - slide-plan.md
+  - council-punch-list.md
+  - flow-review.md
+
+feature_flags:
+  exec_summary_required: false
+  persona_depth: standard
+  diagram_emphasis: true
+  component_view_required: true
+
+slide_type_emphasis:
+  - comparison
+  - stats
+  - content
+
+editorial_voice_defaults:
+  tone: technical
+  precision: high
+  focus: component-focused
+```
+
+---
+
+## Template: `board-strategy`
+
+Workflow for board presentations and strategic reviews — quarterly business
+reviews, investment cases, and market analysis decks. Inserts an executive
+summary phase (like `rfp-exec`) because board audiences require a strategic
+contract before detailed slides are built. Slide type emphasis favors stats
+(for financials and KPIs), comparison (for options and scenarios), and title
+slides (for section dividers that orient the board through the narrative).
+
+```yaml
+name: board-strategy
+description: Board and strategy presentations with executive summary and data emphasis
+phases:
+  - name: source-inventory
+    skill: workflow
+    gate_artifact: facts-manifest.json
+    gate_condition: >-
+      facts-manifest.json exists with at least 1 source document entry
+      AND user has confirmed source list is complete
+    requires_approval: false
+
+  - name: personas
+    skill: workflow
+    gate_artifact: persona-map.md
+    gate_condition: >-
+      persona-map.md exists AND covers all named stakeholders from
+      the facts manifest AND includes board member coverage
+    requires_approval: false
+
+  - name: brainstorm
+    skill: brainstorm
+    gate_artifact: synthesized-architecture.md
+    gate_condition: >-
+      synthesized-architecture.md exists AND user has reviewed
+      and approved it
+    requires_approval: true
+
+  - name: exec-summary
+    skill: exec-summary
+    gate_artifact: exec-summary.md
+    gate_condition: >-
+      exec-summary.md exists AND all sections contain substantive
+      content AND user has explicitly approved
+    requires_approval: true
+
+  - name: architecture
+    skill: workflow
+    gate_artifact: slide-plan.md
+    gate_condition: >-
+      All three review documents exist (narrative, commercial, technical)
+      AND each contains CONDITIONAL APPROVE status AND slide plan
+      maps to approved exec-summary.md sections
+    requires_approval: false
+
+  - name: build
+    skill: workflow
+    gate_artifact: slides/
+    gate_condition: >-
+      All slides in slide-plan.md are built AND visual verification
+      of representative slides passed AND zero blocking issues
+    requires_approval: false
+
+  - name: validate
+    skill: workflow
+    gate_artifact: council-punch-list.md
+    gate_condition: >-
+      council-punch-list.md exists AND contains zero blocking items
+    requires_approval: false
+
+  - name: polish
+    skill: workflow
+    gate_artifact: flow-review.md
+    gate_condition: >-
+      flow-review.md exists AND all non-blocking punch list items
+      addressed or explicitly deferred with user approval
+    requires_approval: false
+
+  - name: export
+    skill: workflow
+    gate_artifact: null
+    gate_condition: >-
+      Export artifacts exist AND visual verification passed
+    requires_approval: false
+
+required_artifacts:
+  - facts-manifest.json
+  - persona-map.md
+  - synthesized-architecture.md
+  - exec-summary.md
+  - slide-plan.md
+  - council-punch-list.md
+  - flow-review.md
+
+feature_flags:
+  exec_summary_required: true
+  persona_depth: board-member
+
+slide_type_emphasis:
+  - stats
+  - comparison
+  - title
+
+editorial_voice_defaults:
+  tone: executive
+  precision: data-driven
+  focus: outcome-focused
+```
+
+---
+
+## Template: `training`
+
+Workflow for training, onboarding, and enablement decks — courses, workshops,
+runbooks, and how-to guides. Uses the standard 8-phase flow without an executive
+summary phase, since training content is instructional rather than strategic.
+Slide type emphasis favors content slides (for instructional material), section
+dividers (for module boundaries), and stats (for progress metrics and benchmarks).
+
+```yaml
+name: training
+description: Training and enablement decks with instructional sequencing
+phases:
+  - name: source-inventory
+    skill: workflow
+    gate_artifact: facts-manifest.json
+    gate_condition: >-
+      facts-manifest.json exists with at least 1 source document entry
+      AND user has confirmed source list is complete
+    requires_approval: false
+
+  - name: personas
+    skill: workflow
+    gate_artifact: persona-map.md
+    gate_condition: >-
+      persona-map.md exists AND covers all named stakeholders from
+      the facts manifest
+    requires_approval: false
+
+  - name: brainstorm
+    skill: brainstorm
+    gate_artifact: synthesized-architecture.md
+    gate_condition: >-
+      synthesized-architecture.md exists AND user has reviewed
+      and approved it
+    requires_approval: true
+
+  - name: architecture
+    skill: workflow
+    gate_artifact: slide-plan.md
+    gate_condition: >-
+      All three review documents exist (narrative, commercial, technical)
+      AND each contains CONDITIONAL APPROVE status
+    requires_approval: false
+
+  - name: build
+    skill: workflow
+    gate_artifact: slides/
+    gate_condition: >-
+      All slides in slide-plan.md are built AND visual verification
+      of representative slides passed AND zero blocking issues
+    requires_approval: false
+
+  - name: validate
+    skill: workflow
+    gate_artifact: council-punch-list.md
+    gate_condition: >-
+      council-punch-list.md exists AND contains zero blocking items
+    requires_approval: false
+
+  - name: polish
+    skill: workflow
+    gate_artifact: flow-review.md
+    gate_condition: >-
+      flow-review.md exists AND all non-blocking punch list items
+      addressed or explicitly deferred with user approval
+    requires_approval: false
+
+  - name: export
+    skill: workflow
+    gate_artifact: null
+    gate_condition: >-
+      Export artifacts exist AND visual verification passed
+    requires_approval: false
+
+required_artifacts:
+  - facts-manifest.json
+  - persona-map.md
+  - synthesized-architecture.md
+  - slide-plan.md
+  - council-punch-list.md
+  - flow-review.md
+
+feature_flags:
+  exec_summary_required: false
+  persona_depth: standard
+  module_boundaries: true
+  sequential_flow: true
+
+slide_type_emphasis:
+  - content
+  - section-divider
+  - stats
+
+editorial_voice_defaults:
+  tone: instructional
+  precision: sequential
+  focus: practical
+```
+
+---
+
+## Key Differences: `general` vs `rfp-exec` vs `architecture` vs `board-strategy` vs `training`
+
+| Aspect | `general` | `rfp-exec` | `architecture` | `board-strategy` | `training` |
+|--------|-----------|------------|-----------------|-------------------|------------|
+| Phase count | 8 | 9 (adds exec-summary) | 8 | 9 (adds exec-summary) | 8 |
+| Exec summary | Not produced | Required, user-approved gate | Not produced | Required, user-approved gate | Not produced |
+| Persona depth | Standard | Evaluation committee | Standard | Board member | Standard |
+| Architecture input | synthesized-architecture.md | exec-summary.md + synthesized-architecture.md | synthesized-architecture.md | exec-summary.md + synthesized-architecture.md | synthesized-architecture.md |
+| Approval gates | 1 (brainstorm) | 2 (brainstorm + exec-summary) | 1 (brainstorm) | 2 (brainstorm + exec-summary) | 1 (brainstorm) |
+| Slide plan mapping | Maps to brainstorm themes | Maps to exec summary sections | Maps to brainstorm themes | Maps to exec summary sections | Maps to brainstorm themes |
+| Slide type emphasis | General mix | General mix | comparison, stats, content | stats, comparison, title | content, section-divider, stats |
+| Editorial voice | Neutral | Formal, persuasive | Technical, precise | Executive, data-driven | Instructional, sequential |
 
 ---
 

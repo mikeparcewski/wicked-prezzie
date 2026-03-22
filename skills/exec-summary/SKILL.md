@@ -41,6 +41,7 @@ template skips it entirely — brainstorm flows directly to architecture.
 | File | Purpose | Load When |
 |------|---------|-----------|
 | `references/sections.md` | 8-section schema with required content, quality criteria, prohibited patterns | Always — defines the output structure |
+| `references/word-export.md` | Word export formatting conventions and customization guide | When exporting to .docx |
 
 ---
 
@@ -184,3 +185,58 @@ gap before presenting for approval.
 **Guard 4 — Constraint inheritance**: Read constraints.json before writing the
 summary. All active constraints apply to executive summary content, not just to
 slides.
+
+---
+
+## Word Export
+
+After the executive summary is approved and before distributing for team review,
+export the summary to a formatted Word document using `exec_summary_export.py`.
+
+### When to Export
+
+- After explicit user approval of the exec summary
+- Before circulating for stakeholder review or tracked-changes feedback
+- When a printable or emailable format is needed
+
+### Usage
+
+```bash
+# Basic export
+python skills/exec-summary/scripts/exec_summary_export.py state/exec-summary.md \
+    --output deliverables/exec-summary.docx \
+    --title "Project Alpha"
+
+# Draft watermark for internal review
+python skills/exec-summary/scripts/exec_summary_export.py state/exec-summary.md \
+    --output deliverables/exec-summary-draft.docx \
+    --title "Project Alpha" \
+    --draft
+```
+
+### What the Export Produces
+
+- Title page with deck title and "Executive Summary" subtitle
+- Table of contents (updates when opened in Word)
+- All 8 sections as Heading 1 entries with formatted body content
+- Professional typography (Calibri, proper heading hierarchy, paragraph spacing)
+- Page numbers in the footer
+- Optional "DRAFT — For Review" diagonal watermark
+
+### Programmatic Use
+
+```python
+from exec_summary_export import export_exec_summary
+
+path = export_exec_summary(
+    md_path="state/exec-summary.md",
+    output_path_str="deliverables/exec-summary.docx",
+    title="Project Alpha — Executive Summary",
+    draft=True,
+)
+```
+
+The Word export is a one-way snapshot. If the summary is revised after export,
+re-run the export. Edits should flow back into `exec-summary.md`, not the .docx.
+
+See `references/word-export.md` for formatting conventions and customization.

@@ -27,6 +27,7 @@ PPTX). workflow runs first; convert runs after build is complete.
 | `references/phase-definitions.md` | 8-phase state machine, gate conditions, agent definitions per phase | Phase transition or gate check |
 | `references/constraint-registry.md` | Constraint JSON schema, 10 default constraints, Learn Constraint protocol | Constraint read/write or new constraint registration |
 | `references/agent-catalog.md` | Prompt templates for all agents, parallelism rules, output contracts | Before dispatching any agent |
+| `references/deck-claude-md.md` | Per-deck CLAUDE.md generation: sections, derivation sources, agent consumption, update protocol | Phase 1 completion or when updating editorial directives |
 
 ---
 
@@ -79,6 +80,38 @@ Phase 8: Export
 Linear by default. Phases may skip back (e.g. build agent discovers architecture
 gap — return to Phase 4). Never skip forward past a gate without explicit user
 approval and a logged warning in deck-state.json.
+
+### Per-Deck CLAUDE.md Generation (Phase 1 Exit)
+
+After the Phase 1 gate condition is satisfied (facts-manifest.json exists, user
+confirms source list complete) and the workflow template is confirmed, the
+orchestrator generates `{deck_dir}/CLAUDE.md` — a per-deck editorial context
+file that all subsequent agents consume.
+
+This file captures six sections: Audience, Tone, Key Themes, Terminology, Brand
+Constraints, and Editorial Preferences. It is derived from three sources:
+user-stated directives (highest priority), source document signals extracted
+during Phase 1, and template editorial defaults (lowest priority).
+
+**Generation is a Phase 1 exit task, not a Phase 2 entry task.** The orchestrator
+writes CLAUDE.md, presents it to the user for review, and incorporates feedback
+before advancing to Phase 2.
+
+**After Phase 1, every agent prompt must include `## Deck Editorial Context`
+populated from the per-deck CLAUDE.md.** This is mandatory — same enforcement
+level as constraint injection (Guard 1). An agent prompt dispatched after Phase 1
+without this section is malformed and must not be sent.
+
+**CLAUDE.md is updated incrementally** throughout the session as the user provides
+editorial feedback. It is not a static artifact — it grows as preferences are
+discovered. Terminology corrections, tone adjustments, and theme refinements are
+written to CLAUDE.md immediately, not deferred to a phase boundary.
+
+**CLAUDE.md vs constraints.json**: CLAUDE.md handles editorial and design
+directives (how the deck should sound and look). constraints.json handles
+runtime-learned rules (what breaks during production). They are complementary.
+See `references/deck-claude-md.md` for the full specification, section schemas,
+derivation sources, and update protocol.
 
 See `references/phase-definitions.md` for full gate conditions, context budgets,
 and phase-specific agent definitions.
@@ -191,6 +224,7 @@ All state files live relative to the deck project directory set in Phase 1.
 | `deck-state.json` | `{deck_dir}/state/deck-state.json` | Phase history, current phase, slide plan, build progress, open issues |
 | `constraints.json` | `{deck_dir}/state/constraints.json` | Accumulated constraints, carries across sessions |
 | `facts-manifest.json` | `{deck_dir}/state/facts-manifest.json` | Structured digest of all source documents |
+| `CLAUDE.md` | `{deck_dir}/CLAUDE.md` | Per-deck editorial context: audience, tone, themes, terminology, brand, preferences |
 
 If the deck directory has not been set yet (new project), prompt the user for it
 during Phase 1 initialization and write it as `deck_directory` in deck-state.json.

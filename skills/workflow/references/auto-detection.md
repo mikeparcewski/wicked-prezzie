@@ -79,6 +79,44 @@ Inferred from the nature of the target audience.
 | Formal governance | 0.4 | References to board, committee, panel, council structures |
 | Regulatory stakeholders | 0.4 | References to compliance officers, regulators, audit requirements |
 
+### Architecture Signals (→ `architecture`)
+
+Keyword and structural signals indicating a technical architecture presentation.
+
+| Signal | Weight | Patterns |
+|--------|--------|----------|
+| Architecture identifier | 1.0 | "architecture", "system design", "ADR", "architecture decision record" |
+| Migration language | 0.8 | "migration", "migration plan", "cutover", "lift and shift", "re-platform" |
+| Infrastructure language | 0.8 | "infrastructure", "microservices", "API", "schema", "database", "deployment" |
+| Component language | 0.6 | "component", "service mesh", "event bus", "message queue", "load balancer" |
+| Diagram language | 0.4 | "diagram", "sequence diagram", "C4 model", "topology", "data flow" |
+
+### Board Strategy Signals (→ `board-strategy`)
+
+Keyword and structural signals indicating a board or strategic review presentation.
+
+| Signal | Weight | Patterns |
+|--------|--------|----------|
+| Board identifier | 1.0 | "board", "board meeting", "board deck", "board presentation" |
+| Quarterly identifier | 1.0 | "quarterly", "Q1", "Q2", "Q3", "Q4", "QBR", "quarterly review" |
+| Investor language | 0.8 | "investor", "investment case", "shareholder", "fundraise", "series" |
+| Strategy language | 0.8 | "strategy", "strategic review", "ROI", "revenue", "market", "growth" |
+| Financial language | 0.6 | "budget", "forecast", "P&L", "EBITDA", "margin", "ARR", "MRR" |
+| Stakeholder language | 0.4 | "stakeholder", "executive team", "C-suite", "leadership team" |
+
+### Training Signals (→ `training`)
+
+Keyword and structural signals indicating a training or enablement presentation.
+
+| Signal | Weight | Patterns |
+|--------|--------|----------|
+| Training identifier | 1.0 | "training", "onboarding", "enablement", "certification" |
+| Workshop identifier | 1.0 | "workshop", "course", "bootcamp", "masterclass" |
+| Module language | 0.8 | "module", "lesson", "unit", "chapter", "curriculum" |
+| Exercise language | 0.8 | "exercise", "hands-on", "lab", "practice", "drill" |
+| Instructional language | 0.6 | "runbook", "how-to", "step-by-step", "walkthrough", "tutorial" |
+| Assessment language | 0.4 | "quiz", "assessment", "knowledge check", "competency", "learning objective" |
+
 ---
 
 ## Confidence Calculation
@@ -148,9 +186,10 @@ Proceed with rfp-exec, or use the general template instead?
 **No signals detected**: Default to `general` without extensive explanation.
 "I'll use the standard workflow. If you need the proposal template, just say so."
 
-**Mixed signals**: If signals point to different templates (unlikely with only
-two templates, but possible with future additions), present both options with
-their signal counts and let the user choose.
+**Mixed signals**: If signals point to different templates, present all matched
+options with their signal counts and confidence levels, and let the user choose.
+For example, a "board training workshop" could match both `board-strategy` and
+`training` — present both with their respective scores.
 
 **User overrides**: Accept immediately. Do not argue or re-present the
 recommendation. Record the override in deck-state.json for future reference:

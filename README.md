@@ -179,10 +179,10 @@ Export as PPTX, HTML (Reveal.js), or both. Versioned automatically.
 |---|---|---|
 | **wicked-prezzie:start** | Universal entry point — auto-detects intent and routes accordingly | "build me a deck" / "convert these slides" |
 | **wicked-prezzie:brainstorm** | Dreamer-skeptic brainstorm — generates and pressure-tests deck architecture | "brainstorm deck ideas" / "run a brainstorm" |
-| **wicked-prezzie:workflow** | Full 8-phase orchestrator from source material to finished export | "build a full deck about X" |
+| **wicked-prezzie:workflow** | Orchestrator with 5 workflow templates (general, rfp-exec, architecture, board-strategy, training) | "build a full deck about X" |
 | **wicked-prezzie:checkpoint** | Synthesize a session into a durable checkpoint with decisions + next steps | "checkpoint this" / "where were we" |
 | **wicked-prezzie:feedback** | Parse Word comment annotations; synthesize reviewer alignment and divergence | "analyze feedback" / "parse comments" |
-| **wicked-prezzie:exec-summary** | Generate executive summary document from deck content | "write an exec summary" |
+| **wicked-prezzie:exec-summary** | Generate 8-section executive summary with optional Word export | "write an exec summary" |
 
 ### Content generation
 
