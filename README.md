@@ -2,7 +2,7 @@
 
 HTML slides to editable PowerPoint. Native shapes and formatted text, not screenshots.
 
-A Claude Code / Gemini CLI plugin that handles the full presentation lifecycle — index source documents, plan content with structured brainstorming, generate themed slides, convert HTML to native PPTX, validate output, iterate until it matches, and analyze team feedback from Word review comments.
+A Claude Code / Gemini CLI plugin that builds presentations the way you actually work — start with an idea, refine it, generate slides, refine again, and export a polished deck. Jump in at any stage, go back when something's off, and iterate until it's right.
 
 ## Quick start
 
@@ -14,8 +14,6 @@ cd wicked-prezzie
 claude
 ```
 
-Claude discovers all skills automatically.
-
 ### Gemini CLI
 
 ```bash
@@ -23,8 +21,6 @@ git clone https://github.com/mikeparcewski/wicked-prezzie.git
 cd wicked-prezzie
 gemini
 ```
-
-Gemini uses the same skills with its own tool names (see [GEMINI.md](GEMINI.md) for the mapping).
 
 ### Prerequisites
 
@@ -38,45 +34,137 @@ pip install python-pptx beautifulsoup4 lxml Pillow
 
 Missing dependencies are auto-detected on first run.
 
-21 skills cover the full pipeline. Just talk to it:
+---
+
+## How you use it
+
+The workflow follows a natural progression. You can start anywhere, skip steps you don't need, and go back to any earlier stage when things change.
 
 ```
-"Make me a presentation about our Q1 results"
-"Convert the HTML slides in my-deck/ to PowerPoint"
-"Use our brand — navy and gold, dark background"
-"Check my deck for layout issues"
-"Index the RFP documents in ./source-materials/"
-"Run a brainstorm for the client deck — use dreamer-skeptic teams"
-"Analyze the team's feedback comments from the Word doc"
+Idea → Refine → Generate → Refine → Final Output
 ```
 
-## What it does
+### 1. Start with an idea
 
-**Plan** — Structure content using the Pyramid Principle. One message per slide, narrative arc, speaker notes.
-
-**Generate** — Turn outlines into themed HTML with proper typography, whitespace, and contrast. Eight slide types, three built-in themes, or extract a theme from your existing brand assets.
-
-**Convert** — Chrome headless extracts every element's computed position, color, and formatting. The builder maps that to native PPTX shapes. Slides extract in parallel (~8s for a 10-slide deck).
-
-**Validate** — Five-category deck audit (structure, content, layout, consistency, lint) with automatic remediation. Visual diff compares HTML source against PPTX output.
-
-**Learn** — Index source documents (PDFs, PPTX, DOCX, images) into searchable markdown with YAML frontmatter. Two-pass architecture: per-document extraction with vision, then cross-document synthesis of themes, relationships, and key facts.
-
-**Orchestrate** — Full deck-building methodology with dreamer-skeptic brainstorming, generative persona validation, constraint persistence, and phased gate reviews. Hub-and-spoke architecture with section-based grouping keeps context lean across long sessions.
-
-**Analyze feedback** — Parse inline comments from Word documents reviewed by your team. Detect where reviewers align, where they diverge, and what it means for the narrative. Generate prioritized action items as markdown or a Word report to share back.
-
-Works with HTML from anywhere — ChatGPT, Claude, Gemini, reveal.js, or hand-coded.
-
-## How it works
+You have a topic, a brief, a pile of documents, or just a rough notion of what you need to present. Tell the plugin what you're working with.
 
 ```
-Topic → slide-outline → slide-generate → standardize → chrome-extract → pptx-builder → validate
-         Pyramid         themed HTML       fix viewport    Chrome headless   native PPTX     5-category
-         Principle        + images          strip anim      bounding boxes    shapes+text     deck audit
+"I need a board deck about our platform strategy. 15 minutes.
+ They care about ROI, timeline, and risk."
 ```
 
-Each stage is independent. Jump in anywhere — bring your own HTML, start from an outline, or go from a blank page.
+```
+"I have RFP documents in ./source-materials/ — index them so we
+ can build a response deck."
+```
+
+```
+"Run a brainstorm — I want dreamer-skeptic teams to explore
+ different angles before we commit to a narrative."
+```
+
+What happens behind the scenes: source documents get indexed into a searchable knowledge base. Brainstorm teams generate competing perspectives. The Pyramid Principle structures your argument — lead with the conclusion, group by evidence, build a narrative arc.
+
+### 2. Refine the plan
+
+Before any slides exist, you shape the story. Review the outline, challenge the structure, reorder sections, sharpen the message.
+
+```
+"Move the risk section before the timeline — they'll want to
+ hear about risks early."
+```
+
+```
+"The opening is too generic. Make it specific to our Q1 results."
+```
+
+```
+"Add a comparison slide: our approach vs. the two alternatives."
+```
+
+This is where most of the thinking happens. The outline is cheap to change — slides are not. Get the narrative right here.
+
+### 3. Generate slides
+
+Turn the refined outline into actual slides. Pick a theme, add images, choose your slide types.
+
+```
+"Generate the slides with the corporate-light theme"
+"Add Unsplash photos for the market opportunity slides"
+"Use our brand — learn it from ./brand-guide.pdf"
+"Make it feel dark and techy with purple accents"
+```
+
+The plugin generates themed HTML slides with proper typography, spacing, and contrast. Eight slide types (title, content, stats, comparison, quote, section divider, CTA, blank), three built-in themes, or extract one from your existing brand assets.
+
+Already have HTML slides from ChatGPT, Claude, Gemini, or reveal.js? Skip straight here:
+
+```
+"Convert the slides in ./my-deck/ to PowerPoint"
+```
+
+### 4. Refine the output
+
+This is where you iterate. Check quality, fix issues, re-generate specific slides, compare versions.
+
+```
+"Audit the deck"
+"The card grid on slide 4 is overlapping — fix it"
+"Re-convert just slides 3 and 7"
+"Compare the HTML originals against the PPTX"
+"The CTA slide needs a stronger closing — rework it"
+```
+
+The plugin runs a 5-category quality audit (structure, content, layout, consistency, lint), renders the PPTX to PNG for visual comparison, and iterates on problem slides until they match. You can also go back — change the outline, regenerate a section, swap the theme.
+
+### 5. Get team feedback
+
+Export the deck as a Word document for team review. Everyone adds inline comments using normal Word functionality. Then parse the feedback.
+
+```
+"Analyze the feedback in ./exec-summary-reviewed.docx"
+```
+
+The plugin extracts every comment, maps it to the document section, and produces a feedback report:
+- **Where reviewers agree** — aligned concerns are your highest-priority changes
+- **Where reviewers diverge** — these need a conversation, not just an edit
+- **What it means for the narrative** — hotspots, blind spots, structural signals
+
+```
+"Generate the feedback report as a Word doc to share with the team"
+"Address the aligned concerns first, then regenerate those slides"
+```
+
+Then loop back to step 2 or 3 with the feedback incorporated.
+
+### 6. Final output
+
+Export as PPTX, HTML (Reveal.js), or both. Versioned automatically.
+
+```
+"Export as both PPTX and HTML"
+"Render the final version to PNG so I can preview"
+```
+
+---
+
+## The key idea: go back anytime
+
+This isn't a one-way pipeline. At any point you can:
+
+- **Go back to the outline** when the narrative isn't landing
+- **Swap the theme** after seeing the generated slides
+- **Regenerate specific slides** without rebuilding the whole deck
+- **Re-run the brainstorm** if the direction feels off
+- **Incorporate feedback** and regenerate only what changed
+
+```
+"Actually, rethink the structure — lead with the customer story instead"
+"Change the theme to warm-dark and regenerate"
+"Just redo slides 5-8 with the updated messaging"
+```
+
+---
 
 ## Themes
 
@@ -94,39 +182,32 @@ Three built-in. Create your own. Extract from existing PPTX, PDF, or brand guide
 "Export my theme to share with the team"
 ```
 
+---
+
+## What's under the hood
+
+21 skills handle the mechanics. You don't need to know these — just describe what you want and the plugin routes to the right tools.
+
+| Stage | Skills | What they do |
+|---|---|---|
+| **Idea** | slide-learn, deck-brainstorm | Index source docs, run structured brainstorms with dreamer-skeptic teams |
+| **Refine (plan)** | slide-outline, deck-pipeline | Pyramid Principle structure, 8-phase orchestration with constraint persistence |
+| **Generate** | slide-theme, slide-generate, slide-html-standardize | Themed HTML slides, brand extraction, normalize AI-generated HTML |
+| **Convert** | chrome-extract, slide-triage, slide-prep, slide-pptx-builder, slide-html-to-pptx | Chrome headless extraction → confidence scoring → manifest → native PPTX |
+| **Refine (output)** | slide-validate, slide-render, slide-compare, slide-treatment-log | 5-category audit, PPTX→PNG rendering, visual diff, fix history |
+| **Feedback** | deck-feedback | Parse Word comments → alignment/divergence → prioritized actions |
+| **Support** | slide-pipeline, slide-design, slide-config, deck-checkpoint | Orchestration, design reference, settings, session continuity |
+
+Works with HTML from anywhere — ChatGPT, Claude, Gemini, reveal.js, or hand-coded.
+
+---
+
 ## Known tradeoffs
 
 - Gradients become solid blended colors (PPTX gradient support is limited)
 - Animations are stripped (static snapshot of the final state)
 - Font metrics differ between CSS and Calibri (compensated, not perfect)
 - Small decorative SVGs under 30px are skipped
-
-## Project layout
-
-```
-skills/
-  slide-outline/           Topic → structured outline (Pyramid Principle)
-  slide-generate/          Outline → themed HTML slides (8 types, images)
-  slide-theme/             Brand palettes, fonts, profiles, vibe matching
-  slide-html-standardize/  Normalize AI-generated HTML + complexity routing
-  chrome-extract/          Chrome headless → layout JSON + screenshots
-  slide-triage/            Confidence scoring + known-pattern detection
-  slide-prep/              Auto-resolve findings → build manifests
-  slide-pptx-builder/      Layout JSON → native PPTX shapes + text
-  slide-html-to-pptx/      Parallel batch conversion
-  slide-validate/          5-category deck audit, content lint, consistency
-  slide-render/            PPTX → PNG rendering (LibreOffice headless)
-  slide-compare/           HTML vs PPTX visual diff
-  slide-pipeline/          End-to-end conversion orchestrator
-  slide-treatment-log/     Per-slide fix history + pattern promotion
-  slide-design/            Design principles + quality rubric (reference)
-  slide-config/            Project + user settings
-  slide-learn/             Source document indexing (two-pass, vision)
-  deck-pipeline/           Full deck orchestrator (8-phase methodology)
-  deck-brainstorm/         Dreamer-skeptic teams + generative personas
-  deck-checkpoint/         Session synthesis: decisions, artifacts, next steps
-  deck-feedback/           Word comment parsing → alignment/divergence report
-```
 
 ## Documentation
 
