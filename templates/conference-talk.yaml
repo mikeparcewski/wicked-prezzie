@@ -1,0 +1,97 @@
+name: conference-talk
+display_name: "Conference Talk"
+description: "Conference and keynote presentations with story-driven structure and rehearsal timing."
+signals:
+  - "conference"
+  - "keynote"
+  - "talk"
+  - "speaking"
+  - "speaker"
+  - "meetup"
+  - "summit"
+  - "symposium"
+  - "ted"
+  - "lightning talk"
+  - "breakout session"
+  - "panel"
+
+phases:
+  - id: story-arc
+    name: "Story Arc"
+    purpose: "Define the narrative arc: hook, tension, resolution. Conference talks live or die on story structure, not information density."
+    gate:
+      condition: "Story arc document approved with hook, key tension, resolution, and call-to-action defined"
+      artifacts: ["state/story-arc.md"]
+    agents: ["storyteller", "audience-advocate", "synthesizer"]
+    skippable: false
+
+  - id: build
+    name: "Build"
+    purpose: "Generate slides optimized for live delivery: high visual impact, minimal text, strong pacing cues in speaker notes."
+    gate:
+      condition: "All slides built with timing estimates and visual verification passed"
+      artifacts: ["slides/"]
+    agents: ["slide-builder", "visual-verifier"]
+    skippable: false
+
+  - id: rehearsal-notes
+    name: "Rehearsal Notes"
+    purpose: "Generate detailed speaker notes with timing targets, transition cues, and audience interaction prompts."
+    gate:
+      condition: "Speaker notes complete for all slides with cumulative timing within target duration"
+      artifacts: ["state/rehearsal-notes.md"]
+    agents: ["speaking-coach", "timing-reviewer"]
+    skippable: true
+
+  - id: validate
+    name: "Validate"
+    purpose: "Validate narrative impact, engagement, and takeaway clarity. Conference audiences remember one thing — make sure it is the right thing."
+    gate:
+      condition: "Validation lenses pass, single clear takeaway identified"
+      artifacts: ["state/validation-report.json"]
+    agents: ["narrative-flow-lens", "engagement-lens", "takeaway-lens"]
+    skippable: false
+
+  - id: export
+    name: "Export"
+    purpose: "Export presenter-optimized formats. Conference talks often need a widescreen PPTX plus a PDF for the conference organizer."
+    gate:
+      condition: "Visual verification of export artifacts passed"
+      artifacts: ["output/"]
+    agents: ["export-agent", "visual-verifier"]
+    skippable: false
+
+personas:
+  brainstorm:
+    - name: "Storyteller"
+      role: dreamer
+      perspective: "Narrative tension, emotional resonance, memorable moments, surprise and delight"
+    - name: "Audience Member"
+      role: skeptic
+      perspective: "Attention span, clarity without context, value of attending vs reading slides later"
+  specialists:
+    - name: "Speaking Coach"
+      scope: "narrative"
+      focus: "Pacing, delivery cues, audience energy management, Q&A preparation"
+    - name: "Visual Designer"
+      scope: "context"
+      focus: "Visual impact at distance, readability in large venues, slide-as-backdrop philosophy"
+
+validation:
+  lenses:
+    - name: "Narrative Flow"
+      checks: ["clear hook in first 2 slides", "tension builds through middle", "resolution satisfying", "no tangent slides"]
+    - name: "Engagement"
+      checks: ["no text-heavy slides", "visual variety", "audience interaction moments", "energy peaks distributed"]
+    - name: "Takeaway Clarity"
+      checks: ["single core message identifiable", "call-to-action explicit", "memorable closing", "key insight repeatable in one sentence"]
+  pass_threshold: 75
+
+notes:
+  tab1: "Notes"
+  tab2: "Talking Points"
+  tab3: "Timing Notes"
+
+export:
+  formats: ["pptx", "presenter-html", "presenter-pdf"]
+  default: "pptx"

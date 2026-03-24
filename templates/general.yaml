@@ -1,0 +1,112 @@
+name: general
+display_name: "General Presentation"
+description: "Default workflow for standard presentations, keynotes, pitches, and internal updates."
+signals:
+  - "presentation"
+  - "deck"
+  - "slides"
+  - "keynote"
+  - "pitch"
+  - "update"
+  - "overview"
+  - "introduction"
+  - "summary"
+  - "walkthrough"
+
+phases:
+  - id: source-inventory
+    name: "Source Inventory"
+    purpose: "Read all source documents and produce the facts manifest. Establish the complete information baseline."
+    gate:
+      condition: "facts-manifest.json exists and user confirms source list is complete"
+      artifacts: ["state/facts-manifest.json"]
+    agents: ["source-reader", "fact-extractor"]
+    skippable: false
+
+  - id: brainstorm
+    name: "Brainstorm"
+    purpose: "Generate and evaluate ideas using dreamer-skeptic teams. Explore narrative angles, story structures, and content strategies."
+    gate:
+      condition: "synthesized-architecture.md approved by user"
+      artifacts: ["state/synthesized-architecture.md"]
+    agents: ["dreamer-team", "skeptic-team", "synthesizer"]
+    skippable: false
+
+  - id: architecture
+    name: "Architecture"
+    purpose: "Define the slide plan: sequence, layout types, content allocation, and narrative arc."
+    gate:
+      condition: "Three-team review returns CONDITIONAL APPROVE on all lenses"
+      artifacts: ["state/slide-plan.json"]
+    agents: ["architect", "review-team-clarity", "review-team-evidence", "review-team-flow"]
+    skippable: false
+
+  - id: build
+    name: "Build"
+    purpose: "Generate HTML slides per the approved plan. One agent per 3-5 slide batch."
+    gate:
+      condition: "All slides built and visual verification passed on representative samples"
+      artifacts: ["slides/"]
+    agents: ["slide-builder", "visual-verifier"]
+    skippable: false
+
+  - id: validate
+    name: "Validate"
+    purpose: "Run validation lenses across the complete deck. Identify issues, generate punch list."
+    gate:
+      condition: "Council punch list complete, zero blocking items"
+      artifacts: ["state/validation-report.json"]
+    agents: ["clarity-lens", "evidence-lens", "flow-lens", "audience-lens"]
+    skippable: false
+
+  - id: export
+    name: "Export"
+    purpose: "Convert approved slides to final output formats. Run visual verification on exports."
+    gate:
+      condition: "Visual verification of export artifacts passed"
+      artifacts: ["output/"]
+    agents: ["export-agent", "visual-verifier"]
+    skippable: false
+
+personas:
+  brainstorm:
+    - name: "Creative Director"
+      role: dreamer
+      perspective: "Narrative impact, visual storytelling, audience engagement"
+    - name: "Subject Matter Expert"
+      role: dreamer
+      perspective: "Technical accuracy, depth of content, domain credibility"
+    - name: "Audience Advocate"
+      role: skeptic
+      perspective: "Clarity for the target audience, jargon reduction, actionability"
+    - name: "Editor"
+      role: skeptic
+      perspective: "Conciseness, logical flow, redundancy elimination"
+  specialists:
+    - name: "Fact Checker"
+      scope: "facts"
+      focus: "Verify claims against source documents, flag unsupported assertions"
+    - name: "Narrative Architect"
+      scope: "narrative"
+      focus: "Story arc coherence, slide-to-slide transitions, opening and closing strength"
+
+validation:
+  lenses:
+    - name: "Clarity"
+      checks: ["jargon-free language", "one idea per slide", "readable font sizes", "clear headlines"]
+    - name: "Evidence"
+      checks: ["claims backed by sources", "data visualizations accurate", "no unsupported assertions"]
+    - name: "Flow"
+      checks: ["logical progression", "smooth transitions", "narrative arc complete", "no orphan slides"]
+    - name: "Audience Fit"
+      checks: ["appropriate depth", "relevant examples", "right level of detail", "clear takeaways"]
+  pass_threshold: 75
+
+notes:
+  tab1: "Notes"
+  tab2: "Talking Points"
+  tab3: "References"
+
+export:
+  formats: ["pptx", "presenter-html", "presenter-pdf", "handout"]
+  default: "pptx"

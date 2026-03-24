@@ -1,0 +1,88 @@
+name: project-status
+display_name: "Project Status"
+description: "Status updates, sprint reviews, and retrospectives with minimal ceremony and accuracy-focused validation."
+signals:
+  - "status update"
+  - "sprint review"
+  - "retrospective"
+  - "retro"
+  - "progress report"
+  - "weekly update"
+  - "monthly update"
+  - "project update"
+  - "standup"
+  - "status report"
+  - "milestone review"
+  - "checkpoint"
+
+phases:
+  - id: data-gathering
+    name: "Data Gathering"
+    purpose: "Collect metrics, milestone status, blockers, risks, and team updates. Pull from project tools, reports, and team inputs."
+    gate:
+      condition: "facts-manifest.json exists with current metrics, milestone status, and blockers documented"
+      artifacts: ["state/facts-manifest.json"]
+    agents: ["source-reader", "fact-extractor", "metrics-collector"]
+    skippable: false
+
+  - id: build
+    name: "Build"
+    purpose: "Generate concise status slides: RAG status, burndown/progress charts, blocker list, upcoming milestones, key decisions needed."
+    gate:
+      condition: "All slides built and visual verification passed"
+      artifacts: ["slides/"]
+    agents: ["slide-builder", "visual-verifier"]
+    skippable: false
+
+  - id: validate
+    name: "Validate"
+    purpose: "Verify accuracy of reported metrics, completeness of status coverage, and actionability of asks."
+    gate:
+      condition: "Validation lenses pass, all reported metrics verified against sources"
+      artifacts: ["state/validation-report.json"]
+    agents: ["accuracy-lens", "completeness-lens", "actionability-lens"]
+    skippable: false
+
+  - id: export
+    name: "Export"
+    purpose: "Export to presentation format. Status decks are typically PPTX only — no handout needed."
+    gate:
+      condition: "Visual verification of export artifacts passed"
+      artifacts: ["output/"]
+    agents: ["export-agent", "visual-verifier"]
+    skippable: false
+
+personas:
+  brainstorm:
+    - name: "Project Manager"
+      role: dreamer
+      perspective: "Progress narrative, risk mitigation, resource optimization, timeline management"
+    - name: "Stakeholder"
+      role: skeptic
+      perspective: "Budget impact, timeline slippage, dependency risks, what's not being said"
+  specialists:
+    - name: "Metrics Analyst"
+      scope: "facts"
+      focus: "Data accuracy, trend calculation, baseline comparison, forecast reliability"
+    - name: "Risk Assessor"
+      scope: "context"
+      focus: "Risk escalation, blocker severity, dependency chain analysis, mitigation status"
+
+validation:
+  lenses:
+    - name: "Accuracy"
+      checks: ["metrics match source data", "dates correct", "RAG ratings justified", "comparisons use same baseline"]
+    - name: "Completeness"
+      checks: ["all workstreams covered", "blockers listed", "risks updated", "upcoming milestones included"]
+    - name: "Actionability"
+      checks: ["decisions needed are explicit", "owners assigned to actions", "help needed is specific", "next steps time-bound"]
+  pass_threshold: 70
+
+notes:
+  tab1: "Notes"
+  tab2: "Talking Points"
+  tab3: "Metrics"
+
+export:
+  formats: ["pptx", "presenter-html"]
+  default: "pptx"

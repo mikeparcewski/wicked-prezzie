@@ -1,0 +1,125 @@
+name: competitive-analysis
+display_name: "Competitive Analysis"
+description: "Market and competitive analysis decks with evidence-quality validation and objectivity checks."
+signals:
+  - "competitive"
+  - "competitor"
+  - "market analysis"
+  - "market map"
+  - "landscape"
+  - "SWOT"
+  - "positioning"
+  - "benchmark"
+  - "market share"
+  - "competitive intelligence"
+  - "industry analysis"
+  - "market entry"
+  - "differentiation"
+  - "comparison"
+
+phases:
+  - id: source-inventory
+    name: "Source Inventory"
+    purpose: "Gather competitive intelligence, market reports, public filings, product documentation, and analyst coverage."
+    gate:
+      condition: "facts-manifest.json exists with competitor profiles and data sources catalogued"
+      artifacts: ["state/facts-manifest.json"]
+    agents: ["source-reader", "fact-extractor", "competitor-profiler"]
+    skippable: false
+
+  - id: market-mapping
+    name: "Market Mapping"
+    purpose: "Define the competitive landscape: identify players, segments, positioning axes, and market dynamics."
+    gate:
+      condition: "Market map document approved with all key competitors identified and positioned"
+      artifacts: ["state/market-map.md"]
+    agents: ["market-analyst", "competitor-advocate", "strategist"]
+    skippable: false
+
+  - id: analysis-framework
+    name: "Analysis Framework"
+    purpose: "Select and apply analytical frameworks (SWOT, Porter's, value chain, feature matrix). Define comparison criteria and weighting."
+    gate:
+      condition: "Analysis framework document approved with criteria, weighting, and scoring methodology"
+      artifacts: ["state/analysis-framework.md"]
+    agents: ["framework-designer", "methodology-reviewer"]
+    skippable: false
+
+  - id: build
+    name: "Build"
+    purpose: "Generate slides with data-rich visualizations: comparison matrices, positioning maps, trend charts, feature grids."
+    gate:
+      condition: "All slides built with data sources cited and visual verification passed"
+      artifacts: ["slides/"]
+    agents: ["slide-builder", "visual-verifier", "data-viz-specialist"]
+    skippable: false
+
+  - id: validate
+    name: "Validate"
+    purpose: "Validate evidence quality, objectivity, and actionability. Competitive decks must be defensible under scrutiny."
+    gate:
+      condition: "Validation lenses pass with evidence quality at 90%+ and objectivity confirmed"
+      artifacts: ["state/validation-report.json"]
+    agents: ["evidence-quality-lens", "objectivity-lens", "actionability-lens", "completeness-lens"]
+    skippable: false
+
+  - id: polish
+    name: "Polish"
+    purpose: "Refine data presentation, ensure consistent comparison methodology, verify data currency and source attribution."
+    gate:
+      condition: "All data points have source attribution, comparison methodology consistent across slides"
+      artifacts: ["state/polish-report.json"]
+    agents: ["data-auditor", "consistency-checker", "source-attributor"]
+    skippable: true
+
+  - id: export
+    name: "Export"
+    purpose: "Export to presentation and reference formats. Competitive analyses often serve as both presentation and reference document."
+    gate:
+      condition: "Visual verification of export artifacts passed"
+      artifacts: ["output/"]
+    agents: ["export-agent", "visual-verifier"]
+    skippable: false
+
+personas:
+  brainstorm:
+    - name: "Market Analyst"
+      role: dreamer
+      perspective: "Market trends, emerging patterns, whitespace opportunities, disruption signals"
+    - name: "Competitor Advocate"
+      role: skeptic
+      perspective: "Steel-man competitor strengths, challenge assumptions, identify blind spots in our analysis"
+    - name: "Strategist"
+      role: dreamer
+      perspective: "Strategic implications, actionable recommendations, investment priorities, timing"
+  specialists:
+    - name: "Data Analyst"
+      scope: "evidence"
+      focus: "Data accuracy, source reliability, statistical validity, trend significance"
+    - name: "Industry Expert"
+      scope: "context"
+      focus: "Market dynamics, regulatory factors, technology shifts, ecosystem effects"
+    - name: "Objectivity Auditor"
+      scope: "facts"
+      focus: "Confirmation bias detection, balanced representation, fair competitor treatment"
+
+validation:
+  lenses:
+    - name: "Evidence Quality"
+      checks: ["all claims sourced", "data less than 12 months old", "primary sources preferred", "sample sizes noted"]
+    - name: "Objectivity"
+      checks: ["competitor strengths acknowledged", "no straw-man comparisons", "methodology applied consistently", "limitations stated"]
+    - name: "Actionability"
+      checks: ["clear strategic implications", "prioritized recommendations", "timeline for action", "resource requirements estimated"]
+    - name: "Completeness"
+      checks: ["all major competitors covered", "relevant market segments addressed", "key buying criteria included", "no obvious gaps"]
+  pass_threshold: 75
+
+notes:
+  tab1: "Notes"
+  tab2: "Talking Points"
+  tab3: "Data Sources"
+
+export:
+  formats: ["pptx", "presenter-html", "presenter-pdf", "handout"]
+  default: "pptx"

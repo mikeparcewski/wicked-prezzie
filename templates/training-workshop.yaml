@@ -1,0 +1,115 @@
+name: training-workshop
+display_name: "Training Workshop"
+description: "Training and education decks with learning design, practice activities, and knowledge check validation."
+signals:
+  - "training"
+  - "workshop"
+  - "course"
+  - "curriculum"
+  - "learning"
+  - "education"
+  - "onboarding"
+  - "tutorial"
+  - "teach"
+  - "lesson plan"
+  - "certification"
+  - "skill development"
+  - "knowledge transfer"
+
+phases:
+  - id: source-inventory
+    name: "Source Inventory"
+    purpose: "Gather training materials, reference docs, existing curricula, and subject matter expert inputs."
+    gate:
+      condition: "facts-manifest.json exists with learning objectives drafted and user confirms completeness"
+      artifacts: ["state/facts-manifest.json"]
+    agents: ["source-reader", "fact-extractor", "learning-objective-drafter"]
+    skippable: false
+
+  - id: learning-design
+    name: "Learning Design"
+    purpose: "Define learning objectives, progression path, and instructional strategy. Map content to Bloom's taxonomy levels."
+    gate:
+      condition: "Learning design document approved with objectives, progression, and assessment strategy"
+      artifacts: ["state/learning-design.md"]
+    agents: ["instructional-designer", "sme-reviewer", "learner-advocate"]
+    skippable: false
+
+  - id: build
+    name: "Build"
+    purpose: "Generate slides following instructional design. Alternate between concept introduction, examples, and practice prompts."
+    gate:
+      condition: "All slides built with learning objective tags and visual verification passed"
+      artifacts: ["slides/"]
+    agents: ["slide-builder", "visual-verifier"]
+    skippable: false
+
+  - id: practice-activities
+    name: "Practice Activities"
+    purpose: "Design exercises, discussion prompts, and knowledge checks. Each learning objective gets at least one practice activity."
+    gate:
+      condition: "Activity guide complete with one activity per learning objective minimum"
+      artifacts: ["state/activity-guide.md"]
+    agents: ["activity-designer", "engagement-reviewer"]
+    skippable: true
+
+  - id: validate
+    name: "Validate"
+    purpose: "Validate instructional effectiveness: concept progression, engagement variety, knowledge check coverage."
+    gate:
+      condition: "Validation lenses pass, all learning objectives covered, no progression gaps"
+      artifacts: ["state/validation-report.json"]
+    agents: ["clarity-lens", "engagement-lens", "knowledge-check-lens", "progression-lens"]
+    skippable: false
+
+  - id: export
+    name: "Export"
+    purpose: "Export presentation and facilitator guide. Training decks typically need both presenter and participant versions."
+    gate:
+      condition: "Visual verification of export artifacts passed"
+      artifacts: ["output/"]
+    agents: ["export-agent", "visual-verifier"]
+    skippable: false
+
+personas:
+  brainstorm:
+    - name: "Instructional Designer"
+      role: dreamer
+      perspective: "Learning science, engagement techniques, scaffolding, active recall strategies"
+    - name: "Learner"
+      role: skeptic
+      perspective: "Cognitive load, prerequisite knowledge gaps, practical applicability, pacing"
+    - name: "Subject Matter Expert"
+      role: dreamer
+      perspective: "Technical accuracy, completeness, real-world relevance, common misconceptions"
+  specialists:
+    - name: "SME Validator"
+      scope: "facts"
+      focus: "Technical accuracy, current best practices, common pitfalls addressed"
+    - name: "Engagement Specialist"
+      scope: "narrative"
+      focus: "Activity variety, attention span management, interactivity balance"
+    - name: "Assessment Designer"
+      scope: "evidence"
+      focus: "Knowledge check alignment with objectives, difficulty progression, feedback quality"
+
+validation:
+  lenses:
+    - name: "Clarity"
+      checks: ["concepts explained before used", "terminology consistent", "examples concrete", "visuals support learning"]
+    - name: "Engagement"
+      checks: ["activity every 10-15 minutes", "variety of interaction types", "real-world scenarios", "no lecture blocks > 10 slides"]
+    - name: "Knowledge Check"
+      checks: ["every objective has assessment", "questions match Bloom's level", "feedback provided for wrong answers"]
+    - name: "Progression"
+      checks: ["prerequisites before advanced topics", "difficulty ramps smoothly", "callbacks to earlier concepts", "summary slides at section breaks"]
+  pass_threshold: 75
+
+notes:
+  tab1: "Notes"
+  tab2: "Talking Points"
+  tab3: "Learning Objectives"
+
+export:
+  formats: ["pptx", "presenter-html", "presenter-pdf", "handout"]
+  default: "pptx"

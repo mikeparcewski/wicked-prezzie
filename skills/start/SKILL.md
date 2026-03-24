@@ -2,9 +2,10 @@
 name: start
 description: >-
   Single entry point for wicked-prezzie. Detects what the user has (topic, source
-  docs, HTML slides, reviewed Word doc), auto-detects the best workflow template,
-  explains the recommendation with confidence level, and routes to the appropriate
-  skill after user confirmation or override.
+  docs, HTML slides, reviewed Word doc, document/response task), auto-detects the
+  best workflow template from templates/*.yaml signal lists, explains the
+  recommendation with confidence level, and routes to the appropriate skill after
+  user confirmation or override.
 triggers:
   - "start"
   - "new deck"
@@ -21,6 +22,10 @@ triggers:
   - "help me build"
   - "where do I start"
   - "what should I do"
+  - "write a proposal"
+  - "draft a report"
+  - "write a response"
+  - "build a document"
 ---
 
 # start — Entry Point
@@ -38,10 +43,17 @@ exactly one of these input types:
 
 | Input Type | Signals | Route Target |
 |------------|---------|--------------|
-| **Topic or brief** | Plain text description, a few sentences or paragraphs, no files | Workflow selection (Step 2) |
-| **Source documents** | PDFs, DOCX, PPTX, spreadsheets — raw material not yet indexed | `wicked-prezzie:learn` first, then workflow selection |
+| **Topic or brief** | Plain text description, a few sentences or paragraphs, no files | Template selection (Step 2) → workflow |
+| **Source documents** | PDFs, DOCX, PPTX, spreadsheets — raw material not yet indexed | `wicked-prezzie:learn` first, then template selection |
 | **HTML slides** | `.html` files with slide content, already generated | `wicked-prezzie:convert` (convert) |
 | **Reviewed Word doc** | `.docx` with inline comments from reviewers | `wicked-prezzie:feedback` (feedback) |
+| **Document/response task** | User wants a structured document (proposal, report, assessment), not a slide deck | `wicked-prezzie:structured-response` |
+
+**Distinguishing deck vs. document tasks**: If the user says "presentation",
+"deck", "slides", "keynote" — it is a deck task (template selection → workflow).
+If the user says "proposal document", "write a report", "draft a response",
+"build a submission", "Word document" — it is a document task (structured-response).
+If ambiguous, ask: "Are you building a slide deck or a written document?"
 
 If the user provides **source documents alongside a topic**, recommend running
 `wicked-prezzie:learn` first to index the documents, then returning here to
@@ -55,7 +67,23 @@ If the input type is ambiguous, ask one clarifying question. Do not guess.
 ## Step 2 — Auto-Detect Workflow Template
 
 When the input type is **topic or brief** (with or without source docs), run
-template auto-detection to recommend the best workflow.
+template auto-detection to recommend the best workflow template.
+
+### Dynamic Template Loading
+
+Templates are YAML files in the `templates/` directory at the project root.
+**Do not hardcode template names or signals.** Instead:
+
+1. Read all `*.yaml` files from `templates/`
+2. For each template, extract:
+   - `name` — template identifier
+   - `display_name` — human-readable name
+   - `description` — one-line summary
+   - `signals` — list of detection keywords
+   - `phases` — phase sequence (show count to user)
+3. Build the signal-matching table dynamically from loaded templates
+
+This means adding a new template is a single YAML file — no code changes needed.
 
 ### Detection Procedure
 
@@ -63,76 +91,60 @@ template auto-detection to recommend the best workflow.
    `learn` indexes if they exist), or the raw documents if indexes are not
    yet built.
 
-2. Score each template by counting signal matches:
+2. Score each template by counting signal matches against its `signals` list:
+   - Case-insensitive keyword matching against brief text and source documents
+   - Each matching signal keyword scores 1 point
+   - Structural signals (numbered requirements, compliance tables, formal
+     procurement language) score 2 points for templates whose signals include
+     related terms
 
-#### `rfp-exec` signals (bid/proposal workflow with executive summary gate)
-
-**Keyword signals** (case-insensitive, match in brief or source docs):
-- "request for proposal" / "RFP"
-- "invitation to tender" / "ITT"
-- "evaluation criteria"
-- "mandatory requirements"
-- "response required by" / "submission deadline"
-- "scoring rubric" / "evaluation matrix"
-- "evaluation committee" / "evaluation panel"
-- "compliance matrix"
-- "bid" / "tender" / "proposal response"
-- "incumbent" / "competitive"
-
-**Structural signals**:
-- Documents with numbered requirements or compliance tables
-- References to specific evaluation weightings or scoring methodology
-- Named evaluation committee members or roles
-- Documents that reference a formal procurement process
-
-**Audience signals**:
-- Multiple named decision-makers with different concerns
-- Formal governance structure (board, committee, panel)
-- Regulatory or compliance stakeholders
-
-#### `general` signals (default — standard presentation workflow)
-
-Everything that is not `rfp-exec`. General purpose presentations, keynotes,
-internal updates, training decks, thought leadership, sales pitches without
-formal procurement process.
+3. Rank templates by total score. The highest-scoring template is the
+   recommendation.
 
 ### Confidence Scoring
 
-- **High (>= 0.8)**: 3+ keyword signals AND 1+ structural signal. Present the
-  recommendation with high confidence. Example: "This looks like an RFP response.
-  I recommend the rfp-exec template, which adds an executive summary approval
-  gate before slide building."
+- **High (>= 3 signal matches)**: Present the recommendation with high
+  confidence. Example: "This looks like a training workshop. I recommend the
+  training-workshop template (6 phases including Learning Design and Practice
+  Activities)."
 
-- **Medium (0.5 - 0.8)**: 2+ keyword signals OR 1 keyword + 1 structural signal.
-  Present the recommendation but explicitly invite override. Example: "I see some
-  proposal language. The rfp-exec template might be a good fit, but the general
-  template would also work. Which do you prefer?"
+- **Medium (2 signal matches)**: Present the recommendation but explicitly
+  invite override. Example: "I see some competitive analysis language. The
+  competitive-analysis template might fit, but other templates could work too."
 
-- **Low (< 0.5)**: 0-1 signals. Default to `general`. Example: "I'll use the
-  standard workflow. If this is actually an RFP response, let me know and I'll
-  switch to the proposal template."
+- **Low (0-1 signal matches)**: Default to `general`. Example: "I'll use the
+  General Presentation template. Let me know if another template fits better."
 
 ### Recommendation Protocol
 
 Always present:
 1. The signals found (or absence of signals)
-2. The recommended template with a one-sentence explanation of what it adds
-3. Confidence level (high / medium / low)
-4. An explicit offer to override
+2. The recommended template with a one-sentence description (from YAML `description`)
+3. The phase sequence for the recommended template (names only, from YAML)
+4. Confidence level (high / medium / low)
+5. A list of all available templates (name + description) so the user can override
+6. An explicit offer to override
 
 Example output:
 
 ```
 I found the following signals in your brief:
-  - "request for proposal" (keyword)
-  - "evaluation criteria" (keyword)
-  - Named evaluation committee members (structural)
+  - "training" (keyword match)
+  - "workshop" (keyword match)
+  - "learning" (keyword match)
 
-Recommendation: **rfp-exec** template (high confidence)
-This adds an executive summary approval gate between brainstorm and architecture.
-You'll review and approve the exec summary before any slides are built.
+Recommendation: **Training Workshop** template (high confidence)
+6 phases: Source Inventory → Learning Design → Build → Practice Activities → Validate → Export
 
-Want to proceed with rfp-exec, or switch to the general template?
+Available templates:
+  - General Presentation — Default workflow for standard presentations
+  - Executive Briefing — Board and C-suite presentations
+  - Training Workshop — Training and education decks (recommended)
+  - Conference Talk — Conference and keynote presentations
+  - Competitive Analysis — Market and competitive analysis decks
+  - Project Status — Status updates, sprint reviews, retrospectives
+
+Want to proceed with Training Workshop, or switch to a different template?
 ```
 
 ---
@@ -141,16 +153,13 @@ Want to proceed with rfp-exec, or switch to the general template?
 
 After the user confirms (or overrides) the template choice:
 
-- **general** → Start `workflow` with the standard 8-phase flow (source
-  inventory, personas, brainstorm, architecture, build, validate, polish, export)
+1. Record the template choice in `deck-state.json` under `template`
+2. Route to `wicked-prezzie:workflow` with the selected template name
+3. Workflow loads the phase sequence from the template YAML
 
-- **rfp-exec** → Start `workflow` with the rfp-exec template, which inserts
-  the `exec-summary` phase between brainstorm and architecture. The phase
-  sequence becomes: source inventory, personas, brainstorm, **exec-summary**,
-  architecture, build, validate, polish, export.
-
-Pass the template name to workflow so it can load the correct phase
-sequence. Record the template choice in `deck-state.json` under `template`.
+The workflow orchestrator reads the template YAML to determine phases, gate
+conditions, personas, and validation lenses. The template name in deck-state.json
+is the source of truth for which template is active.
 
 ---
 
@@ -165,6 +174,12 @@ These input types bypass template selection entirely:
 - **Reviewed Word doc** → Route directly to `wicked-prezzie:feedback`. Tell the
   user: "I see a Word document with reviewer comments. I'll parse the feedback
   and generate an analysis report." No template detection needed.
+
+- **Document/response task** → Route directly to `wicked-prezzie:structured-response`.
+  Tell the user: "You need a structured document. I'll help you configure and
+  generate it with multi-agent review." If the user has source documents, recommend
+  `wicked-prezzie:learn` first, then return to structured-response with
+  `--generate-config`.
 
 ---
 
@@ -202,6 +217,7 @@ If `deck-state.json` already exists in the working directory (or a known deck
 directory), this skill detects it and offers to resume:
 
 "I found an existing deck project at `{deck_dir}` (currently in Phase {N}:
-{phase_name}). Resume where you left off, or start a new project?"
+{phase_name}, template: {template_name}). Resume where you left off, or start
+a new project?"
 
 If resuming, route directly to `workflow` which handles phase resumption.

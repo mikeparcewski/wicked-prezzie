@@ -1,0 +1,127 @@
+name: executive-briefing
+display_name: "Executive Briefing"
+description: "Board and C-suite presentations with executive readiness gate and action-oriented validation."
+signals:
+  - "board"
+  - "executive"
+  - "C-suite"
+  - "leadership team"
+  - "board meeting"
+  - "steering committee"
+  - "investment committee"
+  - "quarterly review"
+  - "strategic review"
+  - "board paper"
+  - "executive summary"
+  - "decision memo"
+  - "governance"
+
+phases:
+  - id: source-inventory
+    name: "Source Inventory"
+    purpose: "Gather all briefing materials, financial data, strategic plans, and prior board papers."
+    gate:
+      condition: "facts-manifest.json exists with executive audience profile and user confirms completeness"
+      artifacts: ["state/facts-manifest.json"]
+    agents: ["source-reader", "fact-extractor", "executive-profiler"]
+    skippable: false
+
+  - id: brainstorm
+    name: "Brainstorm"
+    purpose: "Explore framing strategies for executive audience. Focus on decision-enabling narratives, not information dumps."
+    gate:
+      condition: "synthesized-architecture.md approved by user with decision points identified"
+      artifacts: ["state/synthesized-architecture.md"]
+    agents: ["dreamer-team", "skeptic-team", "synthesizer"]
+    skippable: false
+
+  - id: architecture
+    name: "Architecture"
+    purpose: "Define slide plan optimized for executive attention: situation-complication-resolution structure, decision points at natural breaks."
+    gate:
+      condition: "Three-team review returns CONDITIONAL APPROVE on all lenses including Executive Readiness"
+      artifacts: ["state/slide-plan.json"]
+    agents: ["architect", "review-team-clarity", "review-team-evidence", "review-team-exec-readiness"]
+    skippable: false
+
+  - id: build
+    name: "Build"
+    purpose: "Generate slides with executive-appropriate density: fewer words, stronger visuals, clear decision frameworks."
+    gate:
+      condition: "All slides built and visual verification passed"
+      artifacts: ["slides/"]
+    agents: ["slide-builder", "visual-verifier"]
+    skippable: false
+
+  - id: validate
+    name: "Validate"
+    purpose: "Validate against executive communication standards. Every slide must answer: so what? what now?"
+    gate:
+      condition: "Council punch list complete, zero blocking items, all decision points have clear options"
+      artifacts: ["state/validation-report.json"]
+    agents: ["clarity-lens", "evidence-lens", "exec-readiness-lens", "action-items-lens"]
+    skippable: false
+
+  - id: polish
+    name: "Polish"
+    purpose: "Final refinement: tighten language, verify data currency, ensure consistent executive tone, check appendix completeness."
+    gate:
+      condition: "Flow review passed, balance audit within target ratios, executive tone consistent"
+      artifacts: ["state/polish-report.json"]
+    agents: ["flow-reviewer", "balance-auditor", "tone-checker"]
+    skippable: true
+
+  - id: export
+    name: "Export"
+    purpose: "Export to presentation and handout formats. Executive briefings typically need both a presentation deck and a leave-behind."
+    gate:
+      condition: "Visual verification of export artifacts passed"
+      artifacts: ["output/"]
+    agents: ["export-agent", "visual-verifier"]
+    skippable: false
+
+personas:
+  brainstorm:
+    - name: "CEO"
+      role: dreamer
+      perspective: "Strategic vision, market positioning, competitive advantage, big-picture narrative"
+    - name: "CFO"
+      role: skeptic
+      perspective: "Financial rigor, ROI justification, risk quantification, budget implications"
+    - name: "COO"
+      role: skeptic
+      perspective: "Operational feasibility, implementation timeline, resource requirements, execution risk"
+    - name: "Board Chair"
+      role: dreamer
+      perspective: "Governance alignment, stakeholder impact, long-term value creation"
+  specialists:
+    - name: "Executive Communications"
+      scope: "narrative"
+      focus: "Brevity, decision-enabling framing, action orientation, executive tone"
+    - name: "Data Analyst"
+      scope: "evidence"
+      focus: "Data accuracy, visualization clarity, trend interpretation, benchmark context"
+    - name: "Risk Assessor"
+      scope: "context"
+      focus: "Risk identification, mitigation strategies, scenario analysis, contingency plans"
+
+validation:
+  lenses:
+    - name: "Clarity"
+      checks: ["one message per slide", "no jargon without definition", "headlines tell the story alone"]
+    - name: "Evidence"
+      checks: ["all financials sourced and dated", "benchmarks contextualized", "trends supported by data"]
+    - name: "Executive Readiness"
+      checks: ["decision points explicit", "options presented with trade-offs", "risk assessed", "timeline realistic"]
+    - name: "Action Items"
+      checks: ["clear ask on final slide", "owners identified where possible", "next steps time-bound", "escalation path clear"]
+  pass_threshold: 85
+
+notes:
+  tab1: "Notes"
+  tab2: "Talking Points"
+  tab3: "Decision Points"
+
+export:
+  formats: ["pptx", "presenter-html", "presenter-pdf", "handout"]
+  default: "pptx"
